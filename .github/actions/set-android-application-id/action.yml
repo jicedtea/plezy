@@ -1,0 +1,125 @@
+name: Set Android application ID
+description: >
+  Rewrites the Android applicationId, and the ContentProvider authorities that
+  are hardcoded rather than derived from it, so a fork can ship under its own
+  installation identity. Shared by build-2.yml and sync-upstream.yml.
+
+inputs:
+  application-id:
+    description: >
+      New applicationId. Leave empty, or set it to the value already in
+      build.gradle.kts, to leave the tree untouched.
+    required: false
+    default: ""
+  apk-suffix:
+    description: >
+      Filename suffix for the repackaged artifacts. A leading "-" is added if
+      missing. Defaults to "-pkg-<applicationId>". Ignored, and the suffix left
+      empty, when the applicationId is not actually changed.
+    required: false
+    default: ""
+
+outputs:
+  apk-suffix:
+    description: >
+      Filename suffix marking the artifacts as a repackaged build (empty when
+      the applicationId was left alone).
+    value: ${{ steps.rename.outputs.apk-suffix }}
+  application-id:
+    description: The applicationId the tree ended up with.
+    value: ${{ steps.rename.outputs.application-id }}
+
+runs:
+  using: composite
+  steps:
+    # Rewrites applicationId but deliberately NOT namespace, so the Kotlin
+    # package and the generated R class stay put and no sources have to move.
+    #
+    # The two ContentProvider authorities are hardcoded rather than derived from
+    # ${applicationId}, so they are rewritten alongside it: authorities are
+    # device-global, and leaving them fixed makes the APK unable to install next
+    # to a stock-ID Plezy (INSTALL_FAILED_CONFLICTING_PROVIDER).
+    #
+    # Every substitution is count-verified. A silently missed literal would
+    # still compile and then fail at runtime on share-to-external-player.
+    - id: rename
+      shell: bash
+      env:
+        APPLICATION_ID: ${{ inputs.application-id }}
+        APK_SUFFIX_INPUT: ${{ inputs.apk-suffix }}
+      run: |
+        set -euo pipefail
+
+        gradle=android/app/build.gradle.kts
+        manifest=android/app/src/main/AndroidManifest.xml
+        external=android/app/src/main/kotlin/com/edde746/plezy/ExternalPlayerChannel.kt
+        shelf=android/app/src/main/kotlin/com/edde746/plezy/watchnext/SystemShelfArtworkProvider.kt
+
+        # Read the current ID out of the tree rather than hardcoding it, so an
+        # upstream rename surfaces as a failed count check instead of a no-op.
+        old_id=$(sed -n 's/^ *applicationId = "\(.*\)"/\1/p' "$gradle")
+        if [[ -z "$old_id" ]]; then
+          echo "ERROR: could not read applicationId from $gradle." >&2
+          exit 1
+        fi
+
+        new_id="${APPLICATION_ID}"
+
+        if [[ -z "$new_id" || "$new_id" == "$old_id" ]]; then
+          echo "Keeping applicationId: $old_id"
+          {
+            echo "apk-suffix="
+            echo "application-id=$old_id"
+          } >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+
+        rewrite() {
+          local file="$1" literal="$2" replacement="$3" expected="$4" actual pattern
+          actual=$(grep -c -F -- "$literal" "$file" || true)
+          if [[ "$actual" != "$expected" ]]; then
+            echo "ERROR: $file has $actual occurrences of [$literal], expected $expected." >&2
+            echo "The upstream layout changed; update this action before shipping a renamed build." >&2
+            exit 1
+          fi
+          # grep -F took the literal; sed needs its dots escaped so they match a
+          # dot rather than any character.
+          pattern=$(printf '%s' "$literal" | sed 's/\./\\./g')
+          sed -i "s|${pattern}|${replacement}|g" "$file"
+        }
+
+        # Installation identity.
+        rewrite "$gradle" "applicationId = \"${old_id}\"" "applicationId = \"${new_id}\"" 1
+
+        # ContentProvider authorities, matched as quoted literals so the
+        # `package com.edde746.plezy...` declarations at the top of the Kotlin
+        # files are left alone -- those track namespace, which is not renamed.
+        rewrite "$manifest" "\"${old_id}.fileprovider\"" "\"${new_id}.fileprovider\"" 1
+        rewrite "$external" "\"${old_id}.fileprovider\"" "\"${new_id}.fileprovider\"" 1
+        rewrite "$manifest" "\"${old_id}.systemshelf.artwork\"" "\"${new_id}.systemshelf.artwork\"" 1
+        rewrite "$shelf" "\"${old_id}.systemshelf.artwork\"" "\"${new_id}.systemshelf.artwork\"" 1
+
+        # The Kotlin package declarations must have survived untouched.
+        for src in "$external" "$shelf"; do
+          if ! grep -q "^package ${old_id}" "$src"; then
+            echo "ERROR: $src lost its original package declaration." >&2
+            exit 1
+          fi
+        done
+
+        echo "applicationId and provider authorities rewritten: $old_id -> $new_id"
+        grep -n "applicationId" "$gradle"
+        grep -n "android:authorities" "$manifest"
+
+        suffix="${APK_SUFFIX_INPUT}"
+        if [[ -z "$suffix" ]]; then
+          suffix="-pkg-${new_id}"
+        elif [[ "$suffix" != -* ]]; then
+          suffix="-${suffix}"
+        fi
+        echo "Artifact suffix: $suffix"
+
+        {
+          echo "apk-suffix=${suffix}"
+          echo "application-id=${new_id}"
+        } >> "$GITHUB_OUTPUT"

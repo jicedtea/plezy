@@ -89,79 +89,12 @@ jobs:
       - name: Install dependencies
         run: flutter pub get --enforce-lockfile --no-example
 
-      # Rewrites applicationId (installation identity) but not namespace, so the
-      # Kotlin package and generated R class stay put and no sources move.
-      #
-      # The two ContentProvider authorities are hardcoded rather than derived
-      # from ${applicationId}, so they are rewritten alongside it: authorities
-      # are device-global, and leaving them fixed makes this APK unable to
-      # install next to a stock-ID Plezy (INSTALL_FAILED_CONFLICTING_PROVIDER).
-      # Every substitution is count-verified because a silently missed literal
-      # would compile fine and then fail at runtime on share-to-external-player.
-      - name: Override Android application ID
-        run: |
-          set -euo pipefail
-
-          if [[ -z "${ANDROID_APPLICATION_ID}" ]]; then
-            echo "ANDROID_APPLICATION_ID is empty; keeping the default applicationId."
-            echo "APK_SUFFIX=" >> "$GITHUB_ENV"
-            exit 0
-          fi
-
-          old_id=com.edde746.plezy
-          new_id="${ANDROID_APPLICATION_ID}"
-
-          if [[ "$new_id" == "$old_id" ]]; then
-            echo "ANDROID_APPLICATION_ID matches the default; nothing to rewrite."
-            echo "APK_SUFFIX=" >> "$GITHUB_ENV"
-            exit 0
-          fi
-
-          gradle=android/app/build.gradle.kts
-          manifest=android/app/src/main/AndroidManifest.xml
-          external=android/app/src/main/kotlin/com/edde746/plezy/ExternalPlayerChannel.kt
-          shelf=android/app/src/main/kotlin/com/edde746/plezy/watchnext/SystemShelfArtworkProvider.kt
-
-          rewrite() {
-            local file="$1" literal="$2" replacement="$3" expected="$4" actual pattern
-            actual=$(grep -c -F -- "$literal" "$file" || true)
-            if [[ "$actual" != "$expected" ]]; then
-              echo "ERROR: $file has $actual occurrences of [$literal], expected $expected." >&2
-              echo "The upstream layout changed; update this step before shipping a renamed build." >&2
-              exit 1
-            fi
-            # grep -F took the literal; sed needs its dots escaped so they match
-            # a dot rather than any character.
-            pattern=$(printf '%s' "$literal" | sed 's/\./\\./g')
-            sed -i "s|${pattern}|${replacement}|g" "$file"
-          }
-
-          # Installation identity.
-          rewrite "$gradle" "applicationId = \"${old_id}\"" "applicationId = \"${new_id}\"" 1
-
-          # ContentProvider authorities. Matched as quoted literals so the
-          # `package com.edde746.plezy...` declarations at the top of the Kotlin
-          # files are left alone — those must keep tracking namespace, which is
-          # deliberately not renamed.
-          rewrite "$manifest" "\"${old_id}.fileprovider\"" "\"${new_id}.fileprovider\"" 1
-          rewrite "$external" "\"${old_id}.fileprovider\"" "\"${new_id}.fileprovider\"" 1
-          rewrite "$manifest" "\"${old_id}.systemshelf.artwork\"" "\"${new_id}.systemshelf.artwork\"" 1
-          rewrite "$shelf" "\"${old_id}.systemshelf.artwork\"" "\"${new_id}.systemshelf.artwork\"" 1
-
-          # The Kotlin package declarations must have survived untouched.
-          for src in "$external" "$shelf"; do
-            if ! grep -q "^package ${old_id}" "$src"; then
-              echo "ERROR: $src lost its original package declaration." >&2
-              exit 1
-            fi
-          done
-
-          echo "applicationId and provider authorities rewritten to: ${new_id}"
-          grep -n "applicationId" android/app/build.gradle.kts
-          grep -n "android:authorities" android/app/src/main/AndroidManifest.xml
-
-          # Marks the artifacts as a repackaged build and records which ID.
-          echo "APK_SUFFIX=-pkg-${new_id}" >> "$GITHUB_ENV"
+      - name: Set Android application ID
+        id: appid
+        uses: ./.github/actions/set-android-application-id
+        with:
+          application-id: ${{ env.ANDROID_APPLICATION_ID }}
+          apk-suffix: honor-packed
 
       - name: Configure Android signing
         run: |
@@ -187,11 +120,13 @@ jobs:
         if: always()
         run: rm -f android/app/upload-keystore.jks android/key.properties
 
-      # Released as bare .apk: the tar.gz wrapper only added a download step
-      # before sideloading, and the APK is already a compressed container.
-      # Released as bare .apk; APK_SUFFIX is empty unless the applicationId was
-      # rewritten above, so unrenamed builds keep the plain names.
+      # Released as bare .apk: the tar.gz wrapper only added a decompression step
+      # before sideloading, and an APK is already a compressed container.
+      # APK_SUFFIX is empty unless the applicationId was rewritten, so unrenamed
+      # builds keep the plain names.
       - name: Package APKs
+        env:
+          APK_SUFFIX: ${{ steps.appid.outputs.apk-suffix }}
         run: |
           set -euo pipefail
           for abi in arm64-v8a armeabi-v7a x86_64; do
