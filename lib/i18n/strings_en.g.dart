@@ -68,6 +68,7 @@ class Translations with BaseTranslations<AppLocale, Translations> {
 	late final Translations$serverSelection$en serverSelection = Translations$serverSelection$en.internal(_root);
 	late final Translations$hubDetail$en hubDetail = Translations$hubDetail$en.internal(_root);
 	late final Translations$logs$en logs = Translations$logs$en.internal(_root);
+	late final Translations$startup$en startup = Translations$startup$en.internal(_root);
 	late final Translations$licenses$en licenses = Translations$licenses$en.internal(_root);
 	late final Translations$navigation$en navigation = Translations$navigation$en.internal(_root);
 	late final Translations$explore$en explore = Translations$explore$en.internal(_root);
@@ -2116,6 +2117,12 @@ class Translations$messages$en {
 	/// en: 'Server error (HTTP 500). A bandwidth/transcoding limit likely rejected this session. Ask the owner to adjust it.'
 	String get serverLimitBody => 'Server error (HTTP 500). A bandwidth/transcoding limit likely rejected this session. Ask the owner to adjust it.';
 
+	/// en: 'File unavailable'
+	String get mediaUnreadableTitle => 'File unavailable';
+
+	/// en: 'The server found this item but could not read its file (HTTP 404). The file was probably moved, deleted, or its storage is offline. Ask the server owner to check the file and rescan the library.'
+	String get mediaUnreadableBody => 'The server found this item but could not read its file (HTTP 404). The file was probably moved, deleted, or its storage is offline. Ask the server owner to check the file and rescan the library.';
+
 	/// en: 'Logs uploaded'
 	String get logsUploaded => 'Logs uploaded';
 
@@ -2828,6 +2835,90 @@ class Translations$logs$en {
 
 	/// en: 'Upload Logs'
 	String get uploadLogs => 'Upload Logs';
+}
+
+// Path: startup
+class Translations$startup$en {
+	Translations$startup$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Plezy could not start'
+	String get failedTitle => 'Plezy could not start';
+
+	/// en: 'Something went wrong during startup. The details below identify what failed.'
+	String get failedBody => 'Something went wrong during startup. The details below identify what failed.';
+
+	/// en: 'Step'
+	String get phaseLabel => 'Step';
+
+	/// en: 'Show details'
+	String get showDetails => 'Show details';
+
+	/// en: 'Hide details'
+	String get hideDetails => 'Hide details';
+
+	/// en: 'Copy details'
+	String get copyDetails => 'Copy details';
+
+	/// en: 'Details copied to clipboard'
+	String get detailsCopied => 'Details copied to clipboard';
+
+	/// en: 'Upload details'
+	String get uploadDetails => 'Upload details';
+
+	/// en: 'Repair storage'
+	String get repairStorage => 'Repair storage';
+
+	/// en: 'Repair stored data?'
+	String get repairTitle => 'Repair stored data?';
+
+	/// en: 'Plezy's settings file is damaged and cannot be read. Repairing resets every setting to its default.'
+	String get repairBodyCommon => 'Plezy\'s settings file is damaged and cannot be read. Repairing resets every setting to its default.';
+
+	/// en: 'One saved sign-in is damaged and cannot be read. Repairing removes just that one; your other settings are left alone.'
+	String get repairBodyOneCredential => 'One saved sign-in is damaged and cannot be read. Repairing removes just that one; your other settings are left alone.';
+
+	/// en: 'Servers and profiles normally stay signed in, but trackers (MAL, AniList, Simkl, Trakt) and Seerr may need to be reconnected. Plezy will tell you exactly what it kept.'
+	String get repairBodySessionsAtRisk => 'Servers and profiles normally stay signed in, but trackers (MAL, AniList, Simkl, Trakt) and Seerr may need to be reconnected. Plezy will tell you exactly what it kept.';
+
+	/// en: 'Repair'
+	String get repairConfirm => 'Repair';
+
+	/// en: 'Storage repaired'
+	String get repairSucceeded => 'Storage repaired';
+
+	/// en: 'Storage repaired — restart required'
+	String get repairNeedsRestart => 'Storage repaired — restart required';
+
+	/// en: 'Repair failed'
+	String get repairFailed => 'Repair failed';
+
+	/// en: 'Your servers and profiles are still signed in.'
+	String get repairKeptSignIns => 'Your servers and profiles are still signed in.';
+
+	/// en: 'The key protecting your saved sign-ins could not be recovered. You will have to sign in to every server and profile again.'
+	String get repairLostSignIns => 'The key protecting your saved sign-ins could not be recovered. You will have to sign in to every server and profile again.';
+
+	/// en: 'At least one tracker or Seerr connection was lost and has to be reconnected.'
+	String get repairLostSessions => 'At least one tracker or Seerr connection was lost and has to be reconnected.';
+
+	/// en: 'A copy of the damaged file was kept'
+	String get backupTitle => 'A copy of the damaged file was kept';
+
+	/// en: 'It contains your sign-in credentials. Do not upload or share it.'
+	String get backupWarning => 'It contains your sign-in credentials. Do not upload or share it.';
+
+	/// en: 'Delete copy'
+	String get deleteBackup => 'Delete copy';
+
+	/// en: 'Copy deleted.'
+	String get backupDeleted => 'Copy deleted.';
+
+	/// en: 'Plezy failed to start last time'
+	String get previousFailureTitle => 'Plezy failed to start last time';
 }
 
 // Path: licenses
@@ -6584,6 +6675,8 @@ extension on Translations {
 			'messages.switchingToCompatiblePlayer' => 'Switching to compatible player...',
 			'messages.serverLimitTitle' => 'Playback failed',
 			'messages.serverLimitBody' => 'Server error (HTTP 500). A bandwidth/transcoding limit likely rejected this session. Ask the owner to adjust it.',
+			'messages.mediaUnreadableTitle' => 'File unavailable',
+			'messages.mediaUnreadableBody' => 'The server found this item but could not read its file (HTTP 404). The file was probably moved, deleted, or its storage is offline. Ask the server owner to check the file and rescan the library.',
 			'messages.logsUploaded' => 'Logs uploaded',
 			'messages.logsUploadFailed' => 'Failed to upload logs',
 			'messages.logId' => 'Log ID',
@@ -6825,6 +6918,31 @@ extension on Translations {
 			'logs.clearLogs' => 'Clear Logs',
 			'logs.copyLogs' => 'Copy Logs',
 			'logs.uploadLogs' => 'Upload Logs',
+			'startup.failedTitle' => 'Plezy could not start',
+			'startup.failedBody' => 'Something went wrong during startup. The details below identify what failed.',
+			'startup.phaseLabel' => 'Step',
+			'startup.showDetails' => 'Show details',
+			'startup.hideDetails' => 'Hide details',
+			'startup.copyDetails' => 'Copy details',
+			'startup.detailsCopied' => 'Details copied to clipboard',
+			'startup.uploadDetails' => 'Upload details',
+			'startup.repairStorage' => 'Repair storage',
+			'startup.repairTitle' => 'Repair stored data?',
+			'startup.repairBodyCommon' => 'Plezy\'s settings file is damaged and cannot be read. Repairing resets every setting to its default.',
+			'startup.repairBodyOneCredential' => 'One saved sign-in is damaged and cannot be read. Repairing removes just that one; your other settings are left alone.',
+			'startup.repairBodySessionsAtRisk' => 'Servers and profiles normally stay signed in, but trackers (MAL, AniList, Simkl, Trakt) and Seerr may need to be reconnected. Plezy will tell you exactly what it kept.',
+			'startup.repairConfirm' => 'Repair',
+			'startup.repairSucceeded' => 'Storage repaired',
+			'startup.repairNeedsRestart' => 'Storage repaired — restart required',
+			'startup.repairFailed' => 'Repair failed',
+			'startup.repairKeptSignIns' => 'Your servers and profiles are still signed in.',
+			'startup.repairLostSignIns' => 'The key protecting your saved sign-ins could not be recovered. You will have to sign in to every server and profile again.',
+			'startup.repairLostSessions' => 'At least one tracker or Seerr connection was lost and has to be reconnected.',
+			'startup.backupTitle' => 'A copy of the damaged file was kept',
+			'startup.backupWarning' => 'It contains your sign-in credentials. Do not upload or share it.',
+			'startup.deleteBackup' => 'Delete copy',
+			'startup.backupDeleted' => 'Copy deleted.',
+			'startup.previousFailureTitle' => 'Plezy failed to start last time',
 			'licenses.relatedPackages' => 'Related Packages',
 			'licenses.license' => 'License',
 			'licenses.licenseNumber' => ({required Object number}) => 'License ${number}',
@@ -6924,6 +7042,8 @@ extension on Translations {
 			'explore.sourceMaterial.novel' => 'Novel',
 			'explore.sourceMaterial.visualNovel' => 'Visual novel',
 			'explore.sourceMaterial.game' => 'Game',
+			_ => null,
+		} ?? switch (path) {
 			'explore.sourceMaterial.webComic' => 'Web comic',
 			'explore.sourceMaterial.musicRelease' => 'Music',
 			'explore.sourceMaterial.otherMedia' => 'Other',
@@ -6951,8 +7071,6 @@ extension on Translations {
 			'explore.detail.country' => 'Country',
 			'explore.detail.language' => 'Language',
 			'explore.detail.released' => 'Released',
-			_ => null,
-		} ?? switch (path) {
 			'explore.detail.physicalRelease' => 'On disc',
 			'explore.detail.ended' => 'Ended',
 			'explore.detail.addedOn' => ({required Object date}) => 'Added ${date}',
@@ -7438,6 +7556,8 @@ extension on Translations {
 			'metadataEdit.screenTitle' => 'Edit Metadata',
 			'metadataEdit.basicInfo' => 'Basic Info',
 			'metadataEdit.artwork' => 'Artwork',
+			_ => null,
+		} ?? switch (path) {
 			'metadataEdit.advancedSettings' => 'Advanced Settings',
 			'metadataEdit.title' => 'Title',
 			'metadataEdit.sortTitle' => 'Sort Title',
@@ -7465,8 +7585,6 @@ extension on Translations {
 			'metadataEdit.artworkUpdateFailed' => 'Failed to update artwork',
 			'metadataEdit.noArtworkAvailable' => 'No artwork available',
 			'metadataEdit.artworkOption' => ({required Object index}) => 'Artwork option ${index}',
-			_ => null,
-		} ?? switch (path) {
 			'metadataEdit.selectedArtworkOption' => ({required Object index}) => 'Artwork option ${index}, selected',
 			'metadataEdit.notSet' => 'Not set',
 			'metadataEdit.libraryDefault' => 'Library default',
