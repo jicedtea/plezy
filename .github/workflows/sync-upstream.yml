@@ -60,12 +60,21 @@ jobs:
             exit 1
           fi
 
-      # Credentials are intentionally persisted: this job pushes the
-      # fast-forwarded main back to the fork.
+      # Credentials are intentionally persisted: this job pushes the merged main
+      # back to the fork.
+      #
+      # GITHUB_TOKEN cannot push a commit that adds or changes anything under
+      # .github/workflows/, and there is no `permissions:` key that grants it --
+      # the restriction is structural. Upstream edits its workflows regularly,
+      # so the sync push will eventually be rejected. Set a SYNC_PAT secret (a
+      # PAT or fine-grained token with the `workflow` scope) to make those syncs
+      # go through; without it everything still works until upstream next
+      # touches a workflow file.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: main
           fetch-depth: 0
+          token: ${{ secrets.SYNC_PAT || secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
@@ -87,8 +96,9 @@ jobs:
             git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
           fi
 
-          git fetch upstream main
-          git fetch --tags upstream
+          # Only main. The one release tag that matters is fetched by name in
+          # the next step, once the API has said which one it is.
+          git fetch --no-tags upstream main
 
           if git merge-base --is-ancestor upstream/main HEAD; then
             echo "main already contains every upstream commit."
@@ -104,8 +114,14 @@ jobs:
             exit 1
           fi
 
-          # Mirror upstream tags so the release commit is reachable here.
-          git push origin --tags
+          # Upstream tags are fetched locally (above) but deliberately NOT
+          # pushed. GITHUB_TOKEN may not create a ref that introduces
+          # .github/workflows/ files, and every upstream tag points at a tree
+          # containing them, so `git push --tags` is always rejected. It is also
+          # unnecessary: upstream cuts releases by committing the version bump
+          # to main and tagging it there, so merging main already makes the
+          # release commit reachable. The release job's own tag is created
+          # through the Releases API, which is not subject to that restriction.
 
       - name: Check for an unbuilt upstream release
         id: release
@@ -123,8 +139,24 @@ jobs:
           fi
           echo "Latest upstream release: $tag"
 
+          # Exactly the one tag this run is about, by name.
+          if ! git fetch --no-tags upstream "refs/tags/${tag}:refs/tags/${tag}"; then
+            echo "ERROR: could not fetch tag ${tag} from ${UPSTREAM_REPO}." >&2
+            exit 1
+          fi
+
           if ! tag_sha=$(git rev-parse -q --verify "refs/tags/${tag}^{commit}"); then
-            echo "ERROR: tag ${tag} is not present after mirroring upstream tags." >&2
+            echo "ERROR: tag ${tag} did not resolve to a commit." >&2
+            exit 1
+          fi
+
+          # The build jobs fetch this commit from the fork, so it has to be
+          # reachable from a pushed ref. Merging upstream/main normally puts it
+          # on main; if upstream ever tags off-main it would not be, and that
+          # should fail here rather than as an opaque checkout error later.
+          if ! git merge-base --is-ancestor "$tag_sha" HEAD; then
+            echo "ERROR: ${tag} (${tag_sha}) is not an ancestor of main after syncing." >&2
+            echo "Upstream appears to have tagged off-main; this workflow cannot fetch that commit." >&2
             exit 1
           fi
 
