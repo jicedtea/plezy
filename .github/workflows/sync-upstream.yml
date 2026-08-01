@@ -400,6 +400,39 @@ jobs:
     permissions:
       contents: write
     steps:
+      # check-upstream already gates on SYNC_PAT, but re-running an older run
+      # replays *that run's* workflow file, so the gate can be absent while this
+      # job still executes. Checked again here, and stated plainly, because the
+      # Releases API reports a missing PAT as a generic 403 that reads like a
+      # missing `contents: write`.
+      - name: Verify the release token
+        env:
+          HAS_PAT: ${{ secrets.SYNC_PAT != '' }}
+          RELEASE_TOKEN: ${{ secrets.SYNC_PAT }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$HAS_PAT" != "true" ]]; then
+            echo "::error::SYNC_PAT is not visible to this job, so the release would fall back to GITHUB_TOKEN and fail with 403. Add it under Settings > Secrets and variables > Actions > Repository secrets -- environment-scoped and unshared organization secrets are not visible here. If this is a re-run of an older run, start a fresh run instead: re-runs replay the old workflow file."
+            exit 1
+          fi
+
+          # Classic PATs report their scopes; fine-grained ones report none, so
+          # an empty header is not treated as a failure.
+          scopes=$(curl -sS -o /dev/null -D - \
+            -H "Authorization: Bearer ${RELEASE_TOKEN}" \
+            https://api.github.com/user | tr -d '\r' | sed -n 's/^[Xx]-[Oo][Aa]uth-[Ss]copes: //p')
+
+          if [[ -n "$scopes" ]]; then
+            echo "SYNC_PAT is a classic token with scopes: ${scopes}"
+            if [[ "$scopes" != *workflow* ]]; then
+              echo "::error::SYNC_PAT is missing the 'workflow' scope, which is required to create a tag at a commit containing .github/workflows/. Regenerate it with repo + workflow."
+              exit 1
+            fi
+          else
+            echo "SYNC_PAT reports no OAuth scopes (fine-grained token); needs Contents: write and Workflows: write."
+          fi
+
       - name: Download build artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
