@@ -104,7 +104,15 @@ jobs:
             echo "main already contains every upstream commit."
           elif git merge --no-edit upstream/main; then
             echo "Merged upstream/main into main."
-            git push origin main
+            # Non-fatal on purpose. Without SYNC_PAT this push is rejected as
+            # soon as upstream touches any .github/workflows/ file, and that
+            # must not take the build and release down with it -- keeping main
+            # current is a convenience, shipping the release is the job.
+            if git push origin main; then
+              echo "Pushed the merge to origin/main."
+            else
+              echo "::warning::Could not push the merged main. Set the SYNC_PAT secret (a token with the 'workflow' scope) to keep main in sync; the build continues from upstream regardless."
+            fi
           else
             # Leave the branch untouched so the conflict is resolved by a human
             # rather than guessed at here.
@@ -115,13 +123,10 @@ jobs:
           fi
 
           # Upstream tags are fetched locally (above) but deliberately NOT
-          # pushed. GITHUB_TOKEN may not create a ref that introduces
+          # pushed: GITHUB_TOKEN may not create a ref that introduces
           # .github/workflows/ files, and every upstream tag points at a tree
-          # containing them, so `git push --tags` is always rejected. It is also
-          # unnecessary: upstream cuts releases by committing the version bump
-          # to main and tagging it there, so merging main already makes the
-          # release commit reachable. The release job's own tag is created
-          # through the Releases API, which is not subject to that restriction.
+          # containing them. The build jobs read the tag straight from upstream,
+          # so nothing here needs to exist on this fork.
 
       - name: Check for an unbuilt upstream release
         id: release
@@ -151,15 +156,9 @@ jobs:
             exit 1
           fi
 
-          # The build jobs fetch this commit from the fork, so it has to be
-          # reachable from a pushed ref. Merging upstream/main normally puts it
-          # on main; if upstream ever tags off-main it would not be, and that
-          # should fail here rather than as an opaque checkout error later.
-          if ! git merge-base --is-ancestor "$tag_sha" HEAD; then
-            echo "ERROR: ${tag} (${tag_sha}) is not an ancestor of main after syncing." >&2
-            echo "Upstream appears to have tagged off-main; this workflow cannot fetch that commit." >&2
-            exit 1
-          fi
+          # No reachability check is needed here: the build jobs check the tag
+          # out of the upstream repository directly, so it does not matter
+          # whether this fork's main carries that commit.
 
           # A release already published here means this tag was built before.
           # Checked against releases rather than tags: the release job creates
@@ -223,11 +222,13 @@ jobs:
     outputs:
       apk_suffix: ${{ steps.appid.outputs.apk-suffix }}
     steps:
-      # Builds the release tag, not main: upstream main may already have moved
-      # past the release.
+      # Straight from upstream at the release tag. Two reasons: upstream main
+      # may already have moved past the release, and reading from upstream keeps
+      # the build working even when the sync push to this fork was rejected.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.check-upstream.outputs.tag_sha }}
+          repository: ${{ env.UPSTREAM_REPO }}
+          ref: refs/tags/${{ needs.check-upstream.outputs.tag }}
           persist-credentials: false
 
       # `uses: ./...` resolves against the workspace, and the workspace is now an
@@ -337,9 +338,11 @@ jobs:
     permissions:
       contents: read
     steps:
+      # Straight from upstream at the release tag, same as the Android job.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ needs.check-upstream.outputs.tag_sha }}
+          repository: ${{ env.UPSTREAM_REPO }}
+          ref: refs/tags/${{ needs.check-upstream.outputs.tag }}
           persist-credentials: false
 
       - name: Cache Windows native dependencies
