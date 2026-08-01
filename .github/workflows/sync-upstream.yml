@@ -450,7 +450,40 @@ jobs:
           fi
 
           echo "Token can write to this repository."
-          echo "If the release still returns 403 from here, the remaining gap is workflow permission: publishing creates a tag at a commit containing .github/workflows/, which needs Workflows: Read and write (fine-grained) or the 'workflow' scope (classic)."
+
+      # Done explicitly, ahead of the release, for two reasons. It reports
+      # GitHub's own wording -- the Releases API collapses a workflow-permission
+      # refusal into a bare 403 that reads like a missing Contents scope -- and
+      # once the tag exists the release step only has to attach to it.
+      - name: Ensure the release tag exists
+        env:
+          GH_TOKEN: ${{ secrets.SYNC_PAT }}
+          TAG: ${{ needs.check-upstream.outputs.tag }}
+          SHA: ${{ needs.check-upstream.outputs.tag_sha }}
+        run: |
+          set -euo pipefail
+
+          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}" >/dev/null 2>&1; then
+            echo "Tag ${TAG} already exists in this fork."
+            exit 0
+          fi
+
+          if out=$(gh api -X POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+                     -f "ref=refs/tags/${TAG}" -f "sha=${SHA}" 2>&1); then
+            echo "Created tag ${TAG} at ${SHA}."
+            exit 0
+          fi
+
+          echo "$out" >&2
+          case "$out" in
+            *workflow*)
+              echo "::error::Creating tag ${TAG} was refused because ${SHA} contains .github/workflows/ files. Grant SYNC_PAT 'Workflows: Read and write' (fine-grained) or the 'workflow' scope (classic). Contents write alone is not enough." ;;
+            *"Object does not exist"*|*422*)
+              echo "::error::Commit ${SHA} is not present in ${GITHUB_REPOSITORY}, so no tag can point at it. This happens when the upstream sync push was rejected and the fork never received that commit -- set SYNC_PAT so the sync push succeeds." ;;
+            *)
+              echo "::error::Could not create tag ${TAG}; see the API response above." ;;
+          esac
+          exit 1
 
       - name: Download build artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
