@@ -424,14 +424,33 @@ jobs:
             https://api.github.com/user | tr -d '\r' | sed -n 's/^[Xx]-[Oo][Aa]uth-[Ss]copes: //p')
 
           if [[ -n "$scopes" ]]; then
-            echo "SYNC_PAT is a classic token with scopes: ${scopes}"
+            echo "SYNC_PAT is a classic token. Scopes: ${scopes}"
             if [[ "$scopes" != *workflow* ]]; then
               echo "::error::SYNC_PAT is missing the 'workflow' scope, which is required to create a tag at a commit containing .github/workflows/. Regenerate it with repo + workflow."
               exit 1
             fi
           else
-            echo "SYNC_PAT reports no OAuth scopes (fine-grained token); needs Contents: write and Workflows: write."
+            echo "SYNC_PAT is a fine-grained token (reports no OAuth scopes)."
           fi
+
+          # Ask the API what this token can actually do here, rather than
+          # inferring it from the error text afterwards. A fine-grained token
+          # returns the same "not accessible by integration" 403 as GITHUB_TOKEN
+          # does, so the failure message alone cannot tell them apart.
+          push=$(curl -sS \
+            -H "Authorization: Bearer ${RELEASE_TOKEN}" \
+            -H "Accept: application/vnd.github+json" \
+            "https://api.github.com/repos/${GITHUB_REPOSITORY}" \
+            | jq -r '.permissions.push // "unknown"')
+          echo "Write access to ${GITHUB_REPOSITORY}: ${push}"
+
+          if [[ "$push" != "true" ]]; then
+            echo "::error::SYNC_PAT cannot write to ${GITHUB_REPOSITORY} (permissions.push=${push}). Fine-grained token: list this repository under 'Repository access' and grant Contents: Read and write -- releases and tags live under Contents, not a separate Releases permission. Classic token: needs the 'repo' scope. Also check the token has not expired, and that any organization approval is granted."
+            exit 1
+          fi
+
+          echo "Token can write to this repository."
+          echo "If the release still returns 403 from here, the remaining gap is workflow permission: publishing creates a tag at a commit containing .github/workflows/, which needs Workflows: Read and write (fine-grained) or the 'workflow' scope (classic)."
 
       - name: Download build artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
