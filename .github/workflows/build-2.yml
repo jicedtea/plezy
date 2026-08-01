@@ -1,0 +1,542 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_android:
+        description: Build Android
+        default: true
+        type: boolean
+      build_windows:
+        description: Build Windows
+        default: true
+        type: boolean
+
+env:
+  # Android applicationId these APKs are built under. Overridden from the
+  # upstream com.edde746.plezy because Honor's Histen "Premium Bass" effect is
+  # gated on a per-package allowlist, and this ID is on it.
+  #
+  # Consequences of borrowing a published app's ID, all accepted deliberately:
+  # this APK cannot be installed alongside the real KuWo Music, cannot be
+  # uploaded to Play, and — because it is signed with a different key — Android
+  # will refuse to install it over the real app, so it can never masquerade as
+  # an update to it. Set to "" or com.edde746.plezy to build unrenamed.
+  ANDROID_APPLICATION_ID: "cn.kuwo.player"
+  # Only place this workflow names the SDK; .github/actions/setup-flutter-git pins the same release.
+  FLUTTER_VERSION: "3.44.0"
+  # Shared by every release build command; SENTRY_DIST stays per-platform.
+  RELEASE_DART_DEFINES: --dart-define=ENABLE_UPDATE_CHECK=true ${{ github.repository == 'edde746/plezy' && '--dart-define=ENABLE_SENTRY=true' || '' }} --dart-define=GIT_COMMIT=${{ github.sha }} --dart-define=SENTRY_ENVIRONMENT=github --dart-define=ENABLE_DONATIONS=true
+  TRUSTED_BUILD_CACHE_VERSION: trusted-build-v1
+
+jobs:
+  validate-trusted-ref:
+    name: Validate trusted build ref
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - name: Require the protected main branch
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Release builds may only run from refs/heads/main." >&2
+            exit 1
+          fi
+
+  build-android:
+    needs: validate-trusted-ref
+    if: ${{ inputs.build_android }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Java
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: "${{ env.TRUSTED_BUILD_CACHE_VERSION }}-flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache: false
+
+      - name: Cache Pub dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ env.TRUSTED_BUILD_CACHE_VERSION }}-${{ runner.os }}-${{ runner.arch }}-pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ env.TRUSTED_BUILD_CACHE_VERSION }}-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile --no-example
+
+      # Rewrites applicationId (installation identity) but not namespace, so the
+      # Kotlin package and generated R class stay put and no sources move.
+      #
+      # The two ContentProvider authorities are hardcoded rather than derived
+      # from ${applicationId}, so they are rewritten alongside it: authorities
+      # are device-global, and leaving them fixed makes this APK unable to
+      # install next to a stock-ID Plezy (INSTALL_FAILED_CONFLICTING_PROVIDER).
+      # Every substitution is count-verified because a silently missed literal
+      # would compile fine and then fail at runtime on share-to-external-player.
+      - name: Override Android application ID
+        run: |
+          set -euo pipefail
+
+          if [[ -z "${ANDROID_APPLICATION_ID}" ]]; then
+            echo "ANDROID_APPLICATION_ID is empty; keeping the default applicationId."
+            echo "APK_SUFFIX=" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          old_id=com.edde746.plezy
+          new_id="${ANDROID_APPLICATION_ID}"
+
+          if [[ "$new_id" == "$old_id" ]]; then
+            echo "ANDROID_APPLICATION_ID matches the default; nothing to rewrite."
+            echo "APK_SUFFIX=" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          gradle=android/app/build.gradle.kts
+          manifest=android/app/src/main/AndroidManifest.xml
+          external=android/app/src/main/kotlin/com/edde746/plezy/ExternalPlayerChannel.kt
+          shelf=android/app/src/main/kotlin/com/edde746/plezy/watchnext/SystemShelfArtworkProvider.kt
+
+          rewrite() {
+            local file="$1" literal="$2" replacement="$3" expected="$4" actual pattern
+            actual=$(grep -c -F -- "$literal" "$file" || true)
+            if [[ "$actual" != "$expected" ]]; then
+              echo "ERROR: $file has $actual occurrences of [$literal], expected $expected." >&2
+              echo "The upstream layout changed; update this step before shipping a renamed build." >&2
+              exit 1
+            fi
+            # grep -F took the literal; sed needs its dots escaped so they match
+            # a dot rather than any character.
+            pattern=$(printf '%s' "$literal" | sed 's/\./\\./g')
+            sed -i "s|${pattern}|${replacement}|g" "$file"
+          }
+
+          # Installation identity.
+          rewrite "$gradle" "applicationId = \"${old_id}\"" "applicationId = \"${new_id}\"" 1
+
+          # ContentProvider authorities. Matched as quoted literals so the
+          # `package com.edde746.plezy...` declarations at the top of the Kotlin
+          # files are left alone — those must keep tracking namespace, which is
+          # deliberately not renamed.
+          rewrite "$manifest" "\"${old_id}.fileprovider\"" "\"${new_id}.fileprovider\"" 1
+          rewrite "$external" "\"${old_id}.fileprovider\"" "\"${new_id}.fileprovider\"" 1
+          rewrite "$manifest" "\"${old_id}.systemshelf.artwork\"" "\"${new_id}.systemshelf.artwork\"" 1
+          rewrite "$shelf" "\"${old_id}.systemshelf.artwork\"" "\"${new_id}.systemshelf.artwork\"" 1
+
+          # The Kotlin package declarations must have survived untouched.
+          for src in "$external" "$shelf"; do
+            if ! grep -q "^package ${old_id}" "$src"; then
+              echo "ERROR: $src lost its original package declaration." >&2
+              exit 1
+            fi
+          done
+
+          echo "applicationId and provider authorities rewritten to: ${new_id}"
+          grep -n "applicationId" android/app/build.gradle.kts
+          grep -n "android:authorities" android/app/src/main/AndroidManifest.xml
+
+          # Marks the artifacts as a repackaged build and records which ID.
+          echo "APK_SUFFIX=-pkg-${new_id}" >> "$GITHUB_ENV"
+
+      - name: Configure Android signing
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
+          cat > android/key.properties << EOF
+          storePassword=${{ secrets.ANDROID_STORE_PASSWORD }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          storeFile=upload-keystore.jks
+          EOF
+
+      - name: Build APKs
+        run: flutter build apk --release --split-per-abi ${{ env.RELEASE_DART_DEFINES }} --dart-define=SENTRY_DIST=github-android-apk --obfuscate --split-debug-info=debug-info/android-apk --extra-gen-snapshot-options=--save-obfuscation-map=debug-info/android-apk/obfuscation.map.json
+
+      - name: Upload symbols to bugs.plezy.app
+        if: github.repository == 'edde746/plezy'
+        env:
+          BUGS_ADMIN_TOKEN: ${{ secrets.BUGS_ADMIN_TOKEN }}
+          SENTRY_DIST: github-android-apk
+        run: ./scripts/upload-symbols.sh android-apk
+
+      - name: Clean up keystore
+        if: always()
+        run: rm -f android/app/upload-keystore.jks android/key.properties
+
+      # Released as bare .apk: the tar.gz wrapper only added a download step
+      # before sideloading, and the APK is already a compressed container.
+      # Released as bare .apk; APK_SUFFIX is empty unless the applicationId was
+      # rewritten above, so unrenamed builds keep the plain names.
+      - name: Package APKs
+        run: |
+          set -euo pipefail
+          for abi in arm64-v8a armeabi-v7a x86_64; do
+            cp "build/app/outputs/flutter-apk/app-${abi}-release.apk" \
+               "plezy-android-${abi}${APK_SUFFIX}.apk"
+          done
+          ls -l plezy-android-*.apk
+
+      - name: Attest APKs
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4
+        with:
+          subject-path: plezy-android-*.apk
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: android-apk
+          path: plezy-android-*.apk
+
+  build-windows:
+    needs: validate-trusted-ref
+    name: Build Windows (${{ matrix.arch }})
+    if: ${{ inputs.build_windows }}
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: x64
+            runner: windows-latest
+            flutter_setup: action
+            native_cache_path: build/windows/x64/_deps
+          - arch: arm64
+            runner: windows-11-arm
+            flutter_setup: git
+            native_cache_path: |
+              build/windows/arm64/_deps
+              build/windows/arm64/mpv-dev-arm64
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Cache Windows native dependencies
+        id: windows-native-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: ${{ matrix.native_cache_path }}
+          key: ${{ env.TRUSTED_BUILD_CACHE_VERSION }}-windows-native-${{ matrix.arch }}-${{ hashFiles('windows/CMakeLists.txt') }}
+
+      - name: Install 7-Zip
+        if: matrix.arch == 'arm64' && steps.windows-native-cache.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: choco install 7zip -y
+
+      - name: Setup Flutter
+        if: matrix.flutter_setup == 'action'
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: "${{ env.TRUSTED_BUILD_CACHE_VERSION }}-flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache: false
+
+      - name: Set up Flutter from its pinned commit
+        if: matrix.flutter_setup == 'git'
+        uses: ./.github/actions/setup-flutter-git
+
+      - name: Cache Pub dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~\AppData\Local\Pub\Cache
+          key: ${{ env.TRUSTED_BUILD_CACHE_VERSION }}-${{ runner.os }}-${{ runner.arch }}-pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+
+      - name: Install dependencies
+        shell: pwsh
+        run: flutter pub get --enforce-lockfile --no-example
+
+      - name: Install patched Flutter engine (DComp)
+        shell: pwsh
+        run: |
+          flutter precache --windows
+          .\windows\tool\install-patched-engine.ps1
+
+      - name: Build Windows ${{ matrix.arch }}
+        shell: pwsh
+        run: flutter build windows --release ${{ env.RELEASE_DART_DEFINES }} --dart-define=SENTRY_DIST=github-windows-${{ matrix.arch }} --split-debug-info=debug-info/windows-${{ matrix.arch }}
+
+      - name: Upload symbols to bugs.plezy.app
+        if: github.repository == 'edde746/plezy'
+        shell: pwsh
+        env:
+          BUGS_ADMIN_TOKEN: ${{ secrets.BUGS_ADMIN_TOKEN }}
+          SENTRY_DIST: github-windows-${{ matrix.arch }}
+        run: .\scripts\upload-symbols.ps1 windows-${{ matrix.arch }}
+
+      - name: Upload ${{ matrix.arch }} build
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: windows-${{ matrix.arch }}-build
+          path: build/windows/${{ matrix.arch }}/runner/Release/
+
+  package-windows:
+    needs: build-windows
+    if: ${{ inputs.build_windows }}
+    runs-on: windows-latest
+    permissions:
+      id-token: write
+      attestations: write
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: "${{ env.TRUSTED_BUILD_CACHE_VERSION }}-flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache: false
+
+      - name: Install dependencies
+        shell: pwsh
+        run: flutter pub get --enforce-lockfile --no-example
+
+      - name: Download x64 build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: windows-x64-build
+          path: build-x64
+
+      - name: Download arm64 build
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: windows-arm64-build
+          path: build-arm64
+
+      - name: Read version from pubspec
+        id: version
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path pubspec.yaml -Pattern '^version:\s*(\S+)').Matches[0].Groups[1].Value -replace '\+.*'
+          echo "version=$v" >> $env:GITHUB_OUTPUT
+
+      - name: Build installer and portables
+        run: .\windows\build-installer.ps1 -X64BuildDir "build-x64" -Arm64BuildDir "build-arm64" -Version "${{ steps.version.outputs.version }}"
+
+      # Unsigned on purpose: the Store re-signs the bundle during
+      # certification. See windows/build-msix.ps1.
+      - name: Build Store package (MSIX)
+        run: .\windows\build-msix.ps1 -X64BuildDir "build-x64" -Arm64BuildDir "build-arm64" -Version "${{ steps.version.outputs.version }}"
+
+      - name: Sign installer for WinSparkle (EdDSA)
+        if: env.SPARKLE_PRIVATE_KEY != ''
+        env:
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
+        shell: pwsh
+        run: |
+          $keyPath = Join-Path $env:RUNNER_TEMP "plezy-winsparkle-ed25519.pem"
+          try {
+            Set-Content -Path $keyPath -Value $env:SPARKLE_PRIVATE_KEY -Encoding ascii -NoNewline
+            $output = & dart run auto_updater:sign_update plezy-windows-installer.exe $keyPath
+            if ($LASTEXITCODE -ne 0) {
+              throw "WinSparkle signer failed with exit code $LASTEXITCODE"
+            }
+            $match = [regex]::Match($output, 'edSignature="([^"]*)"')
+            if (-not $match.Success) {
+              throw "WinSparkle signer returned no EdDSA signature"
+            }
+            Set-Content -Path win-ed-signature.txt -Value $match.Groups[1].Value -Encoding ascii -NoNewline
+            Set-Content -Path win-installer-size.txt -Value (Get-Item plezy-windows-installer.exe).Length.ToString() -Encoding ascii -NoNewline
+          } finally {
+            Remove-Item -Path $keyPath -Force -ErrorAction SilentlyContinue
+          }
+
+      - name: Attest Windows artifacts
+        uses: actions/attest-build-provenance@0f67c3f4856b2e3261c31976d6725780e5e4c373 # v4
+        with:
+          subject-path: |
+            plezy-windows-x64-portable.7z
+            plezy-windows-arm64-portable.7z
+            plezy-windows-installer.exe
+            plezy-windows.msixbundle
+
+      - name: Upload x64 portable
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: windows-x64-portable
+          path: plezy-windows-x64-portable.7z
+
+      - name: Upload arm64 portable
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: windows-arm64-portable
+          path: plezy-windows-arm64-portable.7z
+
+      - name: Upload installer
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: windows-installer
+          path: |
+            plezy-windows-installer.exe
+            win-ed-signature.txt
+            win-installer-size.txt
+
+      # Deliberately not attached to the GitHub release in create-release: a
+      # Store-identity package cannot be installed without the Store's
+      # certificate, so it is only useful as a Partner Center upload.
+      - name: Upload Store package
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: windows-msix
+          path: plezy-windows.msixbundle
+
+  create-release:
+    needs: [validate-trusted-ref, build-android, build-windows, package-windows]
+    if: ${{ always() && needs.validate-trusted-ref.result == 'success' && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') && inputs.build_android && inputs.build_windows }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          sparse-checkout: pubspec.yaml
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Read version from pubspec.yaml
+        id: version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*//')
+          BUILD_NUMBER=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Download Android artifacts
+        if: ${{ inputs.build_android }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: android-apk
+          path: artifacts/android-apk
+
+      - name: Download Windows x64 artifact
+        if: ${{ inputs.build_windows }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: windows-x64-portable
+          path: artifacts/windows-x64-portable
+
+      - name: Download Windows arm64 artifact
+        if: ${{ inputs.build_windows }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: windows-arm64-portable
+          path: artifacts/windows-arm64-portable
+
+      - name: Download Windows installer artifact
+        if: ${{ inputs.build_windows }}
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: windows-installer
+          path: artifacts/windows-installer
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Generate appcast.xml
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BUILD_NUMBER="${{ steps.version.outputs.build_number }}"
+
+          # Read Windows signature metadata (may be empty if secrets not configured)
+          WIN_ED_SIG=""
+          WIN_INSTALLER_SIZE="0"
+          if [ -f artifacts/windows-installer/win-ed-signature.txt ]; then
+            WIN_ED_SIG=$(cat artifacts/windows-installer/win-ed-signature.txt)
+          fi
+          if [ -f artifacts/windows-installer/win-installer-size.txt ]; then
+            WIN_INSTALLER_SIZE=$(cat artifacts/windows-installer/win-installer-size.txt)
+          fi
+
+          cat > appcast.xml << XMLEOF
+          <?xml version="1.0" encoding="utf-8"?>
+          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+            <channel>
+              <title>Plezy Updates</title>
+              <item>
+                <title>Version ${VERSION}</title>
+                <sparkle:version>${BUILD_NUMBER}</sparkle:version>
+                <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
+                <sparkle:releaseNotesLink>https://gh-html.edde746.dev/edde746/plezy/${VERSION}</sparkle:releaseNotesLink>
+          XMLEOF
+
+          # Windows enclosure
+          if [ -n "$WIN_ED_SIG" ]; then
+            cat >> appcast.xml << XMLEOF
+                <enclosure url="https://github.com/edde746/plezy/releases/download/${VERSION}/plezy-windows-installer.exe"
+                           length="${WIN_INSTALLER_SIZE}" type="application/octet-stream"
+                           sparkle:edSignature="${WIN_ED_SIG}"
+                           sparkle:installerArguments="/SILENT /SP-"
+                           sparkle:os="windows" />
+          XMLEOF
+          fi
+
+          cat >> appcast.xml << 'XMLEOF'
+              </item>
+            </channel>
+          </rss>
+          XMLEOF
+
+          # Clean up leading whitespace from heredoc indentation
+          sed -i 's/^          //' appcast.xml
+
+          echo "Generated appcast.xml:"
+          cat appcast.xml
+
+      - name: Collect release files
+        id: release-files
+        run: |
+          {
+            echo 'files<<EOF'
+            if [ "${{ inputs.build_android }}" = "true" ]; then
+              echo 'artifacts/android-apk/*.apk'
+            fi
+            if [ "${{ inputs.build_windows }}" = "true" ]; then
+              echo artifacts/windows-x64-portable/plezy-windows-x64-portable.7z
+              echo artifacts/windows-arm64-portable/plezy-windows-arm64-portable.7z
+              echo artifacts/windows-installer/plezy-windows-installer.exe
+            fi
+            echo appcast.xml
+            echo EOF
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
+        with:
+          files: ${{ steps.release-files.outputs.files }}
+          draft: true
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

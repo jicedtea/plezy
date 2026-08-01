@@ -1,0 +1,567 @@
+name: Sync Upstream and Release
+
+# Fast-forwards this fork's main from the upstream repository twice a day and,
+# whenever that pulls in new commits, ships Android + desktop builds as a
+# GitHub release. Deliberately separate from build.yml: that workflow is the
+# upstream release contract (guarded by scripts/check_build_workflow.py) and
+# must not grow fork-only triggers.
+
+on:
+  schedule:
+    # 00:00 and 12:00 UTC.
+    - cron: "0 0/12 * * *"
+  workflow_dispatch:
+    inputs:
+      force_build:
+        description: Build and release even when main is already up to date
+        default: false
+        type: boolean
+
+concurrency:
+  group: sync-upstream-release
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+env:
+  # Keep in step with build.yml's FLUTTER_VERSION.
+  FLUTTER_VERSION: "3.44.0"
+  UPSTREAM_REPO: edde746/plezy
+  # Fork builds get no Sentry DSN and no symbol upload, so obfuscation and
+  # split debug info are left off to keep crash traces readable.
+  RELEASE_DART_DEFINES: --dart-define=ENABLE_UPDATE_CHECK=true --dart-define=ENABLE_DONATIONS=true --dart-define=SENTRY_ENVIRONMENT=github
+  SYNC_BUILD_CACHE_VERSION: sync-build-v1
+  LINUX_APT_PACKAGES: >
+    clang cmake meson ninja-build pkg-config nasm libgtk-3-dev libevdev-dev liblzma-dev
+    libstdc++-12-dev libasound2-dev libass-dev libfreetype-dev libfontconfig-dev libfribidi-dev
+    libharfbuzz-dev libepoxy-dev libegl-dev libgl-dev libgnutls28-dev libpipewire-0.3-dev
+    libva-dev libvdpau-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev
+    libxss-dev libxpresent-dev libxkbcommon-dev libpulse-dev libdbus-1-dev libdrm-dev
+    libgbm-dev libwayland-dev wayland-protocols liblcms2-dev libmujs-dev liblua5.2-dev
+    ruby ruby-dev rubygems build-essential rpm libarchive-tools imagemagick libcurl4-openssl-dev
+
+jobs:
+  sync:
+    name: Sync main from upstream
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    outputs:
+      build: ${{ steps.sync.outputs.build }}
+      sha: ${{ steps.sync.outputs.sha }}
+      short_sha: ${{ steps.sync.outputs.short_sha }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: Require the protected main branch
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "Upstream sync may only run from refs/heads/main." >&2
+            exit 1
+          fi
+
+      # Credentials are intentionally persisted here: this job pushes the
+      # fast-forwarded main back to the fork.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fast-forward main from upstream
+        id: sync
+        env:
+          FORCE_BUILD: ${{ inputs.force_build }}
+        run: |
+          set -euo pipefail
+
+          git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
+          git fetch --no-tags upstream main
+
+          local_sha=$(git rev-parse HEAD)
+          upstream_sha=$(git rev-parse upstream/main)
+          echo "local:    $local_sha"
+          echo "upstream: $upstream_sha"
+
+          updated=false
+          if [[ "$local_sha" == "$upstream_sha" ]]; then
+            echo "main already matches upstream."
+          elif git merge-base --is-ancestor "$upstream_sha" "$local_sha"; then
+            echo "main already contains every upstream commit."
+          elif git merge-base --is-ancestor "$local_sha" "$upstream_sha"; then
+            echo "Fast-forwarding main to upstream."
+            git merge --ff-only "$upstream_sha"
+            git push origin main
+            git fetch --tags upstream
+            git push origin --tags
+            updated=true
+          else
+            echo "main has diverged from ${UPSTREAM_REPO}; refusing to rewrite it." >&2
+            echo "Reconcile the branch manually, then re-run this workflow." >&2
+            exit 1
+          fi
+
+          head_sha=$(git rev-parse HEAD)
+          build=$updated
+          if [[ "$updated" != "true" && "$FORCE_BUILD" == "true" ]]; then
+            echo "No upstream changes, but force_build was requested."
+            build=true
+          fi
+
+          {
+            echo "updated=$updated"
+            echo "build=$build"
+            echo "sha=$head_sha"
+            echo "short_sha=$(git rev-parse --short=8 HEAD)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Read version from pubspec.yaml
+        id: version
+        run: |
+          VERSION=$(python3 scripts/pubspec_version.py pubspec.yaml)
+          echo "version=${VERSION%%+*}" >> "$GITHUB_OUTPUT"
+
+      - name: Summarize
+        run: |
+          {
+            echo "### Upstream sync"
+            echo ""
+            echo "- Upstream: \`${UPSTREAM_REPO}\`"
+            echo "- Updated: \`${{ steps.sync.outputs.updated }}\`"
+            echo "- Building: \`${{ steps.sync.outputs.build }}\`"
+            echo "- Commit: \`${{ steps.sync.outputs.short_sha }}\`"
+            echo "- Version: \`${{ steps.version.outputs.version }}\`"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  build-android:
+    name: Build Android (APK)
+    needs: sync
+    if: ${{ needs.sync.outputs.build == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.sync.outputs.sha }}
+          persist-credentials: false
+
+      - name: Setup Java
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        with:
+          distribution: "temurin"
+          java-version: "21"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: "${{ env.SYNC_BUILD_CACHE_VERSION }}-flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache: false
+
+      - name: Cache Pub dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-${{ runner.os }}-${{ runner.arch }}-pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+
+      - name: Cache Gradle
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile --no-example
+
+      # android/app/build.gradle.kts falls back to debug signing when
+      # key.properties is absent, so an unconfigured fork still gets APKs.
+      - name: Configure Android signing
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$ANDROID_KEYSTORE_BASE64" ]]; then
+            echo "ANDROID_KEYSTORE_BASE64 is not set; building with debug signing."
+            exit 0
+          fi
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          cat > android/key.properties << EOF
+          storePassword=${ANDROID_STORE_PASSWORD}
+          keyPassword=${ANDROID_KEY_PASSWORD}
+          keyAlias=${ANDROID_KEY_ALIAS}
+          storeFile=upload-keystore.jks
+          EOF
+
+      - name: Build APKs
+        run: flutter build apk --release --split-per-abi ${{ env.RELEASE_DART_DEFINES }} --dart-define=GIT_COMMIT=${{ needs.sync.outputs.sha }} --dart-define=SENTRY_DIST=github-android-apk
+
+      - name: Clean up keystore
+        if: always()
+        run: rm -f android/app/upload-keystore.jks android/key.properties
+
+      # Released as bare .apk rather than build.yml's .tar.gz so the assets can
+      # be sideloaded straight off the release page.
+      - name: Collect APKs
+        run: |
+          set -euo pipefail
+          apk_dir=build/app/outputs/flutter-apk
+          cp "$apk_dir/app-arm64-v8a-release.apk" plezy-android-arm64-v8a.apk
+          cp "$apk_dir/app-armeabi-v7a-release.apk" plezy-android-armeabi-v7a.apk
+          cp "$apk_dir/app-x86_64-release.apk" plezy-android-x86_64.apk
+          ls -l plezy-android-*.apk
+
+      - name: Upload APKs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: android-apk
+          path: |
+            plezy-android-arm64-v8a.apk
+            plezy-android-armeabi-v7a.apk
+            plezy-android-x86_64.apk
+
+  build-windows:
+    name: Build Windows (x64)
+    needs: sync
+    if: ${{ needs.sync.outputs.build == 'true' }}
+    runs-on: windows-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.sync.outputs.sha }}
+          persist-credentials: false
+
+      - name: Cache Windows native dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: build/windows/x64/_deps
+          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-windows-native-x64-${{ hashFiles('windows/CMakeLists.txt') }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: "${{ env.SYNC_BUILD_CACHE_VERSION }}-flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache: false
+
+      - name: Cache Pub dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~\AppData\Local\Pub\Cache
+          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-${{ runner.os }}-${{ runner.arch }}-pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+
+      - name: Install dependencies
+        shell: pwsh
+        run: flutter pub get --enforce-lockfile --no-example
+
+      - name: Install patched Flutter engine (DComp)
+        shell: pwsh
+        run: |
+          flutter precache --windows
+          .\windows\tool\install-patched-engine.ps1
+
+      - name: Build Windows x64
+        shell: pwsh
+        run: flutter build windows --release ${{ env.RELEASE_DART_DEFINES }} --dart-define=GIT_COMMIT=${{ needs.sync.outputs.sha }} --dart-define=SENTRY_DIST=github-windows-x64
+
+      # Single-arch mode: the installer script emits an x64-only setup.exe
+      # alongside the portable archive.
+      - name: Build installer and portable
+        shell: pwsh
+        run: .\windows\build-installer.ps1 -X64BuildDir "build\windows\x64\runner\Release" -Version "${{ needs.sync.outputs.version }}"
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: windows-x64
+          path: |
+            plezy-windows-x64-portable.7z
+            plezy-windows-installer.exe
+
+  build-macos:
+    name: Build macOS
+    needs: sync
+    if: ${{ needs.sync.outputs.build == 'true' }}
+    runs-on: macos-26
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.sync.outputs.sha }}
+          persist-credentials: false
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: "${{ env.SYNC_BUILD_CACHE_VERSION }}-flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache: false
+
+      - name: Cache Pub dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-${{ runner.os }}-${{ runner.arch }}-pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+
+      - name: Cache CocoaPods
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            macos/Pods
+            ~/Library/Caches/CocoaPods
+            ~/.cocoapods
+          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-${{ runner.os }}-macos-pods-${{ hashFiles('**/Podfile.lock') }}
+
+      - name: Install dependencies
+        run: flutter pub get --enforce-lockfile --no-example
+
+      - name: Build macOS
+        run: flutter build macos --release ${{ env.RELEASE_DART_DEFINES }} --dart-define=GIT_COMMIT=${{ needs.sync.outputs.sha }} --dart-define=SENTRY_DIST=github-macos
+
+      # Optional: without Apple credentials the .app keeps Flutter's ad-hoc
+      # signature, so the DMG still installs but Gatekeeper warns on first run.
+      - name: Sign and notarize
+        env:
+          MACOS_CERTIFICATE_BASE64: ${{ secrets.MACOS_CERTIFICATE_BASE64 }}
+          MACOS_CERTIFICATE_PASSWORD: ${{ secrets.MACOS_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+
+          if [[ -z "$MACOS_CERTIFICATE_BASE64" || -z "$APPLE_ID" ]]; then
+            echo "Apple signing secrets are not configured; shipping an ad-hoc signed app."
+            exit 0
+          fi
+
+          APP_PATH="build/macos/Build/Products/Release/Plezy.app"
+
+          KEYCHAIN_PATH=$RUNNER_TEMP/build.keychain
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+
+          CERTIFICATE_PATH=$RUNNER_TEMP/certificate.p12
+          echo "$MACOS_CERTIFICATE_BASE64" | base64 --decode -o "$CERTIFICATE_PATH"
+          security import "$CERTIFICATE_PATH" -k "$KEYCHAIN_PATH" -P "$MACOS_CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security list-keychains -d user -s "$KEYCHAIN_PATH" login.keychain
+
+          IDENTITY=$(security find-identity -v -p codesigning | grep "Developer ID Application" | head -1 | grep -o '".*"' | tr -d '"')
+          echo "Signing with identity: $IDENTITY"
+
+          # Deep sign inside-out: nested bundles and dylibs before the app itself.
+          find "$APP_PATH/Contents/Frameworks" \( -name "*.xpc" -o -name "*.app" -o -name "*.framework" -o -name "*.dylib" \) -print0 \
+            | sort -zr \
+            | while IFS= read -r -d '' item; do
+              codesign --force --sign "$IDENTITY" --timestamp --options runtime "$item"
+            done
+
+          find "$APP_PATH/Contents/Frameworks" -type f -perm +111 ! -name "*.dylib" ! -path "*/Headers/*" ! -path "*/Modules/*" -print0 \
+            | while IFS= read -r -d '' exe; do
+              codesign --force --sign "$IDENTITY" --timestamp --options runtime "$exe" || echo "Skipped non-signable file: $exe"
+            done
+
+          codesign --force --sign "$IDENTITY" --timestamp --options runtime --entitlements macos/Runner/Release.entitlements "$APP_PATH"
+          codesign --verify --deep --strict --verbose=2 "$APP_PATH"
+
+          ditto -c -k --keepParent "$APP_PATH" notarization.zip
+          xcrun notarytool submit notarization.zip \
+            --apple-id "$APPLE_ID" \
+            --password "$APPLE_APP_SPECIFIC_PASSWORD" \
+            --team-id "$APPLE_TEAM_ID" \
+            --wait
+          xcrun stapler staple "$APP_PATH"
+          xcrun stapler validate "$APP_PATH"
+
+      - name: Create DMG
+        run: |
+          set -euo pipefail
+          mkdir -p dmg-staging
+          cp -R build/macos/Build/Products/Release/Plezy.app dmg-staging/
+          ln -s /Applications dmg-staging/Applications
+          hdiutil create -format ULMO -srcfolder dmg-staging -volname "Plezy" plezy-macos.dmg
+
+      - name: Upload macOS DMG
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: macos-dmg
+          path: plezy-macos.dmg
+
+  build-linux:
+    name: Build Linux (x64)
+    needs: sync
+    if: ${{ needs.sync.outputs.build == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ needs.sync.outputs.sha }}
+          persist-credentials: false
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
+        with:
+          channel: "stable"
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+          cache-key: "${{ env.SYNC_BUILD_CACHE_VERSION }}-flutter-:os:-:channel:-:version:-:arch:-:hash:"
+          pub-cache: false
+
+      - name: Cache Pub dependencies
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: |
+            ~/.pub-cache
+          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-${{ runner.os }}-${{ runner.arch }}-pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
+
+      - name: Cache APT packages
+        uses: awalsh128/cache-apt-pkgs-action@553a35bb8ebd9fcabcb1c9451aa4c98e1b4ca8a9 # latest
+        with:
+          packages: ${{ env.LINUX_APT_PACKAGES }}
+          version: sync-build-v1.1
+
+      - name: Install Linux dependencies
+        shell: bash
+        run: |
+          read -r -a packages <<< "$LINUX_APT_PACKAGES"
+
+          for attempt in 1 2 3; do
+            if sudo apt-get update -o Acquire::Retries=3 && sudo apt-get install -y -o Acquire::Retries=3 "${packages[@]}"; then
+              exit 0
+            fi
+
+            sudo apt-get clean
+            sudo rm -rf /var/lib/apt/lists/*
+            sleep $((attempt * 15))
+          done
+
+          exit 1
+
+      - name: Cache libmpv build
+        id: libmpv-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
+        with:
+          path: libmpv-prefix
+          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-libmpv-${{ runner.arch }}-${{ hashFiles('linux/packaging/build-libmpv.sh', 'linux/packaging/native-inputs.json') }}
+
+      - name: Build libmpv
+        if: steps.libmpv-cache.outputs.cache-hit != 'true'
+        shell: bash
+        run: bash linux/packaging/build-libmpv.sh
+
+      - name: Install fpm
+        shell: bash
+        run: sudo gem install fpm --version 1.17.0 --no-document
+
+      - name: Install dependencies
+        shell: bash
+        run: flutter pub get --enforce-lockfile --no-example
+
+      - name: Build Linux x64
+        shell: bash
+        run: flutter build linux --release ${{ env.RELEASE_DART_DEFINES }} --dart-define=GIT_COMMIT=${{ needs.sync.outputs.sha }} --dart-define=SENTRY_DIST=github-linux-x64
+        env:
+          PKG_CONFIG_PATH: ${{ github.workspace }}/libmpv-prefix/lib/pkgconfig:${{ github.workspace }}/libmpv-prefix/lib/x86_64-linux-gnu/pkgconfig
+
+      - name: Build Linux packages
+        shell: bash
+        run: |
+          BUILD_DIR=build/linux/x64/release/bundle \
+          ARCH_SUFFIX=x64 \
+          OUTPUT_DIR="$GITHUB_WORKSPACE" \
+          python3 linux/packaging/build-packages.py
+
+      - name: Assemble portable bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE_DIR=build/linux/x64/release/bundle
+          LIBMPV_DIR=$(dirname "$(find libmpv-prefix -name 'libmpv.so' | head -1)")
+          cp -a "$LIBMPV_DIR"/libmpv.so* "$BUNDLE_DIR/lib/"
+          cp -a libmpv-prefix/lib/libshaderc_shared.so* "$BUNDLE_DIR/lib/"
+          bash linux/packaging/bundle-libs.sh "$BUNDLE_DIR"
+          cp linux/packaging/plezy.sh "$BUNDLE_DIR/plezy.sh"
+
+          cd "$BUNDLE_DIR"
+          MISSING=$(LD_LIBRARY_PATH=lib ldd ./plezy 2>&1 | grep "not found" || true)
+          if [[ -n "$MISSING" ]]; then
+            echo "ERROR: Unresolved dependencies found:" >&2
+            echo "$MISSING" >&2
+            exit 1
+          fi
+          tar -czf "$GITHUB_WORKSPACE/plezy-linux-x64.tar.gz" *
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: linux-x64
+          path: |
+            plezy-linux-x64.tar.gz
+            plezy-linux-x64.deb
+            plezy-linux-x64.rpm
+            plezy-linux-x64.pkg.tar.zst
+
+  release:
+    name: Publish release
+    needs: [sync, build-android, build-windows, build-macos, build-linux]
+    if: ${{ needs.sync.outputs.build == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download build artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          path: artifacts
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      # Upstream tags are bare versions, and a sync can land commits without a
+      # version bump, so the commit is folded into the tag to keep it unique.
+      - name: Create release
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
+        with:
+          tag_name: v${{ needs.sync.outputs.version }}-${{ needs.sync.outputs.short_sha }}
+          target_commitish: ${{ needs.sync.outputs.sha }}
+          name: Plezy ${{ needs.sync.outputs.version }} (${{ needs.sync.outputs.short_sha }})
+          body: |
+            Automated build of `${{ env.UPSTREAM_REPO }}` synced at commit ${{ needs.sync.outputs.sha }}.
+
+            Android is published as installable `.apk` files, one per ABI — install `arm64-v8a` unless you know your device needs otherwise.
+          files: |
+            artifacts/android-apk/*.apk
+            artifacts/windows-x64/*
+            artifacts/macos-dmg/*
+            artifacts/linux-x64/*
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
