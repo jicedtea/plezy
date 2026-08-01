@@ -16,6 +16,10 @@ on:
         description: Rebuild the latest upstream release even if it was already published here
         default: false
         type: boolean
+      preflight_only:
+        description: Validate the sync and release path, then stop without building (about a minute)
+        default: false
+        type: boolean
 
 concurrency:
   group: sync-upstream-release
@@ -48,6 +52,7 @@ jobs:
       contents: write
     outputs:
       build: ${{ steps.release.outputs.build }}
+      release_due: ${{ steps.release.outputs.release_due }}
       tag: ${{ steps.release.outputs.tag }}
       tag_sha: ${{ steps.release.outputs.tag_sha }}
       version: ${{ steps.release.outputs.version }}
@@ -133,7 +138,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           FORCE_BUILD: ${{ inputs.force_build }}
-          SYNC_PAT: ${{ secrets.SYNC_PAT }}
+          PREFLIGHT_ONLY: ${{ inputs.preflight_only }}
         run: |
           set -euo pipefail
 
@@ -174,16 +179,13 @@ jobs:
             build=true
           fi
 
-          # Fail here rather than after ~30 minutes of Android and Windows
-          # builds. Publishing the release creates tag ${tag} at a commit whose
-          # tree contains .github/workflows/, and GITHUB_TOKEN is structurally
-          # incapable of that: `workflows` is not a grantable permission, so no
-          # repository setting can enable it.
-          if [[ "$build" == "true" && -z "${SYNC_PAT}" ]]; then
-            echo "ERROR: ${tag} needs building, but the SYNC_PAT secret is not set." >&2
-            echo "Create a token with the 'workflow' scope (classic PAT: repo + workflow;" >&2
-            echo "fine-grained: Contents write + Workflows write) and add it as SYNC_PAT." >&2
-            exit 1
+          # release_due says a release would be published; build says the long
+          # jobs should run. preflight_only splits them so the release path can
+          # be validated in about a minute without building anything.
+          release_due=$build
+          if [[ "$build" == "true" && "$PREFLIGHT_ONLY" == "true" ]]; then
+            echo "preflight_only requested: validating the release path, then stopping."
+            build=false
           fi
 
           # Feeds the Windows installer's -Version; an empty value would
@@ -196,10 +198,59 @@ jobs:
 
           {
             echo "build=$build"
+            echo "release_due=$release_due"
             echo "tag=$tag"
             echo "tag_sha=$tag_sha"
             echo "version=$version"
           } >> "$GITHUB_OUTPUT"
+
+      # Proves the release will work BEFORE ~30 minutes of Android and Windows
+      # builds. Everything the release step does that can fail on permissions is
+      # exercised here with the same token: creating a tag ref at main (the
+      # release's target_commitish) on a tree that contains .github/workflows/.
+      # The probe ref is deleted immediately, so nothing is left behind.
+      - name: Verify the release path
+        if: ${{ steps.release.outputs.release_due == 'true' }}
+        env:
+          # Must match the Create release step's token exactly, or this proves
+          # nothing about the token that will actually publish.
+          GH_TOKEN: ${{ secrets.SYNC_PAT || secrets.GITHUB_TOKEN }}
+          HAS_PAT: ${{ secrets.SYNC_PAT != '' }}
+          TAG: ${{ steps.release.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if [[ "$HAS_PAT" == "true" ]]; then
+            echo "Using SYNC_PAT."
+          else
+            echo "::warning::SYNC_PAT is not set; falling back to GITHUB_TOKEN, which cannot create a tag on a commit containing .github/workflows/."
+          fi
+
+          # Resolve main from the API, not the local checkout: if the sync push
+          # was rejected, the local tip does not exist on the remote and would
+          # give a false failure.
+          main_sha=$(gh api "repos/${GITHUB_REPOSITORY}/commits/main" --jq .sha)
+          probe="refs/tags/zz-release-preflight-${GITHUB_RUN_ID}"
+
+          if out=$(gh api -X POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+                     -f "ref=${probe}" -f "sha=${main_sha}" 2>&1); then
+            gh api -X DELETE "repos/${GITHUB_REPOSITORY}/git/${probe}" >/dev/null 2>&1 \
+              && echo "Probe tag cleaned up." \
+              || echo "::warning::Probe tag ${probe} could not be deleted; remove it manually."
+            echo "Release path OK: this token can create tag ${TAG} at main."
+            exit 0
+          fi
+
+          echo "$out" >&2
+          case "$out" in
+            *workflow*)
+              echo "::error::Token cannot create tags because main contains .github/workflows/ files. Grant it Workflows: Read and write (fine-grained) or the 'workflow' scope (classic). Contents write alone is not enough." ;;
+            *"Resource not accessible"*)
+              echo "::error::Token was rejected creating a tag. If SYNC_PAT is set, check it is not expired, lists this repository under Repository access, and has Contents: Read and write plus Workflows: Read and write." ;;
+            *)
+              echo "::error::Could not create a tag in this fork; see the API response above." ;;
+          esac
+          exit 1
 
       - name: Summarize
         run: |
@@ -400,91 +451,6 @@ jobs:
     permissions:
       contents: write
     steps:
-      # check-upstream already gates on SYNC_PAT, but re-running an older run
-      # replays *that run's* workflow file, so the gate can be absent while this
-      # job still executes. Checked again here, and stated plainly, because the
-      # Releases API reports a missing PAT as a generic 403 that reads like a
-      # missing `contents: write`.
-      - name: Verify the release token
-        env:
-          HAS_PAT: ${{ secrets.SYNC_PAT != '' }}
-          RELEASE_TOKEN: ${{ secrets.SYNC_PAT }}
-        run: |
-          set -euo pipefail
-
-          if [[ "$HAS_PAT" != "true" ]]; then
-            echo "::error::SYNC_PAT is not visible to this job, so the release would fall back to GITHUB_TOKEN and fail with 403. Add it under Settings > Secrets and variables > Actions > Repository secrets -- environment-scoped and unshared organization secrets are not visible here. If this is a re-run of an older run, start a fresh run instead: re-runs replay the old workflow file."
-            exit 1
-          fi
-
-          # Classic PATs report their scopes; fine-grained ones report none, so
-          # an empty header is not treated as a failure.
-          scopes=$(curl -sS -o /dev/null -D - \
-            -H "Authorization: Bearer ${RELEASE_TOKEN}" \
-            https://api.github.com/user | tr -d '\r' | sed -n 's/^[Xx]-[Oo][Aa]uth-[Ss]copes: //p')
-
-          if [[ -n "$scopes" ]]; then
-            echo "SYNC_PAT is a classic token. Scopes: ${scopes}"
-            if [[ "$scopes" != *workflow* ]]; then
-              echo "::error::SYNC_PAT is missing the 'workflow' scope, which is required to create a tag at a commit containing .github/workflows/. Regenerate it with repo + workflow."
-              exit 1
-            fi
-          else
-            echo "SYNC_PAT is a fine-grained token (reports no OAuth scopes)."
-          fi
-
-          # Ask the API what this token can actually do here, rather than
-          # inferring it from the error text afterwards. A fine-grained token
-          # returns the same "not accessible by integration" 403 as GITHUB_TOKEN
-          # does, so the failure message alone cannot tell them apart.
-          push=$(curl -sS \
-            -H "Authorization: Bearer ${RELEASE_TOKEN}" \
-            -H "Accept: application/vnd.github+json" \
-            "https://api.github.com/repos/${GITHUB_REPOSITORY}" \
-            | jq -r '.permissions.push // "unknown"')
-          echo "Write access to ${GITHUB_REPOSITORY}: ${push}"
-
-          if [[ "$push" != "true" ]]; then
-            echo "::error::SYNC_PAT cannot write to ${GITHUB_REPOSITORY} (permissions.push=${push}). Fine-grained token: list this repository under 'Repository access' and grant Contents: Read and write -- releases and tags live under Contents, not a separate Releases permission. Classic token: needs the 'repo' scope. Also check the token has not expired, and that any organization approval is granted."
-            exit 1
-          fi
-
-          echo "Token can write to this repository."
-
-      # Done explicitly, ahead of the release, for two reasons. It reports
-      # GitHub's own wording -- the Releases API collapses a workflow-permission
-      # refusal into a bare 403 that reads like a missing Contents scope -- and
-      # once the tag exists the release step only has to attach to it.
-      - name: Ensure the release tag exists
-        env:
-          GH_TOKEN: ${{ secrets.SYNC_PAT }}
-          TAG: ${{ needs.check-upstream.outputs.tag }}
-          SHA: ${{ needs.check-upstream.outputs.tag_sha }}
-        run: |
-          set -euo pipefail
-
-          if gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${TAG}" >/dev/null 2>&1; then
-            echo "Tag ${TAG} already exists in this fork."
-            exit 0
-          fi
-
-          if out=$(gh api -X POST "repos/${GITHUB_REPOSITORY}/git/refs" \
-                     -f "ref=refs/tags/${TAG}" -f "sha=${SHA}" 2>&1); then
-            echo "Created tag ${TAG} at ${SHA}."
-            exit 0
-          fi
-
-          echo "$out" >&2
-          case "$out" in
-            *workflow*)
-              echo "::error::Creating tag ${TAG} was refused because ${SHA} contains .github/workflows/ files. Grant SYNC_PAT 'Workflows: Read and write' (fine-grained) or the 'workflow' scope (classic). Contents write alone is not enough." ;;
-            *"Object does not exist"*|*422*)
-              echo "::error::Commit ${SHA} is not present in ${GITHUB_REPOSITORY}, so no tag can point at it. This happens when the upstream sync push was rejected and the fork never received that commit -- set SYNC_PAT so the sync push succeeds." ;;
-            *)
-              echo "::error::Could not create tag ${TAG}; see the API response above." ;;
-          esac
-          exit 1
-
       - name: Download build artifacts
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
@@ -507,7 +473,12 @@ jobs:
         uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3
         with:
           tag_name: ${{ needs.check-upstream.outputs.tag }}
-          target_commitish: ${{ needs.check-upstream.outputs.tag_sha }}
+          # This fork's own branch, not the upstream commit. The release ships
+          # this fork's repackaged builds, so its tag belongs on this fork's
+          # history; tagging an old upstream commit also hits the action's
+          # documented "new tag for an older commit" permission case. The
+          # upstream tag and commit that were built are recorded in the body.
+          target_commitish: main
           name: Plezy ${{ needs.check-upstream.outputs.tag }}
           body: |
             Automated build of [`${{ env.UPSTREAM_REPO }}` ${{ needs.check-upstream.outputs.tag }}](https://github.com/${{ env.UPSTREAM_REPO }}/releases/tag/${{ needs.check-upstream.outputs.tag }}), built at commit ${{ needs.check-upstream.outputs.tag_sha }}.
@@ -519,8 +490,12 @@ jobs:
             artifacts/windows-installer/plezy-windows-installer.exe
           draft: false
           prerelease: false
-        env:
-          GITHUB_TOKEN: ${{ secrets.SYNC_PAT || secrets.GITHUB_TOKEN }}
+          # MUST be the `token` input, not an env var. This action's `token`
+          # input defaults to ${{ github.token }}, so it is never empty, and a
+          # non-empty input beats GITHUB_TOKEN from the environment -- setting
+          # the env var here silently authenticates as GITHUB_TOKEN instead,
+          # which fails with 403 "Resource not accessible by integration".
+          token: ${{ secrets.SYNC_PAT || secrets.GITHUB_TOKEN }}
 
       # Skips itself rather than failing when the secrets are absent: a missing
       # notification should not mark an otherwise-good release as failed.
