@@ -12,6 +12,9 @@ import 'package:plezy/main.dart';
 import 'package:plezy/media/ids.dart';
 import 'package:plezy/models/download_models.dart';
 import 'package:plezy/services/base_shared_preferences_service.dart';
+import 'package:plezy/services/prefs_recovery.dart';
+import 'package:plezy/services/startup_diagnostics.dart';
+import 'package:plezy/widgets/startup_failure_view.dart';
 
 import 'test_helpers/download_fixtures.dart';
 import 'test_helpers/prefs.dart';
@@ -89,7 +92,24 @@ void main() {
     expect(find.byKey(startupBootstrapProgressKey), findsNothing);
   });
 
-  testWidgets('shows a localized recoverable failure instead of removing Flutter UI', (tester) async {
+  testWidgets('names the failing phase instead of showing a bare error', (tester) async {
+    await tester.pumpWidget(
+      StartupBootstrap<int>(
+        initialize: () async => throw const StartupPhaseException(StartupPhase.database, FormatException('boom')),
+        buildApp: (_, value) => Text('ready $value'),
+      ),
+    );
+    await tester.pump();
+
+    expect(find.byKey(startupBootstrapFailureKey), findsOneWidget);
+    expect(find.byKey(startupBootstrapRetryKey), findsOneWidget);
+    expect(find.byKey(startupFailureCopyKey), findsOneWidget);
+    // The phase and concrete type are what turn "Error" into a report.
+    expect(find.textContaining('database'), findsOneWidget);
+    expect(find.textContaining('FormatException'), findsOneWidget);
+  });
+
+  testWidgets('expands the full detail block on request', (tester) async {
     await tester.pumpWidget(
       StartupBootstrap<int>(
         initialize: () async => throw StateError('database unavailable'),
@@ -98,9 +118,106 @@ void main() {
     );
     await tester.pump();
 
+    expect(find.byKey(startupFailureDetailsKey), findsNothing);
+    await tester.tap(find.text('Show details'));
+    await tester.pump();
+
+    expect(find.byKey(startupFailureDetailsKey), findsOneWidget);
+    expect(find.textContaining('database unavailable'), findsWidgets);
+  });
+
+  testWidgets('offers a repair only for a repairable failure', (tester) async {
+    await tester.pumpWidget(
+      StartupBootstrap<int>(
+        initialize: () async => throw StateError('unrelated'),
+        buildApp: (_, value) => Text('ready $value'),
+      ),
+    );
+    await tester.pump();
+    expect(find.byKey(startupFailureRepairKey), findsNothing);
+
+    await tester.pumpWidget(
+      StartupBootstrap<int>(
+        key: const Key('repairable'),
+        initialize: () async => throw CorruptPreferenceStoreException(const FormatException('bad'), StackTrace.current),
+        buildApp: (_, value) => Text('ready $value'),
+      ),
+    );
+    await tester.pump();
+    expect(find.byKey(startupFailureRepairKey), findsOneWidget);
+  });
+
+  testWidgets('re-runs initialization after a successful repair', (tester) async {
+    var attempts = 0;
+    var repairCalls = 0;
+
+    await tester.pumpWidget(
+      StartupBootstrap<int>(
+        initialize: () async {
+          attempts++;
+          if (attempts == 1) {
+            throw CorruptPreferenceStoreException(const FormatException('bad'), StackTrace.current);
+          }
+          return 7;
+        },
+        buildApp: (_, value) => MaterialApp(home: Text('ready $value')),
+        repair: (_, _, _) async {
+          repairCalls++;
+          return true;
+        },
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(startupFailureRepairKey));
+    await tester.pump();
+    await tester.pump();
+
+    expect(repairCalls, 1);
+    expect(attempts, 2);
+    expect(find.text('ready 7'), findsOneWidget);
+  });
+
+  testWidgets('a repair that reports no change does not retry', (tester) async {
+    var attempts = 0;
+
+    await tester.pumpWidget(
+      StartupBootstrap<int>(
+        initialize: () async {
+          attempts++;
+          throw CorruptPreferenceStoreException(const FormatException('bad'), StackTrace.current);
+        },
+        buildApp: (_, value) => MaterialApp(home: Text('ready $value')),
+        repair: (_, _, _) async => false,
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(startupFailureRepairKey));
+    await tester.pump();
+    await tester.pump();
+
+    expect(attempts, 1);
     expect(find.byKey(startupBootstrapFailureKey), findsOneWidget);
-    expect(find.text('Error'), findsOneWidget);
-    expect(find.text('Retry'), findsOneWidget);
+  });
+
+  testWidgets('persists the failure so it can be reported once the reporter is up', (tester) async {
+    // Not reported inline: the earliest gate phases run before crash
+    // reporting exists, so an inline capture would reach a no-op hub and be
+    // discarded. The record is held for `flushPendingStartupFailure` (#1732).
+    StartupDiagnosticsStore.resetForTesting();
+    addTearDown(StartupDiagnosticsStore.resetForTesting);
+
+    await tester.pumpWidget(
+      StartupBootstrap<int>(
+        initialize: () async => throw const StartupPhaseException(StartupPhase.storage, 'nope'),
+        buildApp: (_, value) => Text('ready $value'),
+      ),
+    );
+    await tester.pump();
+
+    expect(StartupDiagnosticsStore.pending?.phase, StartupPhase.storage);
+    expect(StartupDiagnosticsStore.pending?.reported, isFalse);
   });
 
   testWidgets('retry clears the failed generation and can commit a later success', (tester) async {
