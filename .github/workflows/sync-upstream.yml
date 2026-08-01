@@ -72,26 +72,35 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Fast-forward main from upstream
+      # A real merge, not --ff-only: this fork permanently carries its own
+      # commits (these workflows and .github/actions), so it is *always*
+      # divergent from upstream by design. Git fast-forwards on its own whenever
+      # that is actually possible, so this stays linear when the fork is clean.
+      - name: Merge upstream into main
         run: |
           set -euo pipefail
 
-          git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
+          # Runners check out fresh, but stay re-runnable anyway.
+          if git remote get-url upstream >/dev/null 2>&1; then
+            git remote set-url upstream "https://github.com/${UPSTREAM_REPO}.git"
+          else
+            git remote add upstream "https://github.com/${UPSTREAM_REPO}.git"
+          fi
+
           git fetch upstream main
           git fetch --tags upstream
 
-          local_sha=$(git rev-parse HEAD)
-          upstream_sha=$(git rev-parse upstream/main)
-
-          if [[ "$local_sha" == "$upstream_sha" ]] || git merge-base --is-ancestor "$upstream_sha" "$local_sha"; then
+          if git merge-base --is-ancestor upstream/main HEAD; then
             echo "main already contains every upstream commit."
-          elif git merge-base --is-ancestor "$local_sha" "$upstream_sha"; then
-            echo "Fast-forwarding main to upstream."
-            git merge --ff-only "$upstream_sha"
+          elif git merge --no-edit upstream/main; then
+            echo "Merged upstream/main into main."
             git push origin main
           else
-            echo "main has diverged from ${UPSTREAM_REPO}; refusing to rewrite it." >&2
-            echo "Reconcile the branch manually, then re-run this workflow." >&2
+            # Leave the branch untouched so the conflict is resolved by a human
+            # rather than guessed at here.
+            git merge --abort
+            echo "ERROR: merging ${UPSTREAM_REPO} into main hit a conflict." >&2
+            echo "Resolve it locally and push, then re-run this workflow." >&2
             exit 1
           fi
 
@@ -176,6 +185,19 @@ jobs:
           ref: ${{ needs.check-upstream.outputs.tag_sha }}
           persist-credentials: false
 
+      # `uses: ./...` resolves against the workspace, and the workspace is now an
+      # upstream commit that has never contained this fork's .github/actions. The
+      # tooling is checked out beside it instead. Composite action steps still
+      # run with the workspace root as their working directory, so the action
+      # edits the tag's android/ sources as intended.
+      - name: Check out fork tooling
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: main
+          path: .fork-tooling
+          sparse-checkout: .github/actions
+          persist-credentials: false
+
       - name: Setup Java
         uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
         with:
@@ -211,7 +233,7 @@ jobs:
 
       - name: Set Android application ID
         id: appid
-        uses: ./.github/actions/set-android-application-id
+        uses: ./.fork-tooling/.github/actions/set-android-application-id
         with:
           application-id: ${{ env.ANDROID_APPLICATION_ID }}
           apk-suffix: honor-packed
