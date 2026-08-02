@@ -64,7 +64,20 @@
     "loading": "Loading...",
     "fullscreen": "Fullscreen",
     "exitFullscreen": "Exit fullscreen",
-    "pressBackAgainToExit": "Press back again to exit"
+    "pressBackAgainToExit": "Press back again to exit",
+    "ratingSource": {
+      "critic": "Critics",
+      "audience": "Audience",
+      "imdb": "IMDb",
+      "tmdb": "TMDB",
+      "rottenTomatoes": "Rotten Tomatoes",
+      "simkl": "Simkl",
+      "mal": "MyAnimeList",
+      "anilist": "AniList",
+      "trakt": "Trakt",
+      "rottenTomatoesCritic": "Rotten Tomatoes critics",
+      "rottenTomatoesAudience": "Rotten Tomatoes audience"
+    }
   },
   "screens": {
     "licenses": "Licenses",
@@ -974,6 +987,7 @@
   "startup": {
     "failedTitle": "Plezy could not start",
     "failedBody": "Something went wrong during startup. The details below identify what failed.",
+    "failedBodyRepairable": "Plezy's saved settings file is damaged and has to be rebuilt before Plezy can start. Retrying will not help — choose Repair storage.",
     "phaseLabel": "Step",
     "showDetails": "Show details",
     "hideDetails": "Hide details",
@@ -984,7 +998,9 @@
     "repairTitle": "Repair stored data?",
     "repairBodyCommon": "Plezy's settings file is damaged and cannot be read. Repairing resets every setting to its default.",
     "repairBodyOneCredential": "One saved sign-in is damaged and cannot be read. Repairing removes just that one; your other settings are left alone.",
-    "repairBodySessionsAtRisk": "Servers and profiles normally stay signed in, but trackers (MAL, AniList, Simkl, Trakt) and Seerr may need to be reconnected. Plezy will tell you exactly what it kept.",
+    "repairBodySignInsKept": "Your servers and profiles should stay signed in.",
+    "repairBodySignInsLost": "The key protecting your saved sign-ins cannot be recovered from this file, so you will have to sign in to every server and profile again. Nothing on your media server is affected.",
+    "repairBodySessionsUncertain": "Trackers (MAL, AniList, Simkl, Trakt) and Seerr are stored separately and may or may not survive. Plezy will tell you exactly what it kept.",
     "repairConfirm": "Repair",
     "repairSucceeded": "Storage repaired",
     "repairNeedsRestart": "Storage repaired — restart required",
@@ -1134,18 +1150,16 @@
       "creator": "Creator",
       "composer": "Composer"
     },
-    "ratingSource": {
-      "critic": "Critics",
-      "audience": "Audience",
-      "imdb": "IMDb",
-      "tmdb": "TMDB",
-      "rottenTomatoes": "Rotten Tomatoes",
-      "simkl": "Simkl",
-      "mal": "MyAnimeList",
-      "anilist": "AniList",
-      "trakt": "Trakt",
-      "rottenTomatoesCritic": "Rotten Tomatoes critics",
-      "rottenTomatoesAudience": "Rotten Tomatoes audience"
+    "relation": {
+      "prequel": "Prequel",
+      "sequel": "Sequel",
+      "sideStory": "Side story",
+      "spinOff": "Spin-off",
+      "alternativeVersion": "Alternative version",
+      "summary": "Summary",
+      "parentStory": "Parent story",
+      "adaptation": "Adaptation",
+      "other": "Related"
     },
     "broadcast": "Airs ${day} at ${time}",
     "broadcastWithZone": "Airs ${day} at ${time} ${timezone}",
@@ -1186,17 +1200,6 @@
     "totalResults": {
       "one": "${n} result",
       "other": "${n} results"
-    },
-    "relation": {
-      "prequel": "Prequel",
-      "sequel": "Sequel",
-      "sideStory": "Side story",
-      "spinOff": "Spin-off",
-      "alternativeVersion": "Alternative version",
-      "summary": "Summary",
-      "parentStory": "Parent story",
-      "adaptation": "Adaptation",
-      "other": "Related"
     }
   },
   "liveTv": {
