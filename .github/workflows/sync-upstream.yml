@@ -392,21 +392,32 @@ jobs:
           done
           ls -l plezy-android-*.apk
 
-      # Catches an unsigned APK here rather than on the phone. Note that keytool
-      # exits 0 even for an unsigned archive (it just prints "Not a signed jar
-      # file"), so the presence of an Owner line is what decides it.
+      # Catches an unsigned APK here rather than on the phone.
+      #
+      # Must be apksigner, NOT `keytool -printcert -jarfile`. minSdk is 25, so
+      # AGP signs with APK Signature Scheme v2/v3 only and disables v1 JAR
+      # signing; keytool understands v1 alone and reports a correctly signed
+      # APK as "Not a signed jar file". apksigner understands v1 through v4.
       - name: Verify the APKs are signed
         run: |
           set -euo pipefail
+
+          sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          apksigner=""
+          if [[ -n "$sdk" && -d "$sdk/build-tools" ]]; then
+            apksigner=$(find "$sdk/build-tools" -maxdepth 2 -name apksigner -type f | sort -V | tail -1)
+          fi
+
+          if [[ -z "$apksigner" ]]; then
+            echo "::warning::apksigner not found under '${sdk:-<no SDK path>}'; skipping signature verification."
+            exit 0
+          fi
+
           for apk in plezy-android-*.apk; do
-            out=$(keytool -printcert -jarfile "$apk" 2>&1) || true
-            owner=$(printf '%s\n' "$out" | sed -n 's/^Owner: //p' | head -1)
-            if [[ -z "$owner" ]]; then
-              printf '%s\n' "$out" >&2
-              echo "::error::${apk} is unsigned and would fail to install with 'does not contain any certificates'. Check the KEYSTORE_BASE64 / KEYSTORE_PASSWORD / KEY_PASSWORD / KEY_ALIAS secrets."
+            if ! "$apksigner" verify --print-certs "$apk"; then
+              echo "::error::${apk} is not correctly signed and would fail to install. Check the KEYSTORE_BASE64 / KEYSTORE_PASSWORD / KEY_PASSWORD / KEY_ALIAS secrets."
               exit 1
             fi
-            echo "${apk} signed by: ${owner}"
           done
 
       - name: Upload APKs
