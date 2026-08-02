@@ -216,9 +216,21 @@ jobs:
           # nothing about the token that will actually publish.
           GH_TOKEN: ${{ secrets.SYNC_PAT || secrets.GITHUB_TOKEN }}
           HAS_PAT: ${{ secrets.SYNC_PAT != '' }}
+          HAS_KEYSTORE: ${{ secrets.KEYSTORE_BASE64 != '' }}
           TAG: ${{ steps.release.outputs.tag }}
         run: |
           set -euo pipefail
+
+          # An unsigned APK cannot be installed, so a missing keystore is worth
+          # catching now rather than 30 minutes into the Android build.
+          if [[ "$HAS_KEYSTORE" != "true" ]]; then
+            echo "::error::KEYSTORE_BASE64 is not set. The release buildType has no signing fallback, so the APK would be unsigned and refuse to install. Generate a keystore once:" >&2
+            echo "  keytool -genkeypair -v -keystore plezy.jks -keyalg RSA -keysize 2048 -validity 10000 -alias plezy" >&2
+            echo "  base64 -w0 plezy.jks   # macOS: base64 -i plezy.jks" >&2
+            echo "Then add repository secrets KEYSTORE_BASE64 (that string), KEYSTORE_PASSWORD, KEY_PASSWORD, KEY_ALIAS (plezy)." >&2
+            echo "Keep the .jks file: rebuilding with a different key means future releases cannot update an installed copy." >&2
+            exit 1
+          fi
 
           if [[ "$HAS_PAT" == "true" ]]; then
             echo "Using SYNC_PAT."
@@ -335,25 +347,30 @@ jobs:
           application-id: ${{ env.ANDROID_APPLICATION_ID }}
           apk-suffix: honor-packed
 
-      # android/app/build.gradle.kts falls back to debug signing when
-      # key.properties is absent, so an unconfigured fork still gets APKs.
+      # The keystore is mandatory. Contrary to the comment in
+      # android/app/build.gradle.kts, the `release` buildType does NOT fall back
+      # to debug signing when key.properties is missing -- it gets no
+      # signingConfig at all and produces an unsigned APK, which Android refuses
+      # to install with "the installation package does not contain any
+      # certificates". (The `minified` variant right below it sets debug signing
+      # explicitly for exactly this reason.)
       - name: Configure Android signing
         env:
-          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
-          ANDROID_STORE_PASSWORD: ${{ secrets.ANDROID_STORE_PASSWORD }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         run: |
           set -euo pipefail
-          if [[ -z "$ANDROID_KEYSTORE_BASE64" ]]; then
-            echo "ANDROID_KEYSTORE_BASE64 is not set; building with debug signing."
-            exit 0
+          if [[ -z "$KEYSTORE_BASE64" ]]; then
+            echo "::error::KEYSTORE_BASE64 is not set, and an unsigned APK cannot be installed. See the keystore setup notes in this workflow's preflight step."
+            exit 1
           fi
-          echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
+          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
           cat > android/key.properties << EOF
-          storePassword=${ANDROID_STORE_PASSWORD}
-          keyPassword=${ANDROID_KEY_PASSWORD}
-          keyAlias=${ANDROID_KEY_ALIAS}
+          storePassword=${KEYSTORE_PASSWORD}
+          keyPassword=${KEY_PASSWORD}
+          keyAlias=${KEY_ALIAS}
           storeFile=upload-keystore.jks
           EOF
 
@@ -374,6 +391,23 @@ jobs:
                "plezy-android-${abi}${APK_SUFFIX}.apk"
           done
           ls -l plezy-android-*.apk
+
+      # Catches an unsigned APK here rather than on the phone. Note that keytool
+      # exits 0 even for an unsigned archive (it just prints "Not a signed jar
+      # file"), so the presence of an Owner line is what decides it.
+      - name: Verify the APKs are signed
+        run: |
+          set -euo pipefail
+          for apk in plezy-android-*.apk; do
+            out=$(keytool -printcert -jarfile "$apk" 2>&1) || true
+            owner=$(printf '%s\n' "$out" | sed -n 's/^Owner: //p' | head -1)
+            if [[ -z "$owner" ]]; then
+              printf '%s\n' "$out" >&2
+              echo "::error::${apk} is unsigned and would fail to install with 'does not contain any certificates'. Check the KEYSTORE_BASE64 / KEYSTORE_PASSWORD / KEY_PASSWORD / KEY_ALIAS secrets."
+              exit 1
+            fi
+            echo "${apk} signed by: ${owner}"
+          done
 
       - name: Upload APKs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
