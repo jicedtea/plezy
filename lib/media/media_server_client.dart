@@ -272,7 +272,18 @@ abstract class MediaServerClient {
   /// candidate budget; a backend may supplement omitted media categories and
   /// return more candidates for cross-server ranking. [abort] cancels every
   /// backend request owned by this search pass.
-  Future<List<MediaItem>> searchItems(String query, {int limit = 100, AbortController? abort});
+  ///
+  /// [excludedLibraryIds] names server-local libraries the user has hidden. A
+  /// backend whose search rows carry a library id may ignore it, because the
+  /// caller drops those rows by id. A backend whose rows cannot be attributed
+  /// to a library MUST scope the request server-side instead — the caller has
+  /// nothing to filter on.
+  Future<List<MediaItem>> searchItems(
+    String query, {
+    int limit = 100,
+    AbortController? abort,
+    Set<String> excludedLibraryIds = const {},
+  });
 
   /// Items the user has started but not finished. Plex calls this "On Deck"
   /// internally; the neutral name matches the Continue Watching UI surface.
@@ -504,7 +515,7 @@ abstract class MediaServerClient {
   /// has no external mapping for the item.
   Future<ExternalIds> fetchExternalIds(String itemId);
 
-  /// Reverse lookup: find a library movie/show matching any of [ids].
+  /// Reverse lookup: find every library movie/show matching any of [ids].
   ///
   /// Neither backend can filter by external id — Plex's `guid=` matches only
   /// the primary `plex://` guid (verified on PMS 1.43) and Jellyfin dropped
@@ -512,7 +523,16 @@ abstract class MediaServerClient {
   /// title and verify candidates against their exact external ids. Title
   /// alone never produces a match.
   ///
-  /// [titles] are tried in order until one yields an id-verified candidate;
+  /// One title can own several library items: a server with a 4K section and
+  /// an HD section holds two rating keys for the same movie, and a library
+  /// still on a legacy agent carries a different primary guid than its modern
+  /// sibling. Implementations MUST return every id-verified copy rather than
+  /// the first, and MUST NOT truncate — external-id verification is the only
+  /// bound, so a long list means the user genuinely owns that many copies and
+  /// the caller (the Explore "In these libraries" chooser) exists to show
+  /// them. Ordering is the implementation's, and callers re-sort.
+  ///
+  /// [titles] are tried in order until one yields id-verified candidates;
   /// pass the entry's own title first and broader forms after (see
   /// `titleMatchCandidates`). A sequel entry's own title never matches its
   /// parent show, which is why more than one is needed. [year] applies a ±1
@@ -520,22 +540,21 @@ abstract class MediaServerClient {
   /// season's, not the show's.
   ///
   /// [plexGuid] is a Plex-only escape hatch: a `plex://show/…` guid the caller
-  /// already holds, which the local server *can* filter on exactly, skipping
-  /// the title search. It is never resolved over the network — only Plex
-  /// Discover catalog items carry one, in their own rating key. Other backends
-  /// ignore it.
+  /// already holds, which the local server *can* filter on exactly. It is
+  /// never resolved over the network — only Plex Discover catalog items carry
+  /// one, in their own rating key. Other backends ignore it.
   ///
-  /// [season] gates the result: when the entry maps to season 2+ of a longer
-  /// series, a match is only returned if the server actually has that season.
+  /// [season] gates the results: when the entry maps to season 2+ of a longer
+  /// series, a candidate is only kept if the server actually has that season.
   /// Implementations MUST gate only on [ExternalSeasonRef.agreedSeason] — the
   /// provider a library numbers its seasons by is a server-side setting no
   /// dataset supplies, so a disagreeing ref is left ungated rather than gated
   /// on a guess.
   ///
-  /// Returns null when this server has no match or [kind] is not movie/show.
-  /// Used to match external catalog items (Explore tab) back to the user's
-  /// libraries.
-  Future<MediaItem?> findByExternalIds(
+  /// Returns an empty list when this server has no match or [kind] is not
+  /// movie/show. Used to match external catalog items (Explore tab) back to
+  /// the user's libraries.
+  Future<List<MediaItem>> findByExternalIds(
     ExternalIds ids, {
     required MediaKind kind,
     List<String> titles = const [],
@@ -750,6 +769,27 @@ abstract interface class SeasonEpisodePagingClient {
     int? size,
     AbortController? abort,
   });
+}
+
+/// Optional capability for clients whose server can answer "may the signed-in
+/// user delete *this* item?" per item.
+///
+/// Jellyfin-only by nature: `BaseItemDto.CanDelete` folds the global
+/// `EnableContentDeletion` grant, the per-library
+/// `EnableContentDeletionFromFolders` grant, and item state (virtual/missing
+/// files, in-progress recordings) into one server-computed boolean — none of
+/// which a client can reproduce. Plex exposes no per-item delete permission,
+/// so it deliberately does not implement this and callers keep using their
+/// account-level owner/admin gate for it.
+abstract interface class MediaDeletionPermissionClient {
+  /// `true`/`false` as reported by the server for [item], or `null` when the
+  /// server did not answer (item not visible to this user, unexpected shape).
+  ///
+  /// Never served from cache: the answer changes server-side with no
+  /// client-visible event, and a stale `true` puts a destructive action back in
+  /// front of a user who lost the grant. Callers must fail closed on `null`
+  /// and on throw.
+  Future<bool?> fetchDeletePermission(MediaItem item);
 }
 
 /// Cache-aware fetch helpers shared by both backends so the offline-first /
