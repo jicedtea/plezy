@@ -2,7 +2,7 @@ name: Sync Upstream and Release
 
 # Every 3 hours: fast-forward this fork's main from upstream, then check whether
 # upstream has published a release this fork has not built yet. If so, build
-# that release's tag and publish the Android APKs and the Windows installer.
+# that release's tag and publish the Android APKs.
 #
 # Keyed on upstream *releases* rather than commits, so intermediate commits on
 # upstream main do not each trigger a build.
@@ -55,7 +55,6 @@ jobs:
       release_due: ${{ steps.release.outputs.release_due }}
       tag: ${{ steps.release.outputs.tag }}
       tag_sha: ${{ steps.release.outputs.tag_sha }}
-      version: ${{ steps.release.outputs.version }}
     steps:
       - name: Require the protected main branch
         shell: bash
@@ -188,24 +187,15 @@ jobs:
             build=false
           fi
 
-          # Feeds the Windows installer's -Version; an empty value would
-          # silently produce a mis-versioned installer.
-          version=$(git show "${tag}:pubspec.yaml" | sed -n 's/^version: \(.*\)+.*/\1/p')
-          if [[ -z "$version" ]]; then
-            echo "ERROR: could not read a version from pubspec.yaml at ${tag}." >&2
-            exit 1
-          fi
 
           {
             echo "build=$build"
             echo "release_due=$release_due"
             echo "tag=$tag"
             echo "tag_sha=$tag_sha"
-            echo "version=$version"
           } >> "$GITHUB_OUTPUT"
 
-      # Proves the release will work BEFORE ~30 minutes of Android and Windows
-      # builds. Everything the release step does that can fail on permissions is
+      # Proves the release will work BEFORE the long Android build. Everything the release step does that can fail on permissions is
       # exercised here with the same token: creating a tag ref at main (the
       # release's target_commitish) on a tree that contains .github/workflows/.
       # The probe ref is deleted immediately, so nothing is left behind.
@@ -426,71 +416,9 @@ jobs:
           name: android-apk
           path: plezy-android-*.apk
 
-  build-windows:
-    name: Build Windows (x64 installer)
-    needs: check-upstream
-    if: ${{ needs.check-upstream.outputs.build == 'true' }}
-    runs-on: windows-latest
-    permissions:
-      contents: read
-    steps:
-      # Straight from upstream at the release tag, same as the Android job.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-        with:
-          repository: ${{ env.UPSTREAM_REPO }}
-          ref: refs/tags/${{ needs.check-upstream.outputs.tag }}
-          persist-credentials: false
-
-      - name: Cache Windows native dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: build/windows/x64/_deps
-          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-windows-native-x64-${{ hashFiles('windows/CMakeLists.txt') }}
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2
-        with:
-          channel: "stable"
-          flutter-version: ${{ env.FLUTTER_VERSION }}
-          cache: true
-          cache-key: "${{ env.SYNC_BUILD_CACHE_VERSION }}-flutter-:os:-:channel:-:version:-:arch:-:hash:"
-          pub-cache: false
-
-      - name: Cache Pub dependencies
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
-        with:
-          path: |
-            ~\AppData\Local\Pub\Cache
-          key: ${{ env.SYNC_BUILD_CACHE_VERSION }}-${{ runner.os }}-${{ runner.arch }}-pub-${{ hashFiles('pubspec.yaml', 'pubspec.lock') }}
-
-      - name: Install dependencies
-        shell: pwsh
-        run: flutter pub get --enforce-lockfile --no-example
-
-      - name: Install patched Flutter engine (DComp)
-        shell: pwsh
-        run: |
-          flutter precache --windows
-          .\windows\tool\install-patched-engine.ps1
-
-      - name: Build Windows x64
-        shell: pwsh
-        run: flutter build windows --release ${{ env.RELEASE_DART_DEFINES }} --dart-define=GIT_COMMIT=${{ needs.check-upstream.outputs.tag_sha }} --dart-define=SENTRY_DIST=github-windows-x64
-
-      # Single-arch mode: emits an x64-only setup .exe next to the portable .7z.
-      - name: Build installer
-        shell: pwsh
-        run: .\windows\build-installer.ps1 -X64BuildDir "build\windows\x64\runner\Release" -Version "${{ needs.check-upstream.outputs.version }}"
-
-      - name: Upload installer
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
-        with:
-          name: windows-installer
-          path: plezy-windows-installer.exe
-
   release:
     name: Publish release
-    needs: [check-upstream, build-android, build-windows]
+    needs: [check-upstream, build-android]
     if: ${{ needs.check-upstream.outputs.build == 'true' }}
     runs-on: ubuntu-latest
     permissions:
@@ -529,10 +457,8 @@ jobs:
             Automated build of [`${{ env.UPSTREAM_REPO }}` ${{ needs.check-upstream.outputs.tag }}](https://github.com/${{ env.UPSTREAM_REPO }}/releases/tag/${{ needs.check-upstream.outputs.tag }}), built at commit ${{ needs.check-upstream.outputs.tag_sha }}.
 
             - **Android** — install the `.apk` matching your device ABI, `arm64-v8a` unless you know otherwise. Built under applicationId `${{ env.ANDROID_APPLICATION_ID }}`, so it cannot be installed alongside an app already using that ID.
-            - **Windows** — run `plezy-windows-installer.exe` (x64).
           files: |
             artifacts/android-apk/*.apk
-            artifacts/windows-installer/plezy-windows-installer.exe
           draft: false
           prerelease: false
           # MUST be the `token` input, not an env var. This action's `token`
@@ -565,7 +491,6 @@ jobs:
             "Upstream release <code>${TAG}</code> was published and has been rebuilt for this fork." \
             "" \
             "• Android — 3 APKs (<code>${APK_SUFFIX}</code>), applicationId <code>${ANDROID_APPLICATION_ID}</code>" \
-            "• Windows — <code>plezy-windows-installer.exe</code> (x64)" \
             "" \
             "${RELEASE_URL}")
 
