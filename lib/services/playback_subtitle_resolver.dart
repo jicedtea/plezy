@@ -263,7 +263,11 @@ class PlaybackSubtitleResolver {
     final playable = sidecar?.track;
     return SubtitleTrack(
       id: 'source:${sourceTrack.id}',
-      title: playable?.title ?? sourceTrack.displayTitle ?? sourceTrack.title ?? sourceTrack.language,
+      // The row's own title first: server display titles collapse to the bare
+      // language ("English") and are identical across same-language rows, so
+      // a carried intent built from them cannot tell a Signs/Songs track from
+      // the full dialogue track on the next episode (#1785).
+      title: sourceTrack.title ?? playable?.title ?? sourceTrack.displayTitle ?? sourceTrack.language,
       language: playable?.language ?? sourceTrack.languageCode ?? sourceTrack.language,
       codec: playable?.codec ?? sourceTrack.codec,
       isDefault: sourceTrack.selected,
@@ -325,18 +329,23 @@ class PlaybackSubtitleResolver {
     return choices[(normalizedCurrentIndex + advances) % choices.length];
   }
 
+  /// Stable semantic descriptor for a source audio row — the audio twin of
+  /// [subtitleTrackForSource]. The row's own title comes first: server
+  /// display titles collapse to the bare language and cannot tell a
+  /// commentary or alternate mix from the main track on another item.
+  static AudioTrack audioTrackForSource(MediaAudioTrack track) {
+    return AudioTrack(
+      id: 'source:${track.id}',
+      title: track.title ?? track.displayTitle ?? track.language,
+      language: track.languageCode ?? track.language,
+      codec: track.codec,
+      channels: track.channels,
+      isDefault: track.selected,
+    );
+  }
+
   static List<AudioTrack> _audioTracksForSource(MediaSourceInfo? mediaInfo) {
-    return [
-      for (final track in mediaInfo?.audioTracks ?? const <MediaAudioTrack>[])
-        AudioTrack(
-          id: 'source:${track.id}',
-          title: track.displayTitle ?? track.title ?? track.language,
-          language: track.languageCode ?? track.language,
-          codec: track.codec,
-          channels: track.channels,
-          isDefault: track.selected,
-        ),
-    ];
+    return [for (final track in mediaInfo?.audioTracks ?? const <MediaAudioTrack>[]) audioTrackForSource(track)];
   }
 }
 
