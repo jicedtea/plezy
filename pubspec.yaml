@@ -1,7 +1,7 @@
 name: plezy
 description: "A beautiful Plex and Jellyfin client for Flutter"
 publish_to: "none"
-version: 2.11.1+125
+version: 2.12.1+127
 
 environment:
   sdk: ">=3.12.0 <4.0.0"
@@ -148,6 +148,7 @@ flutter:
     - assets/plezy_adaptive_foreground.svg
     - assets/plex_chevron.svg
     - assets/jellyfin_icon.svg
+    - assets/emby_icon.svg
     - assets/trakt_circlemark.svg
     - assets/mal_mark.svg
     - assets/anilist_mark.svg

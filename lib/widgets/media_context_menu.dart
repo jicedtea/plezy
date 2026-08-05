@@ -84,13 +84,13 @@ bool isAdminActionAllowedForMediaItem({
 
 /// Whether "Delete from server" may be offered for an item.
 ///
-/// Deliberately not folded into [isAdminActionAllowedForMediaItem]: on Jellyfin
+/// Deliberately not folded into [isAdminActionAllowedForMediaItem]: on MediaBrowser servers
 /// the admin bit says nothing about deletion. `BaseItem.IsAuthorizedToDelete`
 /// consults `EnableContentDeletion` and the per-library grant only, and only
 /// the auto-created first user gets the former for free — so an administrator
 /// can lack the right (issue #1749) and a plain user can hold it. The server's
 /// per-item answer ([resolvedItemPermission], from
-/// [MediaDeletionPermissionClient]) is therefore the sole Jellyfin condition,
+/// [MediaDeletionPermissionClient]) is therefore the sole MediaBrowser condition,
 /// and anything unknown — offline, request failed, timed out, item invisible —
 /// stays hidden rather than offering a button that 401s.
 ///
@@ -102,7 +102,7 @@ bool isMediaDeletionAllowed({
   required bool isAdminActionAllowed,
 }) => switch (itemBackend) {
   null => false,
-  MediaBackend.jellyfin => resolvedItemPermission == true,
+  MediaBackend.jellyfin || MediaBackend.emby => resolvedItemPermission == true,
   MediaBackend.plex => isAdminActionAllowed,
 };
 
@@ -274,7 +274,7 @@ class MediaContextMenuState extends State<MediaContextMenu> {
     final isCollection = mediaKind == MediaKind.collection;
 
     // Backend-aware gate: a few menu items remain Plex-only because the
-    // server-side feature has no Jellyfin equivalent (match/unmatch).
+    // server-side feature has no MediaBrowser equivalent (match/unmatch).
     // No fallback: items without a backend marker show only neutral actions —
     // dispatching a Plex-only action against an unknown-backend item could
     // crash or hit the wrong server.
@@ -290,7 +290,7 @@ class MediaContextMenuState extends State<MediaContextMenu> {
 
     // Check if user has admin privileges. Backend-neutral: Plex uses the
     // server-owned flag (folded with the active Plex Home profile's admin
-    // bit, when applicable); Jellyfin uses `JellyfinConnection.isAdministrator`
+    // bit, when applicable); MediaBrowser servers use `JellyfinConnection.isAdministrator`
     // captured at sign-in.
     final multiServerProvider = Provider.of<MultiServerProvider>(context, listen: false);
     final activeProfile = context.read<ActiveProfileProvider>().active;
@@ -395,7 +395,7 @@ class MediaContextMenuState extends State<MediaContextMenu> {
         // reachable (capabilities stay truthy for offline servers).
         if (itemServerOnline && (mediaClient?.capabilities.instantMix ?? false)) {
           menuActions.add(
-            _MenuAction(value: 'music_instant_mix', icon: Symbols.instant_mix_rounded, label: t.music.instantMix),
+            _MenuAction(value: 'music_instant_mix', icon: Symbols.wand_stars_rounded, label: t.music.instantMix),
           );
         }
 
@@ -476,7 +476,7 @@ class MediaContextMenuState extends State<MediaContextMenu> {
         );
       }
 
-      // Match / Unmatch — Plex-only (Jellyfin doesn't expose match agents).
+      // Match / Unmatch — Plex-only (MediaBrowser servers don't expose match agents).
       if (isPlex && isAdmin && (mediaKind == MediaKind.movie || mediaKind == MediaKind.show)) {
         final isUnmatched = _isUnmatched(mediaItem);
         menuActions.add(
@@ -492,8 +492,8 @@ class MediaContextMenuState extends State<MediaContextMenu> {
       }
 
       // Remove from Collection (only when viewing items within a collection).
-      // Plex-only — uses `removeFromCollection` API; Jellyfin's collection
-      // membership API isn't wired here yet.
+      // Plex-only — uses `removeFromCollection` API; MediaBrowser collection
+      // membership APIs aren't wired here yet.
       if (isPlex && widget.collectionId != null) {
         menuActions.add(
           _MenuAction(
@@ -546,12 +546,15 @@ class MediaContextMenuState extends State<MediaContextMenu> {
         );
       }
 
-      // File Info (for episodes and movies). Backend-neutral — both
-      // PlexClient and JellyfinClient implement [getFileInfo], reading
-      // codec/stream metadata from `Media`/`MediaSources` respectively.
-      // Hidden when the item has no backend marker so we don't fan out
-      // to an arbitrary client.
-      if (itemBackend != null && (mediaKind == MediaKind.episode || mediaKind == MediaKind.movie)) {
+      // File Info — every file-backed leaf kind (movies, episodes, tracks,
+      // clips). Backend-neutral: both PlexClient and JellyfinClient implement
+      // [MediaServerClient.getFileInfo], reading codec/stream metadata from
+      // `Media`/`MediaSources` respectively. Container kinds are excluded by
+      // [MediaKind.hasFileInfo] because neither backend attaches media sources
+      // to them — a show/season/album/artist entry would only ever produce the
+      // "not available" snackbar. Hidden when the item has no backend marker
+      // so we don't fan out to an arbitrary client.
+      if (itemBackend != null && mediaKind != null && mediaKind.hasFileInfo) {
         menuActions.add(_MenuAction(value: 'fileinfo', icon: Symbols.info_rounded, label: t.mediaMenu.fileInfo));
       }
 
@@ -617,7 +620,7 @@ class MediaContextMenuState extends State<MediaContextMenu> {
 
       // Add to... (for episodes, movies, shows, and seasons). Plex-only —
       // uses `buildMetadataUri` + `addToPlaylist` / `addToCollection`. The
-      // Jellyfin item-add API is different and not wired here yet.
+      // MediaBrowser item-add APIs are different and not wired here yet.
       if (isPlex &&
           (mediaKind == MediaKind.episode ||
               mediaKind == MediaKind.movie ||
@@ -627,9 +630,9 @@ class MediaContextMenuState extends State<MediaContextMenu> {
       }
 
       // Delete media item (for episodes, movies, shows, and seasons). Routed
-      // through `MediaServerClient.deleteMediaItem`, which both Plex and
-      // Jellyfin implement (DELETE /library/metadata/{id} and
-      // DELETE /Items/{id} respectively); the kind and permission checks were
+      // through `MediaServerClient.deleteMediaItem`, which every backend
+      // implements (DELETE /library/metadata/{id} for Plex and
+      // DELETE /Items/{id} for MediaBrowser servers); the kind and permission checks were
       // resolved together above.
       if (canDeleteFromServer) {
         menuActions.add(

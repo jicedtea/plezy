@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plezy/media/ids.dart';
 import 'package:plezy/media/media_backend.dart';
+import 'package:plezy/media/media_browser_dialect.dart';
 import 'package:plezy/media/media_kind.dart';
 import 'package:plezy/media/media_item.dart';
 import 'package:plezy/media/media_stream.dart';
@@ -94,6 +95,27 @@ void main() {
       // Multi-server fields.
       expect(item.serverId, _serverId);
       expect(item.serverName, 'Home');
+    });
+
+    test('Emby dialect stamps backend and preserves opaque item and media source ids', () {
+      final item = JellyfinMappers.mediaItem(
+        {
+          'Id': '7330',
+          'Name': 'Movie',
+          'Type': 'Movie',
+          'MediaSources': [
+            {'Id': 'mediasource_7330', 'MediaStreams': <Map<String, dynamic>>[]},
+          ],
+        },
+        serverId: ServerId(_serverId),
+        absolutizer: null,
+        dialect: MediaBrowserDialect.emby,
+      )!;
+
+      expect(item.id, '7330');
+      expect(item.backend, MediaBackend.emby);
+      expect(item.mediaVersions!.single.id, 'mediasource_7330');
+      expect(item.mediaVersions!.single.parts.single.id, 'mediasource_7330');
     });
 
     test('divides the Tomatometer rather than range-sniffing it', () {
@@ -556,6 +578,16 @@ void main() {
       }
     });
 
+    test('Emby dialect stamps the library backend', () {
+      final library = JellyfinMappers.library(
+        {'Id': 'view-movies', 'Name': 'Movies', 'CollectionType': 'movies'},
+        serverId: ServerId(_serverId),
+        dialect: MediaBrowserDialect.emby,
+      )!;
+
+      expect(library.backend, MediaBackend.emby);
+    });
+
     test('maps content-type-less collection folders to a movie and show root browse', () {
       for (final view in [
         {'Id': 'view-missing-type', 'Name': 'Mixed', 'Type': 'CollectionFolder', 'IsFolder': true},
@@ -695,6 +727,57 @@ void main() {
         JellyfinMappers.library({'Name': 'Library', 'CollectionType': 'movies'}, serverId: ServerId(_serverId)),
         isNull,
       );
+    });
+  });
+
+  group('jellyfinUserImageUrl', () {
+    test('builds an absolute, tag-keyed user image URL', () {
+      final url = jellyfinUserImageUrl(baseUrl: 'https://jelly.example', userId: 'user-1', tag: 'abc123');
+
+      final uri = Uri.parse(url!);
+      expect(uri.origin, 'https://jelly.example');
+      expect(uri.path, '/Users/user-1/Images/Primary');
+      expect(uri.queryParameters['tag'], 'abc123');
+    });
+
+    test('carries no api_key — the user image endpoint is anonymous', () {
+      final url = jellyfinUserImageUrl(baseUrl: 'https://jelly.example', userId: 'user-1', tag: 'abc123')!;
+
+      // Item artwork self-authenticates via api_key; baking the access token
+      // into an avatar URL would put it in the image cache key for no reason.
+      expect(url, isNot(contains('api_key')));
+      expect(url, isNot(contains('secret')));
+    });
+
+    test('returns null when the user has no picture', () {
+      expect(jellyfinUserImageUrl(baseUrl: 'https://jelly.example', userId: 'user-1', tag: null), isNull);
+      expect(jellyfinUserImageUrl(baseUrl: 'https://jelly.example', userId: 'user-1', tag: ''), isNull);
+    });
+
+    test('returns null when the connection is missing a base URL or user id', () {
+      expect(jellyfinUserImageUrl(baseUrl: '', userId: 'user-1', tag: 'abc123'), isNull);
+      expect(jellyfinUserImageUrl(baseUrl: 'https://jelly.example', userId: '', tag: 'abc123'), isNull);
+    });
+
+    test('joins a base URL that carries a subpath and a trailing slash', () {
+      final url = jellyfinUserImageUrl(baseUrl: 'https://host.example/jellyfin/', userId: 'user-1', tag: 'abc123');
+
+      expect(Uri.parse(url!).path, '/jellyfin/Users/user-1/Images/Primary');
+    });
+
+    test('escapes a user id that would otherwise break the path', () {
+      final url = jellyfinUserImageUrl(baseUrl: 'https://jelly.example', userId: 'a/b', tag: 'abc123');
+
+      expect(Uri.parse(url!).pathSegments, ['Users', 'a/b', 'Images', 'Primary']);
+    });
+
+    test('requests a bounded size for servers that still honour it', () {
+      final uri = Uri.parse(
+        jellyfinUserImageUrl(baseUrl: 'https://jelly.example', userId: 'user-1', tag: 'abc123', maxSize: 96)!,
+      );
+
+      expect(uri.queryParameters['maxWidth'], '96');
+      expect(uri.queryParameters['maxHeight'], '96');
     });
   });
 }
