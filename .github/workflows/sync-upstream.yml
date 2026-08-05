@@ -149,20 +149,18 @@ jobs:
           fi
           echo "Latest upstream release: $tag"
 
-          # Exactly the one tag this run is about, by name.
-          if ! git fetch --no-tags upstream "refs/tags/${tag}:refs/tags/${tag}"; then
-            echo "ERROR: could not fetch tag ${tag} from ${UPSTREAM_REPO}." >&2
+          # Resolved through the API, deliberately NOT fetched into a local ref.
+          # This fork publishes its own tag of the same name at a different
+          # commit (its releases target main), so a local
+          # `git fetch refs/tags/X:refs/tags/X` is rejected as "would clobber
+          # existing tag" the moment a release exists here. Nothing else needs
+          # the tag locally: the build jobs check it out of upstream directly.
+          tag_sha=$(gh api "repos/${UPSTREAM_REPO}/commits/${tag}" --jq .sha)
+          if [[ -z "$tag_sha" || "$tag_sha" == "null" ]]; then
+            echo "ERROR: could not resolve ${tag} to a commit in ${UPSTREAM_REPO}." >&2
             exit 1
           fi
-
-          if ! tag_sha=$(git rev-parse -q --verify "refs/tags/${tag}^{commit}"); then
-            echo "ERROR: tag ${tag} did not resolve to a commit." >&2
-            exit 1
-          fi
-
-          # No reachability check is needed here: the build jobs check the tag
-          # out of the upstream repository directly, so it does not matter
-          # whether this fork's main carries that commit.
+          echo "Upstream ${tag} is commit ${tag_sha}"
 
           # A release already published here means this tag was built before.
           # Checked against releases rather than tags: the release job creates
@@ -424,13 +422,27 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Download build artifacts
+      # Downloaded by name, so the files land directly in artifacts/ rather than
+      # in an artifacts/<artifact-name>/ subdirectory. Without the name, the
+      # extra level has to be guessed at in the glob below, and getting it wrong
+      # attaches nothing.
+      - name: Download the APKs
         uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
         with:
+          name: android-apk
           path: artifacts
 
-      - name: Display structure of downloaded files
-        run: ls -R artifacts
+      - name: Confirm the APKs are present
+        run: |
+          set -euo pipefail
+          echo "Contents of artifacts/:"
+          ls -lR artifacts
+          count=$(find artifacts -name '*.apk' -type f | wc -l)
+          if [[ "$count" -eq 0 ]]; then
+            echo "::error::No .apk found under artifacts/, so the release would be published empty."
+            exit 1
+          fi
+          echo "Found ${count} APK(s) to attach."
 
       # Tagged with the upstream release tag: that is the key the next run's
       # "already built?" check looks for, so it must be created here.
@@ -458,7 +470,10 @@ jobs:
 
             - **Android** — install the `.apk` matching your device ABI, `arm64-v8a` unless you know otherwise. Built under applicationId `${{ env.ANDROID_APPLICATION_ID }}`, so it cannot be installed alongside an app already using that ID.
           files: |
-            artifacts/android-apk/*.apk
+            artifacts/*.apk
+          # Without this the action treats a glob that matches nothing as
+          # success and publishes an empty release.
+          fail_on_unmatched_files: true
           draft: false
           prerelease: false
           # MUST be the `token` input, not an env var. This action's `token`
