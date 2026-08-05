@@ -794,6 +794,8 @@
     "noConnectionsHint": "Няма връзки — добавете такава, за да използвате този профил.",
     "noConnections": "Няма връзки",
     "plexHomeAccount": "Plex Home акаунт",
+    "plexAccountChip": "Plex акаунт: ${account}",
+    "plexAccountUserChip": "${user} през ${account}",
     "connectionDefault": "По подразбиране",
     "connectionAs": "като ${displayName}",
     "makeDefault": "Направи по подразбиране",
@@ -1840,7 +1842,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "Активиране на Plezy в ${service}",

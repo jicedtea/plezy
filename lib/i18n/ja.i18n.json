@@ -793,6 +793,8 @@
     "noConnectionsHint": "接続がありません — このプロフィールを使うには接続を追加してください。",
     "noConnections": "接続がありません",
     "plexHomeAccount": "Plex Homeアカウント",
+    "plexAccountChip": "Plexアカウント: ${account}",
+    "plexAccountUserChip": "${account}経由の${user}",
     "connectionDefault": "デフォルト",
     "connectionAs": "${displayName}として",
     "makeDefault": "デフォルトに設定",
@@ -1834,7 +1836,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "${service} で Plezy を有効化",

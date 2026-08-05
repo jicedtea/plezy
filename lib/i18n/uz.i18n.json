@@ -794,6 +794,8 @@
     "noConnectionsHint": "Ulanishlar yoʻq — ushbu profildan foydalanish uchun ulanish qoʻshing.",
     "noConnections": "Ulanishlar yoʻq",
     "plexHomeAccount": "Plex Home hisobi",
+    "plexAccountChip": "Plex hisobi: ${account}",
+    "plexAccountUserChip": "${account} hisobi orqali ${user}",
     "connectionDefault": "Standart",
     "connectionAs": "${displayName} sifatida",
     "makeDefault": "Standart qilish",
@@ -1840,7 +1842,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "Plezy-ni ${service} xizmatida faollashtiring",

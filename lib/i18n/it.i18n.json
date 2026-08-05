@@ -794,6 +794,8 @@
     "noConnectionsHint": "Nessuna connessione — aggiungine una per usare questo profilo.",
     "noConnections": "Nessuna connessione",
     "plexHomeAccount": "Account Plex Home",
+    "plexAccountChip": "Account Plex: ${account}",
+    "plexAccountUserChip": "${user} tramite ${account}",
     "connectionDefault": "Predefinita",
     "connectionAs": "come ${displayName}",
     "makeDefault": "Imposta come predefinita",
@@ -1840,7 +1842,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "Attiva Plezy su ${service}",

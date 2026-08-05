@@ -793,6 +793,8 @@
     "noConnectionsHint": "没有连接 — 请添加连接以使用此用户资料。",
     "noConnections": "没有连接",
     "plexHomeAccount": "Plex Home 账户",
+    "plexAccountChip": "Plex 账户：${account}",
+    "plexAccountUserChip": "${account} 账户下的 ${user}",
     "connectionDefault": "默认",
     "connectionAs": "以 ${displayName} 身份",
     "makeDefault": "设为默认",
@@ -1834,7 +1836,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "在 ${service} 上激活 Plezy",

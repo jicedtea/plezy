@@ -794,6 +794,8 @@
     "noConnectionsHint": "Bağlantı yok — bu profili kullanmak için bir tane ekleyin.",
     "noConnections": "Bağlantı yok",
     "plexHomeAccount": "Plex Ev hesabı",
+    "plexAccountChip": "Plex hesabı: ${account}",
+    "plexAccountUserChip": "${account} hesabı üzerinden ${user}",
     "connectionDefault": "Varsayılan",
     "connectionAs": "${displayName} olarak",
     "makeDefault": "Varsayılan yap",
@@ -1840,7 +1842,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "Plezy'yi ${service} üzerinde etkinleştirin",

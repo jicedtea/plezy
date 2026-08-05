@@ -793,6 +793,8 @@
     "noConnectionsHint": "無連線 — 請新增一個連線以啟用此設定檔。",
     "noConnections": "無連線資訊",
     "plexHomeAccount": "Plex Home 帳戶",
+    "plexAccountChip": "Plex 帳戶：${account}",
+    "plexAccountUserChip": "${account} 帳戶下的 ${user}",
     "connectionDefault": "預設",
     "connectionAs": "以 ${displayName} 身分",
     "makeDefault": "設為預設值",
@@ -1834,7 +1836,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "在 ${service} 啟用 Plezy",

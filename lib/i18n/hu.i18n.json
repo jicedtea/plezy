@@ -794,6 +794,8 @@
     "noConnectionsHint": "Nincsenek kapcsolatok — adj hozzá egyet a profil használatához.",
     "noConnections": "Nincsenek kapcsolatok",
     "plexHomeAccount": "Plex Home-fiók",
+    "plexAccountChip": "Plex-fiók: ${account}",
+    "plexAccountUserChip": "${account} fiókján keresztül: ${user}",
     "connectionDefault": "Alapértelmezett",
     "connectionAs": "mint ${displayName}",
     "makeDefault": "Beállítás alapértelmezettként",
@@ -1840,7 +1842,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "Plezy aktiválása a következőn: ${service}",

@@ -794,6 +794,8 @@
     "noConnectionsHint": "Қосылымдар жоқ — бұл профильді пайдалану үшін қосылым қосыңыз.",
     "noConnections": "Қосылымдар жоқ",
     "plexHomeAccount": "Plex Home тіркелгісі",
+    "plexAccountChip": "Plex тіркелгісі: ${account}",
+    "plexAccountUserChip": "${account} арқылы ${user}",
     "connectionDefault": "Әдепкі",
     "connectionAs": "${displayName} ретінде",
     "makeDefault": "Әдепкі ету",
@@ -1840,7 +1842,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "Plezy-ді ${service} қызметінде белсендіру",

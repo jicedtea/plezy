@@ -794,6 +794,8 @@
     "noConnectionsHint": "Geen verbindingen — voeg er één toe om dit profiel te gebruiken.",
     "noConnections": "Geen verbindingen",
     "plexHomeAccount": "Plex Home-account",
+    "plexAccountChip": "Plex-account: ${account}",
+    "plexAccountUserChip": "${user} via ${account}",
     "connectionDefault": "Standaard",
     "connectionAs": "als ${displayName}",
     "makeDefault": "Als standaard instellen",
@@ -1840,7 +1842,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "Plezy activeren op ${service}",

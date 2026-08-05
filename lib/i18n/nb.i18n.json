@@ -794,6 +794,8 @@
     "noConnectionsHint": "Ingen tilkoblinger — legg til én for å bruke denne profilen.",
     "noConnections": "Ingen tilkoblinger",
     "plexHomeAccount": "Plex Home-konto",
+    "plexAccountChip": "Plex-konto: ${account}",
+    "plexAccountUserChip": "${user} via ${account}",
     "connectionDefault": "Standard",
     "connectionAs": "som ${displayName}",
     "makeDefault": "Gjør til standard",
@@ -1840,7 +1842,8 @@
       "mal": "MyAnimeList",
       "anilist": "AniList",
       "simkl": "Simkl",
-      "seerr": "Seerr"
+      "seerr": "Seerr",
+      "mdblist": ""
     },
     "deviceCode": {
       "title": "Aktiver Plezy på ${service}",
