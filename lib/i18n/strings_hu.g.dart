@@ -546,8 +546,6 @@ class _Translations$mediaMenu$hu extends Translations$mediaMenu$en {
 	@override String get shufflePlay => 'Véletlenszerű lejátszás';
 	@override String get shuffleNotAvailableOffline => 'A véletlenszerű lejátszás nem érhető el offline';
 	@override String get fileInfo => 'Fájlinformáció';
-	@override String get deleteFromServer => 'Törlés a szerverről';
-	@override String get confirmDelete => 'Törlöd ezt a médiát és a fájljait a szerveredről?';
 	@override String get deleteMultipleWarning => 'Ez magában foglalja az összes epizódot és azok fájljait.';
 	@override String get mediaDeletedSuccessfully => 'Médiaelem sikeresen törölve';
 	@override String get mediaFailedToDelete => 'Nem sikerült a médiaelem törlése';
@@ -1519,7 +1517,6 @@ class _Translations$videoSettings$hu extends Translations$videoSettings$en {
 	@override String get hdr => 'HDR';
 	@override String get audioOutput => 'Hangkimenet';
 	@override String get performanceOverlay => 'Teljesítményadatok';
-	@override String get audioPassthrough => 'Hangtovábbítás (passthrough)';
 	@override String get audioOutputDolbyAtmos => 'Dolby Atmos';
 	@override String get audioOutputDolbyAudio => 'Dolby Audio';
 	@override String get audioOutputSurround => 'Térhatású';
@@ -2583,8 +2580,6 @@ extension on TranslationsHu {
 			'mediaMenu.shufflePlay' => 'Véletlenszerű lejátszás',
 			'mediaMenu.shuffleNotAvailableOffline' => 'A véletlenszerű lejátszás nem érhető el offline',
 			'mediaMenu.fileInfo' => 'Fájlinformáció',
-			'mediaMenu.deleteFromServer' => 'Törlés a szerverről',
-			'mediaMenu.confirmDelete' => 'Törlöd ezt a médiát és a fájljait a szerveredről?',
 			'mediaMenu.deleteMultipleWarning' => 'Ez magában foglalja az összes epizódot és azok fájljait.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Médiaelem sikeresen törölve',
 			'mediaMenu.mediaFailedToDelete' => 'Nem sikerült a médiaelem törlése',
@@ -2703,10 +2698,10 @@ extension on TranslationsHu {
 			'videoControls.language' => 'Nyelv',
 			'videoControls.noSubtitlesFound' => 'Nem találhatók feliratok',
 			'videoControls.subtitleDownloaded' => 'Felirat letöltve',
-			_ => null,
-		} ?? switch (path) {
 			'videoControls.subtitleDownloadedNotApplied' => 'Felirat letöltve, de nem sikerült kiválasztani',
 			'videoControls.subtitleDownloadFailed' => 'Nem sikerült a felirat letöltése',
+			_ => null,
+		} ?? switch (path) {
 			'videoControls.searchLanguages' => 'Nyelvek keresése...',
 			'messages.markedAsWatched' => 'Megjelölve megtekintettként',
 			'messages.markedAsUnwatched' => 'Megjelölve nem megtekintettként',
@@ -3217,10 +3212,10 @@ extension on TranslationsHu {
 			'watchTogether.failedToJoin' => 'Nem sikerült csatlakozni a munkamenethez',
 			'watchTogether.sessionCodeCopied' => 'A munkamenetkód a vágólapra másolva',
 			'watchTogether.relayUnreachable' => 'A relészerver nem érhető el. Az internetszolgáltató blokkolása megakadályozhatja a közös nézést.',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.reconnectingToHost' => 'Újracsatlakozás a házigazdához...',
 			'watchTogether.currentPlayback' => 'Jelenlegi lejátszás',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.joinCurrentPlayback' => 'Csatlakozás a jelenlegi lejátszáshoz',
 			'watchTogether.joinCurrentPlaybackDescription' => 'Visszatérés ahhoz, amit a házigazda éppen néz',
 			'watchTogether.failedToOpenCurrentPlayback' => 'Nem sikerült megnyitni a jelenlegi lejátszást',
@@ -3422,7 +3417,6 @@ extension on TranslationsHu {
 			'videoSettings.hdr' => 'HDR',
 			'videoSettings.audioOutput' => 'Hangkimenet',
 			'videoSettings.performanceOverlay' => 'Teljesítményadatok',
-			'videoSettings.audioPassthrough' => 'Hangtovábbítás (passthrough)',
 			'videoSettings.audioOutputDolbyAtmos' => 'Dolby Atmos',
 			'videoSettings.audioOutputDolbyAudio' => 'Dolby Audio',
 			'videoSettings.audioOutputSurround' => 'Térhatású',

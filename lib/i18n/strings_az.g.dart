@@ -549,8 +549,6 @@ class _Translations$mediaMenu$az extends Translations$mediaMenu$en {
 	@override String get shufflePlay => 'Qarışıq oynat';
 	@override String get shuffleNotAvailableOffline => 'Qarışıq oynatma oflayn rejimdə əlçatan deyil';
 	@override String get fileInfo => 'Fayl məlumatı';
-	@override String get deleteFromServer => 'Serverdən sil';
-	@override String get confirmDelete => 'Bu media və faylları serverinizdən silinsin?';
 	@override String get deleteMultipleWarning => 'Bu bütün seriyaları və faylları əhatə edir.';
 	@override String get mediaDeletedSuccessfully => 'Media elementi uğurla silindi';
 	@override String get mediaFailedToDelete => 'Media elementi silinə bilmədi';
@@ -1530,7 +1528,6 @@ class _Translations$videoSettings$az extends Translations$videoSettings$en {
 	@override String get hdr => 'HDR';
 	@override String get audioOutput => 'Səs çıxışı';
 	@override String get performanceOverlay => 'Məhsuldarlıq paneli';
-	@override String get audioPassthrough => 'Səsin birbaşa ötürülməsi';
 	@override String get audioOutputDolbyAtmos => 'Dolby Atmos';
 	@override String get audioOutputDolbyAudio => 'Dolby Audio';
 	@override String get audioOutputSurround => 'Əhatəli səs';
@@ -2597,8 +2594,6 @@ extension on TranslationsAz {
 			'mediaMenu.shufflePlay' => 'Qarışıq oynat',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Qarışıq oynatma oflayn rejimdə əlçatan deyil',
 			'mediaMenu.fileInfo' => 'Fayl məlumatı',
-			'mediaMenu.deleteFromServer' => 'Serverdən sil',
-			'mediaMenu.confirmDelete' => 'Bu media və faylları serverinizdən silinsin?',
 			'mediaMenu.deleteMultipleWarning' => 'Bu bütün seriyaları və faylları əhatə edir.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Media elementi uğurla silindi',
 			'mediaMenu.mediaFailedToDelete' => 'Media elementi silinə bilmədi',
@@ -2714,10 +2709,10 @@ extension on TranslationsAz {
 			'videoControls.queue' => 'Növbə',
 			'videoControls.noQueueItems' => 'Növbədə element yoxdur',
 			'videoControls.searchSubtitles' => 'Altyazı axtar',
-			_ => null,
-		} ?? switch (path) {
 			'videoControls.language' => 'Dil',
 			'videoControls.noSubtitlesFound' => 'Altyazı tapılmadı',
+			_ => null,
+		} ?? switch (path) {
 			'videoControls.subtitleDownloaded' => 'Altyazı yükləndi',
 			'videoControls.subtitleDownloadedNotApplied' => 'Altyazı yükləndi, lakin seçilə bilmədi',
 			'videoControls.subtitleDownloadFailed' => 'Altyazı yüklənə bilmədi',
@@ -3228,10 +3223,10 @@ extension on TranslationsAz {
 			'watchTogether.pasteFromClipboard' => 'Buferdən yapışdır',
 			'watchTogether.pleaseEnterCode' => 'Lütfən seans kodunu daxil edin',
 			'watchTogether.codeMustBe5Chars' => 'Seans kodu 5 simvol olmalıdır',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.joinInstructions' => 'Qoşulmaq üçün təşkilatçının seans kodunu daxil edin.',
 			'watchTogether.failedToCreate' => 'Seans yaradıla bilmədi',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.failedToJoin' => 'Seansa qoşuluna bilmədi',
 			'watchTogether.sessionCodeCopied' => 'Seans kodu buferə kopyalandı',
 			'watchTogether.relayUnreachable' => 'Rele serverinə çatmaq olmur. İnternet provayderinin bloklaması Birlikdə İzləməyə mane ola bilər.',
@@ -3444,7 +3439,6 @@ extension on TranslationsAz {
 			'videoSettings.hdr' => 'HDR',
 			'videoSettings.audioOutput' => 'Səs çıxışı',
 			'videoSettings.performanceOverlay' => 'Məhsuldarlıq paneli',
-			'videoSettings.audioPassthrough' => 'Səsin birbaşa ötürülməsi',
 			'videoSettings.audioOutputDolbyAtmos' => 'Dolby Atmos',
 			'videoSettings.audioOutputDolbyAudio' => 'Dolby Audio',
 			'videoSettings.audioOutputSurround' => 'Əhatəli səs',

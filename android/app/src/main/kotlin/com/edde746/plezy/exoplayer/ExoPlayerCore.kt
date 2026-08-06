@@ -283,6 +283,12 @@ class ExoPlayerCore(private val activity: Activity) :
   private var bufferingStallSinceMs = 0L
   private var bufferingStallBaselinePositionMs = 0L
 
+  /**
+   * The live load control, so the buffering watchdog can ask whether media3 itself considers the
+   * buffer sufficient to start rather than re-deriving that from durations.
+   */
+  private var observingLoadControl: ObservingLoadControl? = null
+
   // Decoder hang detection: tracks gap between decoder init and first rendered frame
   private var decoderHangRunnable: Runnable? = null
   private var decoderInitName: String? = null
@@ -321,6 +327,12 @@ class ExoPlayerCore(private val activity: Activity) :
   // FPS detection from frame timestamps (fallback when Format.frameRate is NO_VALUE)
   @Volatile private var detectedFrameRate: Float = -1f
   private val fpsTimestamps = LongArray(FPS_SAMPLE_COUNT)
+
+  // Frame rate the media server reported for the open item, or -1 when unknown.
+  // Supplied per open because the extractors media3 uses for direct play (Matroska,
+  // MP4) never populate Format.frameRate, and the tunneled path renders no frames
+  // back to the app for detectedFrameRate to derive one from.
+  @Volatile private var contentFrameRate: Float = -1f
 
   @Volatile private var fpsTimestampCount = 0
   private var assSyncFrameCount = 0L
@@ -783,7 +795,7 @@ class ExoPlayerCore(private val activity: Activity) :
             LoadControlPolicy.BUFFER_FOR_PLAYBACK_AFTER_REBUFFER_MS
           )
         }
-      }.build()
+      }.build().let { ObservingLoadControl(it).also { observing -> observingLoadControl = observing } }
       emitLog(
         "info",
         "init",
@@ -1421,6 +1433,8 @@ class ExoPlayerCore(private val activity: Activity) :
     setCurrentMediaSource(player, uri, savedPosition)
     player.prepare()
     player.playWhenReady = savedPlayWhenReady
+    // See reloadCurrentMediaForDvMode: a same-state reload never re-arms the watchdog by itself.
+    armBufferingStallWatchdog()
     return true
   }
 
@@ -1526,6 +1540,8 @@ class ExoPlayerCore(private val activity: Activity) :
     setCurrentMediaSource(player, uri, savedPosition)
     player.prepare()
     player.playWhenReady = savedPlayWhenReady
+    // See reloadCurrentMediaForDvMode: a same-state reload never re-arms the watchdog by itself.
+    armBufferingStallWatchdog()
     return true
   }
 
@@ -2590,6 +2606,7 @@ class ExoPlayerCore(private val activity: Activity) :
     val player = exoPlayer ?: return null
     val audioDelayActive = (renderersFactory?.audioDelayUs?.get() ?: 0L) != 0L
     return tunnelingUserEnabled &&
+      !DeviceQuirks.hasUnreliableTunneledPlayback(contentFrameRate) &&
       (player.playbackParameters.speed == 1f) &&
       !tunnelingDisabledForCodec &&
       !tunnelingDisabledForAssSubtitles &&
@@ -3176,6 +3193,8 @@ class ExoPlayerCore(private val activity: Activity) :
     val player = exoPlayer ?: return
     bufferingStallSinceMs = System.currentTimeMillis()
     bufferingStallBaselinePositionMs = player.currentPosition
+    // Fresh window: do not judge it on a verdict media3 gave for the previous one.
+    observingLoadControl?.reset()
     val mediaGeneration = currentMediaGeneration
     bufferingStallRunnable = object : Runnable {
       override fun run() {
@@ -3201,7 +3220,16 @@ class ExoPlayerCore(private val activity: Activity) :
           elapsedMs = elapsedMs,
           baselinePositionMs = bufferingStallBaselinePositionMs,
           currentPositionMs = current.currentPosition,
-          bufferedPositionMs = current.bufferedPosition
+          bufferedPositionMs = current.bufferedPosition,
+          // The load control's bar is in playout time, so a fast-forward legitimately needs
+          // proportionally more media. Only used when media3 has not answered for itself yet.
+          playbackSpeed = current.playbackParameters.speed,
+          // media3's own verdict, which also covers the byte-target release no duration comparison
+          // can express — but it is only asked once the renderers are ready.
+          loadControlReady = observingLoadControl?.startPlaybackVerdict,
+          // A loader that has stopped asking for data has all it wants, whatever the duration says.
+          // This is the signal that survives a renderer which never becomes ready.
+          loading = current.isLoading
         )
         if (verdict == BufferingStallPolicy.Verdict.STALLED) {
           cancelBufferingStallWatchdog()
@@ -3246,6 +3274,8 @@ class ExoPlayerCore(private val activity: Activity) :
         blockDirectOutput = sinkError != null
       )
     ) {
+      // recoverAudioOutputInPlace re-arms the watchdog itself, so the retry is watched and can
+      // escalate to the handover below.
       return
     }
 
@@ -3255,7 +3285,9 @@ class ExoPlayerCore(private val activity: Activity) :
     requestFormatFallback(
       mediaGeneration = mediaGeneration,
       uri = uri,
-      positionMs = positionMs,
+      // Not the raw position: a failed sink can report 0, which would restart a resumed episode from
+      // the beginning. Every other fallback path hands over the tracked position for the same reason.
+      positionMs = maxOf(positionMs, effectivePosition),
       playWhenReady = playWhenReady,
       errorMessage = "Playback stalled while buffering for ${stalledMs}ms"
     )
@@ -3270,7 +3302,8 @@ class ExoPlayerCore(private val activity: Activity) :
     autoPlay: Boolean,
     mediaGeneration: Int,
     isLive: Boolean = false,
-    externalSubtitleList: List<Map<String, Any?>>? = null
+    externalSubtitleList: List<Map<String, Any?>>? = null,
+    contentFrameRate: Float = -1f
   ) {
     if (!isInitialized) return
 
@@ -3283,6 +3316,7 @@ class ExoPlayerCore(private val activity: Activity) :
 
     // Reset FPS detection for new content
     detectedFrameRate = -1f
+    this.contentFrameRate = contentFrameRate
     fpsTimestampCount = 0
     assSyncFrameCount = 0
 
@@ -3397,10 +3431,21 @@ class ExoPlayerCore(private val activity: Activity) :
       setCurrentMediaSource(this, uri, startPositionMs)
       prepare()
       playWhenReady = autoPlay
+      // Same reason as the recovery reloads: replacing the source while the previous item was
+      // already buffering produces no state change, so nothing would arm the watchdog for this
+      // generation. The runnable cancels itself as soon as the player is not buffering.
+      armBufferingStallWatchdog()
     }
 
     val sourceLabel = if (isLive) "live HLS" else "media"
-    emitLog("info", "media", "Opened $sourceLabel: ${redactUri(uri)}, startPosition: ${startPositionMs}ms, autoPlay: $autoPlay, sessionTunneling=$currentTunneledPlayback, userTunneling=$tunnelingUserEnabled")
+    emitLog(
+      "info",
+      "media",
+      "Opened $sourceLabel: ${redactUri(uri)}, startPosition: ${startPositionMs}ms, autoPlay: $autoPlay, " +
+        "contentFps=${if (contentFrameRate > 0f) contentFrameRate.toString() else "unknown"}, " +
+        "sessionTunneling=$currentTunneledPlayback, userTunneling=$tunnelingUserEnabled, " +
+        "tunnelingStatus=${exoPlayer?.let(::getTunnelingStatus) ?: "n/a"}"
+    )
   }
 
   fun setAudioDelay(seconds: Double) {
@@ -3629,6 +3674,10 @@ class ExoPlayerCore(private val activity: Activity) :
     setCurrentMediaSource(player, uri, savedPosition)
     player.prepare()
     player.playWhenReady = savedPlayWhenReady
+    // Replacing the source while the player is already buffering produces no state change, and that
+    // change is the only thing that arms the stall watchdog — so arm it here or a reload that never
+    // becomes ready has nothing left watching it.
+    armBufferingStallWatchdog()
     emitLog("info", "dv-debug", "Reloaded media for DV mode $dvMode at ${savedPosition}ms")
     return true
   }
@@ -3668,6 +3717,17 @@ class ExoPlayerCore(private val activity: Activity) :
     player.seekTo(clampedPositionMs)
     lastPosition = clampedPositionMs
     lastKnownGoodPositionMs = clampedPositionMs
+    // A seek discards whatever the stall watchdog was measuring: it compares against a baseline
+    // position, and the policy reads a lower position as stalled, so a backward seek during a
+    // legitimate buffered wait would inherit the pre-seek stall time and trip recovery on the next
+    // poll. Re-baseline here so the new position gets the full timeout.
+    if (bufferingStallRunnable != null) {
+      bufferingStallSinceMs = System.currentTimeMillis()
+      bufferingStallBaselinePositionMs = clampedPositionMs
+      // The load control's recorded verdict belongs to the buffer this seek just discarded, and the
+      // policy prefers it over the live loader state, so a stale answer would decide the new window.
+      observingLoadControl?.reset()
+    }
     delegate?.onPropertyChange("time-pos", clampedPositionMs / 1000.0)
   }
 
@@ -3773,6 +3833,9 @@ class ExoPlayerCore(private val activity: Activity) :
         setCurrentMediaSource(player, mediaUri, savedPosition)
         player.prepare()
         player.playWhenReady = savedPlayWhenReady
+        // Same-state source replacement: media3 reports no change when the player was already
+        // buffering, so arm here or this window keeps the previous one's watchdog and verdict.
+        armBufferingStallWatchdog()
       } else {
         // Already attached — select the existing track via override. The
         // reported id carries media3's merge prefixes, so compare the tag.
@@ -4114,6 +4177,7 @@ class ExoPlayerCore(private val activity: Activity) :
   private fun getTunnelingStatus(player: ExoPlayer): String {
     if (currentTunneledPlayback) return "Active"
     if (!tunnelingUserEnabled) return "Disabled by user"
+    if (DeviceQuirks.hasUnreliableTunneledPlayback(contentFrameRate)) return "Off (unreliable on this device)"
     if (player.playbackParameters.speed != 1f) return "Off (speed ≠ 1×)"
     if (audioNormalizationEnabled) return "Off (loudness normalization)"
     if (tunnelingDisabledForAudioRecovery) return "Off (audio recovery)"

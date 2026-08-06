@@ -438,6 +438,9 @@ class Translations$settings$en {
 	/// en: 'Library Density'
 	String get libraryDensity => 'Library Density';
 
+	/// en: 'Display Scale'
+	String get displayScale => 'Display Scale';
+
 	/// en: 'Compact'
 	String get compact => 'Compact';
 
@@ -924,8 +927,8 @@ class Translations$settings$en {
 	/// en: 'Tunneled Playback'
 	String get tunneledPlayback => 'Tunneled Playback';
 
-	/// en: 'Use video tunneling. Disable if HDR playback shows black video.'
-	String get tunneledPlaybackDescription => 'Use video tunneling. Disable if HDR playback shows black video.';
+	/// en: 'Use video tunneling. Disable if HDR playback shows black video or motion stutters.'
+	String get tunneledPlaybackDescription => 'Use video tunneling. Disable if HDR playback shows black video or motion stutters.';
 
 	/// en: 'Audio Passthrough'
 	String get audioPassthrough => 'Audio Passthrough';
@@ -1565,14 +1568,74 @@ class Translations$mediaMenu$en {
 	/// en: 'File Info'
 	String get fileInfo => 'File Info';
 
-	/// en: 'Delete from server'
-	String get deleteFromServer => 'Delete from server';
+	/// en: 'Delete episode from server'
+	String get deleteEpisodeFromServer => 'Delete episode from server';
 
-	/// en: 'Delete this media and its files from your server?'
-	String get confirmDelete => 'Delete this media and its files from your server?';
+	/// en: 'Delete season from server'
+	String get deleteSeasonFromServer => 'Delete season from server';
+
+	/// en: 'Delete show from server'
+	String get deleteShowFromServer => 'Delete show from server';
+
+	/// en: 'Delete movie from server'
+	String get deleteMovieFromServer => 'Delete movie from server';
+
+	/// en: 'Delete this episode?'
+	String get deleteEpisodeTitle => 'Delete this episode?';
+
+	/// en: 'Delete this season?'
+	String get deleteSeasonTitle => 'Delete this season?';
+
+	/// en: 'Delete this show?'
+	String get deleteShowTitle => 'Delete this show?';
+
+	/// en: 'Delete this movie?'
+	String get deleteMovieTitle => 'Delete this movie?';
+
+	/// en: 'Delete episode'
+	String get deleteEpisodeConfirm => 'Delete episode';
+
+	/// en: 'Delete season'
+	String get deleteSeasonConfirm => 'Delete season';
+
+	/// en: 'Delete show'
+	String get deleteShowConfirm => 'Delete show';
+
+	/// en: 'Delete movie'
+	String get deleteMovieConfirm => 'Delete movie';
+
+	/// en: 'Delete anyway'
+	String get deleteAnyway => 'Delete anyway';
+
+	/// en: 'Permanently delete ${title} from your server?'
+	String confirmDeleteTarget({required Object title}) => 'Permanently delete ${title} from your server?';
 
 	/// en: 'This includes all episodes and their files.'
 	String get deleteMultipleWarning => 'This includes all episodes and their files.';
+
+	/// en: '(one) {This deletes all ${n} episode in it, and its file.} (other) {This deletes all ${n} episodes in it, and their files.}'
+	String deleteEpisodeCountWarning({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: 'This deletes all ${n} episode in it, and its file.',
+		other: 'This deletes all ${n} episodes in it, and their files.',
+	);
+
+	/// en: '(one) {This item is stored as ${n} file, which will be deleted.} (other) {This item is stored across ${n} files, and all of them will be deleted.}'
+	String deleteMultiPartWarning({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: 'This item is stored as ${n} file, which will be deleted.',
+		other: 'This item is stored across ${n} files, and all of them will be deleted.',
+	);
+
+	/// en: '(one) {${n} other episode is stored in the same file and will be deleted too:} (other) {${n} other episodes are stored in the same file and will be deleted too:}'
+	String deleteSharedFileHeading({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n,
+		one: '${n} other episode is stored in the same file and will be deleted too:',
+		other: '${n} other episodes are stored in the same file and will be deleted too:',
+	);
+
+	/// en: 'Plezy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.'
+	String get deleteScopeUnverifiedProbeFailed => 'Plezy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.';
+
+	/// en: 'Your server did not provide file details for this item, so Plezy cannot check which files this will remove. It may delete more than the item named above.'
+	String get deleteScopeUnverifiedNoFileInfo => 'Your server did not provide file details for this item, so Plezy cannot check which files this will remove. It may delete more than the item named above.';
 
 	/// en: 'Media item deleted successfully'
 	String get mediaDeletedSuccessfully => 'Media item deleted successfully';
@@ -4073,9 +4136,6 @@ class Translations$videoSettings$en {
 	/// en: 'Performance Overlay'
 	String get performanceOverlay => 'Performance Overlay';
 
-	/// en: 'Audio Passthrough'
-	String get audioPassthrough => 'Audio Passthrough';
-
 	/// en: 'Dolby Atmos'
 	String get audioOutputDolbyAtmos => 'Dolby Atmos';
 
@@ -6151,6 +6211,7 @@ extension on Translations {
 			'settings.darkTheme' => 'Dark',
 			'settings.oledTheme' => 'OLED',
 			'settings.libraryDensity' => 'Library Density',
+			'settings.displayScale' => 'Display Scale',
 			'settings.compact' => 'Compact',
 			'settings.comfortable' => 'Comfortable',
 			'settings.tvCornerSpotlightBackdrop' => 'Corner Spotlight Backdrop',
@@ -6313,7 +6374,7 @@ extension on Translations {
 			'settings.matchDynamicRangeDescription' => 'Switch HDR on for HDR content, then back to SDR',
 			'settings.displaySwitchDelay' => 'Display Switch Delay',
 			'settings.tunneledPlayback' => 'Tunneled Playback',
-			'settings.tunneledPlaybackDescription' => 'Use video tunneling. Disable if HDR playback shows black video.',
+			'settings.tunneledPlaybackDescription' => 'Use video tunneling. Disable if HDR playback shows black video or motion stutters.',
 			'settings.audioPassthrough' => 'Audio Passthrough',
 			'settings.audioPassthroughDescription' => 'Send Dolby/DTS audio to your receiver or TV without re-encoding, preserving surround sound. Turn off if you have no sound.',
 			'settings.audioPassthroughDescriptionAppleTv' => 'Use Apple\'s native Dolby decoder for Dolby Digital Plus, including Atmos. DTS and TrueHD still play as multichannel PCM. Turn off if you have no sound.',
@@ -6539,9 +6600,28 @@ extension on Translations {
 			'mediaMenu.shufflePlay' => 'Shuffle Play',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Shuffle not available offline',
 			'mediaMenu.fileInfo' => 'File Info',
-			'mediaMenu.deleteFromServer' => 'Delete from server',
-			'mediaMenu.confirmDelete' => 'Delete this media and its files from your server?',
+			'mediaMenu.deleteEpisodeFromServer' => 'Delete episode from server',
+			'mediaMenu.deleteSeasonFromServer' => 'Delete season from server',
+			'mediaMenu.deleteShowFromServer' => 'Delete show from server',
+			'mediaMenu.deleteMovieFromServer' => 'Delete movie from server',
+			'mediaMenu.deleteEpisodeTitle' => 'Delete this episode?',
+			'mediaMenu.deleteSeasonTitle' => 'Delete this season?',
+			'mediaMenu.deleteShowTitle' => 'Delete this show?',
+			'mediaMenu.deleteMovieTitle' => 'Delete this movie?',
+			'mediaMenu.deleteEpisodeConfirm' => 'Delete episode',
+			'mediaMenu.deleteSeasonConfirm' => 'Delete season',
+			'mediaMenu.deleteShowConfirm' => 'Delete show',
+			'mediaMenu.deleteMovieConfirm' => 'Delete movie',
+			'mediaMenu.deleteAnyway' => 'Delete anyway',
+			'mediaMenu.confirmDeleteTarget' => ({required Object title}) => 'Permanently delete ${title} from your server?',
 			'mediaMenu.deleteMultipleWarning' => 'This includes all episodes and their files.',
+			_ => null,
+		} ?? switch (path) {
+			'mediaMenu.deleteEpisodeCountWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'This deletes all ${n} episode in it, and its file.', other: 'This deletes all ${n} episodes in it, and their files.', ), 
+			'mediaMenu.deleteMultiPartWarning' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: 'This item is stored as ${n} file, which will be deleted.', other: 'This item is stored across ${n} files, and all of them will be deleted.', ), 
+			'mediaMenu.deleteSharedFileHeading' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} other episode is stored in the same file and will be deleted too:', other: '${n} other episodes are stored in the same file and will be deleted too:', ), 
+			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plezy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.',
+			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Your server did not provide file details for this item, so Plezy cannot check which files this will remove. It may delete more than the item named above.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Media item deleted successfully',
 			'mediaMenu.mediaFailedToDelete' => 'Failed to delete media item',
 			'mediaMenu.rate' => 'Rate',
@@ -6555,8 +6635,6 @@ extension on Translations {
 			'rateSheet.notAvailable' => 'No match found',
 			'rateSheet.noConnectedServices' => 'Connect a service in Settings to rate there.',
 			'accessibility.mediaCardMovie' => ({required Object title}) => '${title}, movie',
-			_ => null,
-		} ?? switch (path) {
 			'accessibility.mediaCardShow' => ({required Object title}) => '${title}, TV show',
 			'accessibility.mediaCardEpisode' => ({required Object title, required Object episodeInfo}) => '${title}, ${episodeInfo}',
 			'accessibility.mediaCardSeason' => ({required Object title, required Object seasonInfo}) => '${title}, ${seasonInfo}',
@@ -7051,6 +7129,8 @@ extension on Translations {
 			'explore.badge.seasonsAvailable' => ({required Object available, required Object total}) => '${available}/${total} seasons',
 			'explore.badge.nextEpisodeIn' => ({required Object episode, required Object duration}) => 'Ep ${episode} in ${duration}',
 			'explore.badge.nextAiringIn' => ({required Object duration}) => 'Next in ${duration}',
+			_ => null,
+		} ?? switch (path) {
 			'explore.badge.episodesShort' => ({required Object n}) => '${n} eps',
 			'explore.badge.minutesPerEpisode' => ({required Object n}) => '${n} min/ep',
 			'explore.badge.adult' => '18+',
@@ -7069,8 +7149,6 @@ extension on Translations {
 			'explore.stats.completed' => ({required Object n}) => '${n} completed',
 			'explore.stats.onHold' => ({required Object n}) => '${n} on hold',
 			'explore.stats.dropped' => ({required Object n}) => '${n} dropped',
-			_ => null,
-		} ?? switch (path) {
 			'explore.season.winter' => 'Winter',
 			'explore.season.spring' => 'Spring',
 			'explore.season.summer' => 'Summer',
@@ -7528,7 +7606,6 @@ extension on Translations {
 			'videoSettings.hdr' => 'HDR',
 			'videoSettings.audioOutput' => 'Audio Output',
 			'videoSettings.performanceOverlay' => 'Performance Overlay',
-			'videoSettings.audioPassthrough' => 'Audio Passthrough',
 			'videoSettings.audioOutputDolbyAtmos' => 'Dolby Atmos',
 			'videoSettings.audioOutputDolbyAudio' => 'Dolby Audio',
 			'videoSettings.audioOutputSurround' => 'Surround',
@@ -7566,6 +7643,8 @@ extension on Translations {
 			'performanceOverlay.maxCll' => 'MaxCLL',
 			'performanceOverlay.maxFall' => 'MaxFALL',
 			'performanceOverlay.cacheUsed' => 'Cache Used',
+			_ => null,
+		} ?? switch (path) {
 			'performanceOverlay.cacheLimit' => 'Cache Limit',
 			'performanceOverlay.speed' => 'Speed',
 			'performanceOverlay.player' => 'Player',
@@ -7583,8 +7662,6 @@ extension on Translations {
 			'externalPlayer.playerCommand' => 'Command',
 			'externalPlayer.playerPackage' => 'Package Name',
 			'externalPlayer.playerUrlScheme' => 'URL Scheme',
-			_ => null,
-		} ?? switch (path) {
 			'externalPlayer.off' => 'Off',
 			'externalPlayer.launchFailed' => 'Failed to open external player',
 			'externalPlayer.appNotInstalled' => ({required Object name}) => '${name} is not installed',
