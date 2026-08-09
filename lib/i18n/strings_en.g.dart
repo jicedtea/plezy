@@ -1047,6 +1047,12 @@ class Translations$settings$en {
 	/// en: 'Startup Section'
 	String get startupSection => 'Startup Section';
 
+	/// en: 'Show Explore Tab'
+	String get showExploreTab => 'Show Explore Tab';
+
+	/// en: 'Display the Explore tab with content from Plex Discover and connected trackers'
+	String get showExploreTabDescription => 'Display the Explore tab with content from Plex Discover and connected trackers';
+
 	/// en: 'Default to Favorite Channels'
 	String get liveTvDefaultFavorites => 'Default to Favorite Channels';
 
@@ -2212,6 +2218,12 @@ class Translations$subtitlingStyling$en {
 	/// en: 'Bottom'
 	String get positionBottom => 'Bottom';
 
+	/// en: 'Anchor to Screen'
+	String get anchorToScreen => 'Anchor to Screen';
+
+	/// en: 'Show text subtitles in the black bars below widescreen video'
+	String get anchorToScreenDescription => 'Show text subtitles in the black bars below widescreen video';
+
 	/// en: 'Bold'
 	String get bold => 'Bold';
 
@@ -3042,8 +3054,17 @@ class Translations$explore$en {
 	/// en: 'Remove from Watchlist'
 	String get removeFromWatchlist => 'Remove from Watchlist';
 
+	/// en: 'Added to watchlist'
+	String get addedToWatchlist => 'Added to watchlist';
+
+	/// en: 'Removed from watchlist'
+	String get removedFromWatchlist => 'Removed from watchlist';
+
 	/// en: 'Couldn't update watchlist'
 	String get watchlistUpdateFailed => 'Couldn\'t update watchlist';
+
+	/// en: 'Couldn't match this item to a watchlist'
+	String get watchlistNoMatch => 'Couldn\'t match this item to a watchlist';
 
 	/// en: 'Not in your library'
 	String get notInLibrary => 'Not in your library';
@@ -6378,6 +6399,8 @@ extension on Translations {
 			'settings.showNavBarLabels' => 'Show Navigation Bar Labels',
 			'settings.showNavBarLabelsDescription' => 'Display text labels under navigation bar icons',
 			'settings.startupSection' => 'Startup Section',
+			'settings.showExploreTab' => 'Show Explore Tab',
+			'settings.showExploreTabDescription' => 'Display the Explore tab with content from Plex Discover and connected trackers',
 			'settings.liveTvDefaultFavorites' => 'Default to Favorite Channels',
 			'settings.liveTvDefaultFavoritesDescription' => 'Show only favorite channels when opening Live TV',
 			'settings.display' => 'Display',
@@ -6577,10 +6600,10 @@ extension on Translations {
 			'rateSheet.saved' => 'Saved',
 			'rateSheet.notAvailable' => 'No match found',
 			'rateSheet.noConnectedServices' => 'Connect a service in Settings to rate there.',
-			'accessibility.mediaCardMovie' => ({required Object title}) => '${title}, movie',
-			'accessibility.mediaCardShow' => ({required Object title}) => '${title}, TV show',
 			_ => null,
 		} ?? switch (path) {
+			'accessibility.mediaCardMovie' => ({required Object title}) => '${title}, movie',
+			'accessibility.mediaCardShow' => ({required Object title}) => '${title}, TV show',
 			'accessibility.mediaCardEpisode' => ({required Object title, required Object episodeInfo}) => '${title}, ${episodeInfo}',
 			'accessibility.mediaCardSeason' => ({required Object title, required Object seasonInfo}) => '${title}, ${seasonInfo}',
 			'accessibility.mediaCardWatched' => 'watched',
@@ -6762,6 +6785,8 @@ extension on Translations {
 			'subtitlingStyling.overrideStrip' => 'Remove styling',
 			'subtitlingStyling.positionTop' => 'Top',
 			'subtitlingStyling.positionBottom' => 'Bottom',
+			'subtitlingStyling.anchorToScreen' => 'Anchor to Screen',
+			'subtitlingStyling.anchorToScreenDescription' => 'Show text subtitles in the black bars below widescreen video',
 			'subtitlingStyling.bold' => 'Bold',
 			'subtitlingStyling.italic' => 'Italic',
 			'subtitlingStyling.renderResolution' => 'Render Resolution',
@@ -7049,7 +7074,10 @@ extension on Translations {
 			'explore.characters' => 'Characters',
 			'explore.addToWatchlist' => 'Add to Watchlist',
 			'explore.removeFromWatchlist' => 'Remove from Watchlist',
+			'explore.addedToWatchlist' => 'Added to watchlist',
+			'explore.removedFromWatchlist' => 'Removed from watchlist',
 			'explore.watchlistUpdateFailed' => 'Couldn\'t update watchlist',
+			'explore.watchlistNoMatch' => 'Couldn\'t match this item to a watchlist',
 			'explore.notInLibrary' => 'Not in your library',
 			'explore.inTheseLibraries' => 'In these libraries',
 			'explore.checkingLibrary' => 'Checking your library...',
@@ -7086,6 +7114,8 @@ extension on Translations {
 			'explore.stats.viewersWeek' => ({required Object n}) => '${n} watched this week',
 			'explore.stats.viewersMonth' => ({required Object n}) => '${n} watched this month',
 			'explore.stats.viewersYear' => ({required Object n}) => '${n} watched this year',
+			_ => null,
+		} ?? switch (path) {
 			'explore.stats.viewersAllTime' => ({required Object n}) => '${n} viewers',
 			'explore.stats.planning' => ({required Object n}) => '${n} planning to watch',
 			'explore.stats.favorited' => ({required Object n}) => '${n} favorites',
@@ -7093,8 +7123,6 @@ extension on Translations {
 			'explore.stats.comments' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} comment', other: '${n} comments', ), 
 			'explore.stats.votes' => ({required Object n}) => '${n} votes',
 			'explore.stats.watching' => ({required Object n}) => '${n} watching it',
-			_ => null,
-		} ?? switch (path) {
 			'explore.stats.completed' => ({required Object n}) => '${n} completed',
 			'explore.stats.onHold' => ({required Object n}) => '${n} on hold',
 			'explore.stats.dropped' => ({required Object n}) => '${n} dropped',
@@ -7600,6 +7628,8 @@ extension on Translations {
 			'performanceOverlay.player' => 'Player',
 			'performanceOverlay.memory' => 'Memory',
 			'performanceOverlay.uiFps' => 'UI FPS',
+			_ => null,
+		} ?? switch (path) {
 			'externalPlayer.title' => 'External Player',
 			'externalPlayer.useExternalPlayer' => 'Use External Player',
 			'externalPlayer.useExternalPlayerDescription' => 'Open videos in another app',
@@ -7607,8 +7637,6 @@ extension on Translations {
 			'externalPlayer.customPlayers' => 'Custom Players',
 			'externalPlayer.systemDefault' => 'System Default',
 			'externalPlayer.addCustomPlayer' => 'Add Custom Player',
-			_ => null,
-		} ?? switch (path) {
 			'externalPlayer.playerName' => 'Player Name',
 			'externalPlayer.playerNameHint' => 'My Player',
 			'externalPlayer.playerCommand' => 'Command',
