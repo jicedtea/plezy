@@ -1644,6 +1644,13 @@
     "audioSync": "Синхронизация на аудио",
     "subtitleSync": "Синхронизация на субтитри",
     "hdr": "HDR",
+    "hdrUnsupported": "",
+    "hdrToneMapping": "",
+    "hdrToneMappingCompositor": "",
+    "hdrToneMappingCompositorDescription": "",
+    "hdrToneMappingPlayer": "",
+    "hdrToneMappingPlayerDescription": "",
+    "hdrToneMappingFailed": "",
     "audioOutput": "Аудио изход",
     "performanceOverlay": "Оверлей за производителност",
     "audioOutputDolbyAtmos": "Dolby Atmos",
@@ -1868,7 +1875,7 @@
     },
     "deviceCode": {
       "title": "Активиране на Plezy в ${service}",
-      "body": "Посетете ${url} и въведете този код:",
+      "instructions": "",
       "openToActivate": "Отворете ${service}, за да активирате",
       "copyCode": "Копирай кода за активиране",
       "waitingForAuthorization": "Изчакване на оторизация…",
@@ -1877,7 +1884,9 @@
     "oauthProxy": {
       "title": "Вход в ${service}",
       "body": "Сканирайте този QR код или отворете URL-а на което и да е устройство.",
-      "openToSignIn": "Отворете ${service}, за да влезете",
+      "openToSignIn": "Отворете ${service}, за да влезете"
+    },
+    "pendingAuth": {
       "copyUrl": "Копирай URL адреса за вход",
       "urlCopied": "URL адресът е копиран"
     },

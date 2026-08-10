@@ -1644,6 +1644,13 @@
     "audioSync": "Аудио синхрондау",
     "subtitleSync": "Субтитр синхрондау",
     "hdr": "HDR",
+    "hdrUnsupported": "",
+    "hdrToneMapping": "",
+    "hdrToneMappingCompositor": "",
+    "hdrToneMappingCompositorDescription": "",
+    "hdrToneMappingPlayer": "",
+    "hdrToneMappingPlayerDescription": "",
+    "hdrToneMappingFailed": "",
     "audioOutput": "Аудио шығысы",
     "performanceOverlay": "Өнімділік панелі",
     "audioOutputDolbyAtmos": "Dolby Atmos",
@@ -1868,7 +1875,7 @@
     },
     "deviceCode": {
       "title": "Plezy-ді ${service} қызметінде белсендіру",
-      "body": "${url} мекенжайына өтіп, осы кодты енгізіңіз:",
+      "instructions": "",
       "openToActivate": "Белсендіру үшін ${service} ашу",
       "copyCode": "Белсендіру кодын көшіру",
       "waitingForAuthorization": "Авторизация күтілуде…",
@@ -1877,7 +1884,9 @@
     "oauthProxy": {
       "title": "${service} қызметіне кіру",
       "body": "Осы QR кодты сканерлеңіз немесе URL-ді ашыңыз.",
-      "openToSignIn": "Кіру үшін ${service} ашу",
+      "openToSignIn": "Кіру үшін ${service} ашу"
+    },
+    "pendingAuth": {
       "copyUrl": "Кіру URL-ін көшіру",
       "urlCopied": "URL көшірілді"
     },

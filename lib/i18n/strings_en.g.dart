@@ -4115,6 +4115,27 @@ class Translations$videoSettings$en {
 	/// en: 'HDR'
 	String get hdr => 'HDR';
 
+	/// en: 'HDR isn't available here — this desktop compositor or video output can't carry it.'
+	String get hdrUnsupported => 'HDR isn\'t available here — this desktop compositor or video output can\'t carry it.';
+
+	/// en: 'HDR Tone Mapping'
+	String get hdrToneMapping => 'HDR Tone Mapping';
+
+	/// en: 'Compositor'
+	String get hdrToneMappingCompositor => 'Compositor';
+
+	/// en: 'Pass the source's HDR metadata through and let the desktop compositor map it.'
+	String get hdrToneMappingCompositorDescription => 'Pass the source\'s HDR metadata through and let the desktop compositor map it.';
+
+	/// en: 'Player'
+	String get hdrToneMappingPlayer => 'Player';
+
+	/// en: 'Map to the display's peak brightness in the player, then tell the compositor the result.'
+	String get hdrToneMappingPlayerDescription => 'Map to the display\'s peak brightness in the player, then tell the compositor the result.';
+
+	/// en: 'Couldn't change HDR tone mapping — the previous mode is still active.'
+	String get hdrToneMappingFailed => 'Couldn\'t change HDR tone mapping — the previous mode is still active.';
+
 	/// en: 'Audio Output'
 	String get audioOutput => 'Audio Output';
 
@@ -4787,6 +4808,7 @@ class Translations$services$en {
 	late final Translations$services$names$en names = Translations$services$names$en.internal(_root);
 	late final Translations$services$deviceCode$en deviceCode = Translations$services$deviceCode$en.internal(_root);
 	late final Translations$services$oauthProxy$en oauthProxy = Translations$services$oauthProxy$en.internal(_root);
+	late final Translations$services$pendingAuth$en pendingAuth = Translations$services$pendingAuth$en.internal(_root);
 	late final Translations$services$libraryFilter$en libraryFilter = Translations$services$libraryFilter$en.internal(_root);
 }
 
@@ -5995,8 +6017,8 @@ class Translations$services$deviceCode$en {
 	/// en: 'Activate Plezy on ${service}'
 	String title({required Object service}) => 'Activate Plezy on ${service}';
 
-	/// en: 'Visit ${url} and enter this code:'
-	String body({required Object url}) => 'Visit ${url} and enter this code:';
+	/// en: 'Scan the QR code, or visit the address below and enter this code:'
+	String get instructions => 'Scan the QR code, or visit the address below and enter this code:';
 
 	/// en: 'Open ${service} to activate'
 	String openToActivate({required Object service}) => 'Open ${service} to activate';
@@ -6027,6 +6049,15 @@ class Translations$services$oauthProxy$en {
 
 	/// en: 'Open ${service} to sign in'
 	String openToSignIn({required Object service}) => 'Open ${service} to sign in';
+}
+
+// Path: services.pendingAuth
+class Translations$services$pendingAuth$en {
+	Translations$services$pendingAuth$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
 
 	/// en: 'Copy sign-in URL'
 	String get copyUrl => 'Copy sign-in URL';
@@ -7584,6 +7615,13 @@ extension on Translations {
 			'videoSettings.audioSync' => 'Audio Sync',
 			'videoSettings.subtitleSync' => 'Subtitle Sync',
 			'videoSettings.hdr' => 'HDR',
+			'videoSettings.hdrUnsupported' => 'HDR isn\'t available here — this desktop compositor or video output can\'t carry it.',
+			'videoSettings.hdrToneMapping' => 'HDR Tone Mapping',
+			'videoSettings.hdrToneMappingCompositor' => 'Compositor',
+			'videoSettings.hdrToneMappingCompositorDescription' => 'Pass the source\'s HDR metadata through and let the desktop compositor map it.',
+			'videoSettings.hdrToneMappingPlayer' => 'Player',
+			'videoSettings.hdrToneMappingPlayerDescription' => 'Map to the display\'s peak brightness in the player, then tell the compositor the result.',
+			'videoSettings.hdrToneMappingFailed' => 'Couldn\'t change HDR tone mapping — the previous mode is still active.',
 			'videoSettings.audioOutput' => 'Audio Output',
 			'videoSettings.performanceOverlay' => 'Performance Overlay',
 			'videoSettings.audioOutputDolbyAtmos' => 'Dolby Atmos',
@@ -7621,6 +7659,8 @@ extension on Translations {
 			'performanceOverlay.maxLuma' => 'Max Luma',
 			'performanceOverlay.minLuma' => 'Min Luma',
 			'performanceOverlay.maxCll' => 'MaxCLL',
+			_ => null,
+		} ?? switch (path) {
 			'performanceOverlay.maxFall' => 'MaxFALL',
 			'performanceOverlay.cacheUsed' => 'Cache Used',
 			'performanceOverlay.cacheLimit' => 'Cache Limit',
@@ -7628,8 +7668,6 @@ extension on Translations {
 			'performanceOverlay.player' => 'Player',
 			'performanceOverlay.memory' => 'Memory',
 			'performanceOverlay.uiFps' => 'UI FPS',
-			_ => null,
-		} ?? switch (path) {
 			'externalPlayer.title' => 'External Player',
 			'externalPlayer.useExternalPlayer' => 'Use External Player',
 			'externalPlayer.useExternalPlayerDescription' => 'Open videos in another app',
@@ -7791,7 +7829,7 @@ extension on Translations {
 			'services.names.seerr' => 'Seerr',
 			'services.names.mdblist' => 'MDBList',
 			'services.deviceCode.title' => ({required Object service}) => 'Activate Plezy on ${service}',
-			'services.deviceCode.body' => ({required Object url}) => 'Visit ${url} and enter this code:',
+			'services.deviceCode.instructions' => 'Scan the QR code, or visit the address below and enter this code:',
 			'services.deviceCode.openToActivate' => ({required Object service}) => 'Open ${service} to activate',
 			'services.deviceCode.copyCode' => 'Copy activation code',
 			'services.deviceCode.waitingForAuthorization' => 'Waiting for authorization…',
@@ -7799,8 +7837,8 @@ extension on Translations {
 			'services.oauthProxy.title' => ({required Object service}) => 'Sign in to ${service}',
 			'services.oauthProxy.body' => 'Scan this QR code or open the URL on any device.',
 			'services.oauthProxy.openToSignIn' => ({required Object service}) => 'Open ${service} to sign in',
-			'services.oauthProxy.copyUrl' => 'Copy sign-in URL',
-			'services.oauthProxy.urlCopied' => 'URL copied',
+			'services.pendingAuth.copyUrl' => 'Copy sign-in URL',
+			'services.pendingAuth.urlCopied' => 'URL copied',
 			'services.libraryFilter.title' => 'Library filter',
 			'services.libraryFilter.subtitleAllSyncing' => 'Syncing all libraries',
 			'services.libraryFilter.subtitleNoneSyncing' => 'Nothing syncing',

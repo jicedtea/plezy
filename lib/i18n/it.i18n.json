@@ -1644,6 +1644,13 @@
     "audioSync": "Sincronizzazione audio",
     "subtitleSync": "Sincronizzazione sottotitoli",
     "hdr": "HDR",
+    "hdrUnsupported": "",
+    "hdrToneMapping": "",
+    "hdrToneMappingCompositor": "",
+    "hdrToneMappingCompositorDescription": "",
+    "hdrToneMappingPlayer": "",
+    "hdrToneMappingPlayerDescription": "",
+    "hdrToneMappingFailed": "",
     "audioOutput": "Uscita audio",
     "performanceOverlay": "Overlay prestazioni",
     "audioOutputDolbyAtmos": "Dolby Atmos",
@@ -1868,7 +1875,7 @@
     },
     "deviceCode": {
       "title": "Attiva Plezy su ${service}",
-      "body": "Visita ${url} e inserisci questo codice:",
+      "instructions": "",
       "openToActivate": "Apri ${service} per attivare",
       "copyCode": "Copia il codice di attivazione",
       "waitingForAuthorization": "In attesa di autorizzazione…",
@@ -1877,7 +1884,9 @@
     "oauthProxy": {
       "title": "Accedi a ${service}",
       "body": "Scansiona questo codice QR o apri l'URL su qualsiasi dispositivo.",
-      "openToSignIn": "Apri ${service} per accedere",
+      "openToSignIn": "Apri ${service} per accedere"
+    },
+    "pendingAuth": {
       "copyUrl": "Copia l'URL di accesso",
       "urlCopied": "URL copiato"
     },

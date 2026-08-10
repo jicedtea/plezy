@@ -1635,6 +1635,13 @@
     "audioSync": "音声同期",
     "subtitleSync": "字幕同期",
     "hdr": "HDR",
+    "hdrUnsupported": "",
+    "hdrToneMapping": "",
+    "hdrToneMappingCompositor": "",
+    "hdrToneMappingCompositorDescription": "",
+    "hdrToneMappingPlayer": "",
+    "hdrToneMappingPlayerDescription": "",
+    "hdrToneMappingFailed": "",
     "audioOutput": "音声出力",
     "performanceOverlay": "パフォーマンスオーバーレイ",
     "audioOutputDolbyAtmos": "Dolby Atmos",
@@ -1859,7 +1866,7 @@
     },
     "deviceCode": {
       "title": "${service} で Plezy を有効化",
-      "body": "${url}にアクセスして、このコードを入力してください。",
+      "instructions": "",
       "openToActivate": "${service} を開いて有効化",
       "copyCode": "アクティベーションコードをコピー",
       "waitingForAuthorization": "認証を待っています…",
@@ -1868,7 +1875,9 @@
     "oauthProxy": {
       "title": "${service} にサインイン",
       "body": "このQRコードをスキャンするか、任意のデバイスでURLを開いてください。",
-      "openToSignIn": "${service} を開いてサインイン",
+      "openToSignIn": "${service} を開いてサインイン"
+    },
+    "pendingAuth": {
       "copyUrl": "サインインURLをコピー",
       "urlCopied": "URLをコピーしました"
     },

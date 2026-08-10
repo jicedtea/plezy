@@ -1644,6 +1644,13 @@
     "audioSync": "Səs sinxronizasiyası",
     "subtitleSync": "Altyazı sinxronizasiyası",
     "hdr": "HDR",
+    "hdrUnsupported": "",
+    "hdrToneMapping": "",
+    "hdrToneMappingCompositor": "",
+    "hdrToneMappingCompositorDescription": "",
+    "hdrToneMappingPlayer": "",
+    "hdrToneMappingPlayerDescription": "",
+    "hdrToneMappingFailed": "",
     "audioOutput": "Səs çıxışı",
     "performanceOverlay": "Məhsuldarlıq paneli",
     "audioOutputDolbyAtmos": "Dolby Atmos",
@@ -1868,7 +1875,7 @@
     },
     "deviceCode": {
       "title": "Plezy-ni ${service} üzərində aktivləşdirin",
-      "body": "${url} ünvanına keçin və bu kodu daxil edin:",
+      "instructions": "",
       "openToActivate": "Aktivləşdirmək üçün ${service} açın",
       "copyCode": "Aktivləşdirmə kodunu kopyala",
       "waitingForAuthorization": "Səlahiyyət gözlənilir…",
@@ -1877,7 +1884,9 @@
     "oauthProxy": {
       "title": "${service} xidmətinə daxil olun",
       "body": "Bu QR kodu skan edin və ya URL-i açın.",
-      "openToSignIn": "Daxil olmaq üçün ${service} açın",
+      "openToSignIn": "Daxil olmaq üçün ${service} açın"
+    },
+    "pendingAuth": {
       "copyUrl": "Daxil olma URL-ini kopyala",
       "urlCopied": "URL kopyalandı"
     },
