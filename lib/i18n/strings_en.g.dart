@@ -1100,6 +1100,18 @@ class Translations$settings$en {
 
 	/// en: 'Export Plezy settings'
 	String get exportDialogTitle => 'Export Plezy settings';
+
+	/// en: 'Video rendering mode'
+	String get linuxVideoRenderMode => 'Video rendering mode';
+
+	/// en: 'Automatic prefers the native Wayland plane (HDR-capable); Texture forces the SDR fallback path.'
+	String get linuxVideoRenderModeDescription => 'Automatic prefers the native Wayland plane (HDR-capable); Texture forces the SDR fallback path.';
+
+	/// en: 'Automatic'
+	String get linuxVideoRenderModeAuto => 'Automatic';
+
+	/// en: 'Texture (SDR)'
+	String get linuxVideoRenderModeTexture => 'Texture (SDR)';
 }
 
 // Path: search
@@ -2370,6 +2382,9 @@ class Translations$mpvConfig$en {
 
 	/// en: 'gpu-api=vulkan hwdec=auto # comment'
 	String get configPlaceholder => 'gpu-api=vulkan\nhwdec=auto\n# comment';
+
+	/// en: 'vo, gpu-context and gpu-api are ignored on Linux: embedded video always renders through vo=libmpv on the video plane, and gpu-next (which compute shaders like ArtCNN need) cannot run embedded.'
+	String get embeddedVoHint => 'vo, gpu-context and gpu-api are ignored on Linux: embedded video always renders through vo=libmpv on the video plane, and gpu-next (which compute shaders like ArtCNN need) cannot run embedded.';
 }
 
 // Path: dialog
@@ -6709,6 +6724,10 @@ extension on Translations {
 			'settings.seekAndTiming' => 'Seek & Timing',
 			'settings.behavior' => 'Behavior',
 			'settings.exportDialogTitle' => 'Export Plezy settings',
+			'settings.linuxVideoRenderMode' => 'Video rendering mode',
+			'settings.linuxVideoRenderModeDescription' => 'Automatic prefers the native Wayland plane (HDR-capable); Texture forces the SDR fallback path.',
+			'settings.linuxVideoRenderModeAuto' => 'Automatic',
+			'settings.linuxVideoRenderModeTexture' => 'Texture (SDR)',
 			'search.hint' => 'Search movies, shows, music...',
 			'search.tryDifferentTerm' => 'Try a different search term',
 			'search.searchYourMedia' => 'Search your media',
@@ -6888,12 +6907,12 @@ extension on Translations {
 			'mediaMenu.deleteScopeUnverifiedProbeFailed' => 'Plezy could not check which files this will remove, so it may delete more than the item named above. Cancel and try again, or delete anyway.',
 			'mediaMenu.deleteScopeUnverifiedNoFileInfo' => 'Your server did not provide file details for this item, so Plezy cannot check which files this will remove. It may delete more than the item named above.',
 			'mediaMenu.mediaDeletedSuccessfully' => 'Media item deleted successfully',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.mediaFailedToDelete' => 'Failed to delete media item',
 			'mediaMenu.rate' => 'Rate',
 			'mediaMenu.playFromBeginning' => 'Play from Beginning',
 			'mediaMenu.playVersion' => 'Play Version...',
-			_ => null,
-		} ?? switch (path) {
 			'rateSheet.title' => 'Rate',
 			'rateSheet.server' => 'Server',
 			'rateSheet.favorite' => 'Favorite',
@@ -7125,6 +7144,7 @@ extension on Translations {
 			'mpvConfig.presetDeleted' => 'Preset deleted',
 			'mpvConfig.confirmDeletePreset' => 'Are you sure you want to delete this preset?',
 			'mpvConfig.configPlaceholder' => 'gpu-api=vulkan\nhwdec=auto\n# comment',
+			'mpvConfig.embeddedVoHint' => 'vo, gpu-context and gpu-api are ignored on Linux: embedded video always renders through vo=libmpv on the video plane, and gpu-next (which compute shaders like ArtCNN need) cannot run embedded.',
 			'dialog.confirmAction' => 'Confirm Action',
 			'profiles.addPlezyProfile' => 'Add Plezy profile',
 			'profiles.switchingProfile' => 'Switching profile…',
@@ -7401,13 +7421,13 @@ extension on Translations {
 			'explore.watchlistNoMatch' => 'Couldn\'t match this item to a watchlist',
 			'explore.notInLibrary' => 'Not in your library',
 			'explore.inTheseLibraries' => 'In these libraries',
+			_ => null,
+		} ?? switch (path) {
 			'explore.checkingLibrary' => 'Checking your library...',
 			'explore.emptyTitle' => 'Nothing here yet',
 			'explore.emptyMessage' => ({required Object source}) => 'Rows from ${source} will appear here once they have content.',
 			'explore.searchHint' => ({required Object source}) => 'Search ${source}',
 			'explore.searchEmpty' => ({required Object query}) => 'No results for "${query}"',
-			_ => null,
-		} ?? switch (path) {
 			'explore.searchPrompt' => ({required Object source}) => 'Search for movies and shows on ${source}.',
 			'explore.searchFailed' => 'Search failed. Check your connection and try again.',
 			'explore.badge.rankPopular' => ({required Object n}) => '#${n} popular',
@@ -7915,13 +7935,13 @@ extension on Translations {
 			'companionRemote.errors.failedToConnectAnyAddress' => 'Failed to connect to any address',
 			'companionRemote.errors.connectionLostAfterAttempts' => ({required Object attempts}) => 'Connection lost after ${attempts} attempts',
 			'companionRemote.errors.connectionLost' => 'Connection lost',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.closedBeforeAuth' => 'The connection closed before authentication',
 			'videoSettings.playbackSpeed' => 'Playback Speed',
 			'videoSettings.normalSpeed' => 'Normal',
 			'videoSettings.sleepTimerActive' => ({required Object duration}) => 'Active (${duration})',
 			'videoSettings.zoom' => 'Zoom',
-			_ => null,
-		} ?? switch (path) {
 			'videoSettings.sleepTimer' => 'Sleep Timer',
 			'videoSettings.audioSync' => 'Audio Sync',
 			'videoSettings.subtitleSync' => 'Subtitle Sync',
