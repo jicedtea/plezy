@@ -5,13 +5,6 @@ import '../models/livetv_program.dart';
 import '../models/media_grab_operation.dart';
 import '../models/media_subscription.dart';
 
-class LiveTvActivityResult<T> {
-  final T value;
-  final String? activityUuid;
-
-  const LiveTvActivityResult({required this.value, this.activityUuid});
-}
-
 /// Program info captured when a live session starts. Plex's tune response
 /// carries the airing program; Jellyfin streams the channel without a
 /// program-scoped session, so its sessions report [none].
@@ -151,13 +144,6 @@ abstract class LiveTvSupport {
   /// `/livetv/dvrs/{dvrKey}/grid`; Jellyfin queries `/LiveTv/Programs`.
   Future<List<LiveTvProgram>> fetchSchedule({DateTime? from, DateTime? to});
 
-  /// Resolve a playable stream URL for [channelKey].
-  ///
-  /// Jellyfin returns a negotiated HLS stream URL plus the play session id. Plex
-  /// returns `null` because its stream URL is only valid after a tune;
-  /// playback callers use [startPlayback], which owns that difference.
-  Future<LiveTvStreamResolution?> resolveStreamUrl(String channelKey, {String? dvrKey});
-
   /// Start a playback session for [channelKey] — the single entry the player
   /// uses for initial launch and channel switching. Plex requires [dvrKey]
   /// (tune + transcode-session setup); Jellyfin ignores it and negotiates an
@@ -197,7 +183,7 @@ abstract class LiveTvSupport {
 /// recording APIs.
 abstract class LiveTvDvrSupport {
   Future<List<LiveTvDvr>> fetchDvrs();
-  Future<LiveTvActivityResult<void>> reloadGuide(String dvrId);
+  Future<void> reloadGuide(String dvrId);
 
   Future<List<SubscriptionTemplate>> getSubscriptionTemplate(String guid);
   Future<List<MediaSubscription>> fetchRecordingRules({bool includeGrabs = true, bool includeStorage = true});

@@ -22,8 +22,6 @@ mixin _PlexLiveTvClientMethods on _PlexClientInternals implements LiveTvSupport,
     }
   }
 
-  String? _activityUuid(MediaServerResponse response) => response.headers['x-plex-activity'];
-
   List<T> _extractContainerList<T>(
     MediaServerResponse response,
     Iterable<String> keys,
@@ -66,10 +64,7 @@ mixin _PlexLiveTvClientMethods on _PlexClientInternals implements LiveTvSupport,
       'targetLibrarySectionID': request.targetLibrarySectionID,
       'targetSectionLocationID': request.targetSectionLocationID,
       'type': request.type,
-      if (request.providers != null) 'providers': request.providers,
-      for (final entry in request.hints.entries) 'hints[${entry.key}]': entry.value,
       for (final entry in request.prefs.entries) 'prefs[${entry.key}]': entry.value,
-      for (final entry in request.params.entries) 'params[${entry.key}]': entry.value,
     };
     final encoded = encodeQueryParameters(flat);
     if (encoded.isNotEmpty) parts.add(encoded);
@@ -173,10 +168,9 @@ mixin _PlexLiveTvClientMethods on _PlexClientInternals implements LiveTvSupport,
   }
 
   @override
-  Future<LiveTvActivityResult<void>> reloadGuide(String dvrId) async {
+  Future<void> reloadGuide(String dvrId) async {
     final response = await _http.post('/livetv/dvrs/$dvrId/reloadGuide', timeout: MediaServerTimeouts.receive);
     _throwIfFailed(response);
-    return LiveTvActivityResult(value: null, activityUuid: _activityUuid(response));
   }
 
   /// Get EPG channels using provider lineup endpoints (matches official Plex web client)
@@ -819,9 +813,6 @@ mixin _PlexLiveTvClientMethods on _PlexClientInternals implements LiveTvSupport,
     int? toEpoch(DateTime? dt) => dt == null ? null : dt.millisecondsSinceEpoch ~/ 1000;
     return getEpgGrid(beginsAt: toEpoch(from), endsAt: toEpoch(to));
   }
-
-  @override
-  Future<LiveTvStreamResolution?> resolveStreamUrl(String channelKey, {String? dvrKey}) async => null;
 
   @override
   Future<LiveTvPlaybackSession?> startPlayback(String channelKey, {String? dvrKey}) {

@@ -141,10 +141,6 @@ abstract class MediaServerClient {
 
   Future<List<MediaLibrary>> fetchLibraries();
 
-  /// Page through items in [libraryId] using the neutral [query]. Backends
-  /// translate sort/filter clauses into their own DSL.
-  Future<LibraryPage<MediaItem>> fetchLibraryContent(String libraryId, LibraryQuery query);
-
   /// Backend-aware paginated content fetch.
   ///
   /// Pagination lives on [LibraryQuery.offset] / [LibraryQuery.limit].
@@ -208,15 +204,15 @@ abstract class MediaServerClient {
   /// HTTP status throws.
   ///
   /// Plex bundles both via `/library/metadata/{id}?includeOnDeck=1`. Jellyfin
-  /// has no equivalent endpoint and needs a second request for on-deck, so it
-  /// would otherwise hold the item behind a round trip the detail screen does
-  /// not need in order to paint.
+  /// has no equivalent endpoint and chains further round trips — library
+  /// attribution via `/Items/{id}/Ancestors`, on-deck for shows — that the
+  /// detail screen does not need in order to paint.
   ///
   /// [onItemReady] exists for exactly that case: implementations invoke it as
-  /// soon as the item is known, *if* that is strictly before the on-deck
-  /// lookup finishes. Backends that return both together never invoke it, and
-  /// neither does a null item. Callers must therefore treat it as an optional
-  /// early paint and still handle the returned record.
+  /// soon as the item is known, *if* that is strictly before the full lookup
+  /// settles. Backends that resolve everything in one round trip never invoke
+  /// it, and neither does a null item. Callers must therefore treat it as an
+  /// optional early paint and still handle the returned record.
   Future<({MediaItem? item, MediaItem? onDeckEpisode})> fetchItemWithOnDeck(
     String id, {
     void Function(MediaItem item)? onItemReady,
@@ -893,6 +889,12 @@ abstract interface class MediaDeletionPermissionClient {
   /// and on throw.
   Future<bool?> fetchDeletePermission(MediaItem item);
 }
+
+/// Bounds how old a cached metadata row may be to be served without a network
+/// round trip on playback start. Sized to cover the detail-screen-visit →
+/// play-tap gap while keeping stale-file risk (replaced/deleted media parts)
+/// negligible.
+const Duration playbackMetadataCacheFreshness = Duration(minutes: 5);
 
 /// Cache-aware fetch helpers shared by both backends so the offline-first /
 /// network-then-cache pattern lives in one place.
