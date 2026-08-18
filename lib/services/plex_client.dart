@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 
+import '../media/artist_discography.dart';
 import '../media/download_resolution.dart';
 import '../media/episode_collection.dart';
 import '../media/library_filter_result.dart';
@@ -1643,7 +1644,58 @@ class PlexClient
       }
       result.add(item);
     }
-    return result;
+    return _backfillMissingLogos(result);
+  }
+
+  /// Some PMS versions (before the ~1.43 hub refresh) omit the show's
+  /// inherited `clearLogo` image from episode/season hub rows while the
+  /// show's own metadata still carries it, so the hero and other logo
+  /// surfaces fall back to the title even though the detail page works.
+  /// Resolve every missing owner's logo in one bulk metadata request
+  /// (`/library/metadata` accepts comma-joined rating keys) and stamp it on
+  /// the rows — the same grandparent lookup Plex Web performs. Best-effort:
+  /// a failed lookup never fails the shelf (it is retried on the next
+  /// refresh).
+  Future<List<PlexMetadataDto>> _backfillMissingLogos(List<PlexMetadataDto> items) async {
+    final missingByOwner = <String, List<int>>{};
+    for (var i = 0; i < items.length; i++) {
+      final item = items[i];
+      if (item.clearLogo != null && item.clearLogo!.isNotEmpty) continue;
+      final ownerKey = switch (item.type?.toLowerCase()) {
+        'episode' => item.grandparentRatingKey,
+        'season' => item.parentRatingKey,
+        _ => null,
+      };
+      if (ownerKey == null || ownerKey.isEmpty) continue;
+      missingByOwner.putIfAbsent(ownerKey, () => []).add(i);
+    }
+    if (missingByOwner.isEmpty) return items;
+
+    try {
+      final response = await _getWithFailover(
+        '/library/metadata/${missingByOwner.keys.join(',')}',
+        allowEndpointFailover: false,
+      );
+      final metadata = _getMediaContainer(response)?['Metadata'] as List? ?? const [];
+      final logosByKey = <String, String>{};
+      for (final entry in metadata) {
+        final json = entry as Map<String, dynamic>;
+        final ratingKey = json['ratingKey']?.toString();
+        final logo = PlexMetadataDto.fromJsonWithImages(json).clearLogo;
+        if (ratingKey == null || ratingKey.isEmpty || logo == null || logo.isEmpty) continue;
+        logosByKey[ratingKey] = logo;
+      }
+      for (final entry in missingByOwner.entries) {
+        final logo = logosByKey[entry.key];
+        if (logo == null) continue;
+        for (final index in entry.value) {
+          items[index] = items[index].copyWith(clearLogo: logo);
+        }
+      }
+    } catch (e, st) {
+      appLogger.d('Failed to backfill continue-watching logos', error: e, stackTrace: st);
+    }
+    return items;
   }
 
   /// Get children of a metadata item (e.g., seasons for a show, episodes for a season).
@@ -3387,6 +3439,65 @@ class PlexClient
       parseResponse: (response) => _extractMetadataList(response),
     );
     return (metadata ?? const <PlexMetadataDto>[]).map((item) => PlexMappers.mediaItem(item)).toList();
+  }
+
+  /// Grouped discography for [artist]: albums, singles & EPs, live, and
+  /// compilations. Plex listing rows never carry `Format`/`Subformat` tags
+  /// (even with `resolveTags=1`), so the album list is followed by one
+  /// batched `/library/metadata/{ids}` detail request, whose rows do include
+  /// them; each album is then classified individually. A failed tag fetch
+  /// degrades to the flat albums list rather than sinking the screen.
+  @override
+  Future<List<ArtistDiscographyGroup>> fetchArtistDiscography(MediaItem artist) async {
+    final albums = await fetchArtistAlbums(artist);
+    // With one album at most, grouping is invisible (a single section renders
+    // as the flat grid), so the tag lookup is pure overhead.
+    if (albums.length <= 1) {
+      return [if (albums.isNotEmpty) ArtistDiscographyGroup(kind: DiscographyGroupKind.albums, items: albums)];
+    }
+
+    final Map<String, DiscographyGroupKind> kinds;
+    try {
+      kinds = await _fetchDiscographyKinds(artist.id, [for (final album in albums) album.id]);
+    } catch (e) {
+      appLogger.w('Discography tag fetch failed for artist ${artist.id}, degrading to a flat albums list', error: e);
+      return [ArtistDiscographyGroup(kind: DiscographyGroupKind.albums, items: albums)];
+    }
+    return buildArtistDiscographyGroups(albums, (album) => kinds[album.id] ?? DiscographyGroupKind.albums);
+  }
+
+  /// Ids per batched `/library/metadata/{ids}` request. Plex ids are short,
+  /// so 100 keeps the URL well under proxy limits.
+  static const _discographyTagChunkSize = 100;
+
+  /// Fetches `Format`/`Subformat` tags for [albumIds] via batched by-id
+  /// metadata requests and classifies each album. Explicit container bounds
+  /// defeat any server-side default page cap; a missing row simply leaves
+  /// that album in the default section.
+  Future<Map<String, DiscographyGroupKind>> _fetchDiscographyKinds(String artistId, List<String> albumIds) async {
+    final chunks = [
+      for (var i = 0; i < albumIds.length; i += _discographyTagChunkSize)
+        albumIds.sublist(
+          i,
+          i + _discographyTagChunkSize > albumIds.length ? albumIds.length : i + _discographyTagChunkSize,
+        ),
+    ];
+    final results = await Future.wait([
+      for (final (index, chunk) in chunks.indexed)
+        fetchWithCacheFallback<List<PlexMetadataDto>>(
+          cacheKey: '/library/metadata/$artistId/discography-tags/$index',
+          networkCall: () => _http.get(
+            '/library/metadata/${chunk.join(',')}',
+            queryParameters: {'X-Plex-Container-Start': 0, 'X-Plex-Container-Size': chunk.length},
+          ),
+          parseCache: (cachedData) => _parseMetadataListFromCachedResponse(cachedData),
+          parseResponse: (response) => _extractMetadataList(response),
+        ),
+    ]);
+    return {
+      for (final metadata in results)
+        for (final dto in metadata ?? const <PlexMetadataDto>[]) dto.ratingKey: PlexMappers.discographyKind(dto),
+    };
   }
 
   @override
