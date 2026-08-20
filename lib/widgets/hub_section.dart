@@ -22,10 +22,12 @@ import '../utils/media_navigation_helper.dart';
 import 'card_inflation_budget.dart';
 import 'focus_builders.dart';
 import 'media_card.dart';
+import 'media_grid_delegate.dart';
 import 'skeleton_media_card.dart';
 import 'sliver_child_memo.dart';
 import '../utils/scroll_utils.dart';
 import 'horizontal_scroll_with_arrows.dart';
+import 'tv_browse_rail.dart';
 import '../i18n/strings.g.dart';
 
 enum HubCardSizing {
@@ -428,11 +430,25 @@ class HubSectionState extends State<HubSection> with MountedSetStateMixin, Skele
     );
   }
 
-  double _getTvCardWidth(double availableWidth, int density, double leadingPadding) {
-    final f = LibraryDensity.factor(density);
-    final targetCards = 7.0 - (f * 2.0);
-    final usableWidth = (availableWidth - (leadingPadding * 2)).clamp(1.0, double.infinity);
-    return (usableWidth / targetCards).clamp(210.0, 340.0);
+  /// TV shelf cards share [TvBrowseRailLayout.cardWidthFor] so the two
+  /// remaining HubSection-on-TV surfaces (live TV "What's On", catalog item
+  /// related rows) match the rails every neighboring TV screen renders —
+  /// including the rail's own wide-card target instead of a local multiplier.
+  double _getTvCardWidth(
+    BuildContext context,
+    double availableWidth,
+    int density,
+    double leadingPadding,
+    bool useWideLayout,
+  ) {
+    return TvBrowseRailLayout.cardWidthFor(
+      availableWidth: availableWidth,
+      density: density,
+      useWideLayout: useWideLayout,
+      scale: TvLayoutConstants.scaleOf(context),
+      horizontalPadding: leadingPadding * 2,
+      itemGap: 0,
+    );
   }
 
   @override
@@ -527,10 +543,6 @@ class HubSectionState extends State<HubSection> with MountedSetStateMixin, Skele
                     final svc = SettingsService.instanceOrNull;
                     if (svc == null) return const SizedBox.shrink();
                     final density = svc.read(SettingsService.libraryDensity);
-                    final baseCardWidth = isTv && widget.cardSizing == HubCardSizing.shelf
-                        ? _getTvCardWidth(constraints.maxWidth, density, leadingPadding)
-                        : GridSizeCalculator.getCellWidth(constraints.maxWidth, context, density);
-
                     final EpisodePosterMode episodePosterMode =
                         widget.episodePosterModeOverride ?? svc.read(SettingsService.episodePosterMode);
 
@@ -552,9 +564,13 @@ class HubSectionState extends State<HubSection> with MountedSetStateMixin, Skele
                         widget.hub.items.isNotEmpty &&
                         widget.hub.items.every((item) => item.cardShape(episodePosterMode) == CardShape.square);
 
-                    // Card dimensions based on hub type
-                    const wideCardMultiplier = 1.5;
-                    final cardWidth = useWideLayout ? baseCardWidth * wideCardMultiplier : baseCardWidth;
+                    // One widening scheme (MediaGridDelegate): wide cells come
+                    // from the grid's packed cell, never poster cell x 1.5.
+                    final cardWidth = isTv && widget.cardSizing == HubCardSizing.shelf
+                        ? _getTvCardWidth(context, constraints.maxWidth, density, leadingPadding, useWideLayout)
+                        : useWideLayout
+                        ? MediaGridDelegate.wideCellWidth(context, constraints.maxWidth, density)
+                        : GridSizeCalculator.getCellWidth(constraints.maxWidth, context, density);
                     final posterWidth = cardWidth - 6; // 3px padding on each side
                     final posterHeight = useWideLayout
                         ? posterWidth *
