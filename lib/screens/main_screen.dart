@@ -284,6 +284,68 @@ ProfileInvalidationAction profileInvalidationAction({
   return ProfileInvalidationAction.none;
 }
 
+/// The initial-profile prompt flow behind [_MainScreenState]'s post-frame
+/// prompt and its late-profiles re-arm, extracted so the mid-await re-entry
+/// race is testable without the full MainScreen tree.
+///
+/// [claimPrompt] must synchronously claim the "picker is up" guard and return
+/// false when it is already claimed. The claim is taken before the first
+/// await: the provider notifies mid-initialize (e.g. a fresh sign-in's slow
+/// home-user fetch), and the listener's re-entrant call would otherwise stack
+/// a second requireSelection picker on the root navigator. [releasePrompt]
+/// clears the claim on every exit; on the push path that re-clear is
+/// idempotent with [pushProfileSelection]'s own post-pop clear.
+@visibleForTesting
+Future<void> runInitialProfilePrompt({
+  required ActiveProfileProvider activeProfile,
+  required bool Function() claimPrompt,
+  required void Function() releasePrompt,
+  required bool Function() isMounted,
+  required bool isOfflineMode,
+  required Future<bool> Function() hasConnections,
+  required Future<void> Function() settleSession,
+  required Future<void> Function() pushProfileSelection,
+  Future<SettingsService> Function() settings = SettingsService.getInstance,
+}) async {
+  if (!claimPrompt()) return;
+  try {
+    // The provider's initialize() is fire-and-forget from MultiProvider —
+    // wait for it to settle so `active` and `profiles` reflect storage
+    // before we decide whether to prompt.
+    await activeProfile.initialize();
+    if (!isMounted()) return;
+
+    final settingsService = await settings();
+    if (!isMounted()) return;
+
+    // Connections but ZERO resolvable profiles (e.g. the home-user fetch
+    // failed at sign-in): a session with nothing to select and no picker is
+    // a dead end. Mirror the boot guard — prune orphans and route to auth
+    // when nothing selectable remains.
+    if (activeProfile.active == null && activeProfile.profiles.isEmpty) {
+      // Offline, "unresolvable" may just be an unreachable plex.tv — don't
+      // kick the user to auth over it.
+      if (!isOfflineMode && await hasConnections() && isMounted()) {
+        appLogger.w('MainScreen: connections exist but no profiles resolved — settling session');
+        await settleSession();
+      }
+      return;
+    }
+
+    // Always prompt when there's no active profile but profiles exist
+    // (fresh sign-in with multiple Plex Home users): otherwise the binder
+    // has no profile to bind, and the user lands on an empty screen with
+    // no way back to the picker.
+    final hasNoActive = activeProfile.active == null && activeProfile.profiles.isNotEmpty;
+
+    if (!hasNoActive && !activeProfile.requiresSelectionOnOpen(settingsService)) return;
+
+    await pushProfileSelection();
+  } finally {
+    releasePrompt();
+  }
+}
+
 class MainScreen extends StatefulWidget {
   final bool isOfflineMode;
 
@@ -391,12 +453,18 @@ class _MainScreenState extends State<MainScreen>
   bool _wasBindingPrev = false;
   bool _hadProfiles = false;
 
-  /// Subscription to MultiServerManager status changes. Used to resume any
-  /// queued downloads as soon as a Plex client comes online for the first
-  /// time after launch (legacy main.dart used to do this from SetupScreen
+  /// Subscription to MultiServerManager status changes. Held for the
+  /// MainScreen lifetime (cancelled in dispose) so queued downloads resume
+  /// whenever a server comes online — first connect after launch or a later
+  /// reconnect (legacy main.dart used to do the launch half from SetupScreen
   /// before navigating).
   StreamSubscription<Map<String, bool>>? _serverStatusSub;
-  bool _downloadResumeFired = false;
+
+  /// Online-server snapshot covered by the last queued-download resume. A
+  /// server missing from the latest snapshot drops out of the set, so a
+  /// disconnect/reconnect surfaces it as newly online again and triggers a
+  /// fresh resume for rows the queue drain skipped while it was away.
+  final Set<String> _resumeCoveredServerIds = {};
 
   /// Listener that fires when [ActiveProfileBinder] settles (Plex *and*
   /// Jellyfin both bound). Drives the once-per-launch priming of
@@ -483,6 +551,11 @@ class _MainScreenState extends State<MainScreen>
       final activeProfile = context.read<ActiveProfileProvider>();
       _activeProfileForListener = activeProfile;
       _lastSeenProfileId = activeProfile.activeId;
+      // Prime the late-profiles edge alongside _lastSeenProfileId so the
+      // "!_hadProfiles && hasProfilesNow" check in _onActiveProfileChanged
+      // fires only on a genuine empty -> non-empty transition, not on the
+      // first notification of a session that started with profiles.
+      _hadProfiles = activeProfile.profiles.isNotEmpty;
       activeProfile.addListener(_onActiveProfileChanged);
       _plexHomeService = context.read<PlexHomeService>();
       unawaited(_plexHomeService!.start());
@@ -526,17 +599,18 @@ class _MainScreenState extends State<MainScreen>
 
   /// Run startup tasks that depend on having at least one online server:
   /// initialize and load the libraries provider, kick off the initial
-  /// watch-state sync, and (for Plex) resume any queued downloads. The
-  /// legacy [SetupScreen] path used to do all this before navigating to
+  /// watch-state sync, and resume any queued downloads. The legacy
+  /// [SetupScreen] path used to do all this before navigating to
   /// MainScreen; with the binder taking over for the connect, we hook
   /// into [ActiveProfileProvider.isBinding] (for the once-only priming,
   /// which must wait for *all* connections — Plex *and* Jellyfin — to
   /// land so the navbar shows libraries from both backends) and
-  /// [MultiServerManager.statusStream] (for download resume, which only
-  /// cares about the first online Plex client). Fires at most once per
-  /// MainScreen lifetime.
+  /// [MultiServerManager.statusStream] (for download resume, which
+  /// re-fires whenever a server comes online that the last resume didn't
+  /// cover, so rows skipped while their server was offline get drained).
+  /// The priming fires at most once per MainScreen lifetime.
   void _runStartupOnFirstOnlineServer(MultiServerManager manager) {
-    if (_isOffline || _downloadResumeFired) return;
+    if (_isOffline) return;
 
     final activeProfile = context.read<ActiveProfileProvider>();
 
@@ -572,7 +646,8 @@ class _MainScreenState extends State<MainScreen>
       // pipeline is backend-neutral (resumeQueuedDownloads accepts a
       // MediaServerClient and per-item resolution picks up the right
       // backend), so a Jellyfin-only setup can resume too.
-      _resumeQueuedDownloadsOnce(manager.onlineClients.values.firstOrNull);
+      final onlineClients = manager.onlineClients;
+      _resumeQueuedDownloadsForServers(onlineClients.keys.toSet(), onlineClients.values.firstOrNull);
     }
 
     // Listen for binding-settle so the once-only priming runs after both
@@ -587,12 +662,14 @@ class _MainScreenState extends State<MainScreen>
       primeServicesOnBindingSettle(fromTimeout: true);
     });
 
-    // Fast paths: binder may have already settled / first Plex server may
+    // Fast paths: binder may have already settled / first server may
     // already be online (binder finished before this microtask).
     primeServicesOnBindingSettle();
     tryDownloadResume();
-    if (_downloadResumeFired) return;
 
+    // Held for the MainScreen lifetime (cancelled in dispose): every status
+    // change re-checks the resume so a server that connects late — or drops
+    // and reconnects — re-drives the queue for rows skipped while offline.
     _serverStatusSub = manager.statusStream.listen((_) => tryDownloadResume());
   }
 
@@ -610,7 +687,8 @@ class _MainScreenState extends State<MainScreen>
         if (!mounted) return;
         context.read<OfflineWatchSyncService>().onServersConnected();
         unawaited(context.read<DownloadProvider>().refreshMetadataFromCache());
-        _resumeQueuedDownloadsOnce(
+        _resumeQueuedDownloadsForServers(
+          mp.onlineServerIds.toSet(),
           mp.onlineServerIds.map((id) => mp.getClientForServer(ServerId(id))).nonNulls.firstOrNull,
         );
       }
@@ -620,18 +698,26 @@ class _MainScreenState extends State<MainScreen>
     _primeContentTabs();
   }
 
-  /// Single-shot "resume queued downloads once any client is online" rule,
+  /// Resume queued downloads for servers the last resume didn't cover,
   /// shared by the startup status-stream path and [_primeOnlineServices] —
-  /// each caller resolves its own candidate client (unfiltered manager view
-  /// vs the visibility-filtered provider) and hands it here. No-op once the
-  /// resume has fired, or while no client is online yet.
-  void _resumeQueuedDownloadsOnce(MediaServerClient? onlineClient) {
-    if (_downloadResumeFired || !mounted) return;
-    if (onlineClient == null) return;
-    _downloadResumeFired = true;
-    // The status subscription exists only to drive this one-shot.
-    _serverStatusSub?.cancel();
-    _serverStatusSub = null;
+  /// each caller resolves its own view of online server ids plus a candidate
+  /// client (unfiltered manager view vs the visibility-filtered provider)
+  /// and hands them here. Replacing (not accumulating) the covered snapshot
+  /// means a disconnected server drops out and its reconnect counts as newly
+  /// online again. No-op while nothing new is online or no client resolves;
+  /// per-item client resolution inside the drain picks the right server.
+  void _resumeQueuedDownloadsForServers(Set<String> onlineServerIds, MediaServerClient? onlineClient) {
+    final newlyOnline = onlineServerIds.difference(_resumeCoveredServerIds);
+    if (!mounted || newlyOnline.isEmpty || onlineClient == null) {
+      // Drop servers that went offline so their reconnect counts as newly
+      // online, but never mark servers covered that no resume actually saw —
+      // a null client here would otherwise swallow their trigger for good.
+      _resumeCoveredServerIds.retainAll(onlineServerIds);
+      return;
+    }
+    _resumeCoveredServerIds
+      ..clear()
+      ..addAll(onlineServerIds);
     final downloadProvider = context.read<DownloadProvider>();
     unawaited(
       downloadProvider.ensureInitialized().then((_) {
@@ -680,38 +766,20 @@ class _MainScreenState extends State<MainScreen>
 
     final activeProfile = context.read<ActiveProfileProvider>();
     final connections = context.read<ConnectionRegistry>();
-    // The provider's initialize() is fire-and-forget from MultiProvider —
-    // wait for it to settle so `active` and `profiles` reflect storage
-    // before we decide whether to prompt.
-    await activeProfile.initialize();
-    if (!mounted) return;
-
-    final settingsService = await SettingsService.getInstance();
-    if (!mounted) return;
-
-    // Connections but ZERO resolvable profiles (e.g. the home-user fetch
-    // failed at sign-in): a session with nothing to select and no picker is
-    // a dead end. Mirror the boot guard — prune orphans and route to auth
-    // when nothing selectable remains.
-    if (activeProfile.active == null && activeProfile.profiles.isEmpty) {
-      // Offline, "unresolvable" may just be an unreachable plex.tv — don't
-      // kick the user to auth over it.
-      if (!widget.isOfflineMode && (await connections.list()).isNotEmpty && mounted) {
-        appLogger.w('MainScreen: connections exist but no profiles resolved — settling session');
-        await settleSessionAfterRemoval(SessionTeardownScope.of(context));
-      }
-      return;
-    }
-
-    // Always prompt when there's no active profile but profiles exist
-    // (fresh sign-in with multiple Plex Home users): otherwise the binder
-    // has no profile to bind, and the user lands on an empty screen with
-    // no way back to the picker.
-    final hasNoActive = activeProfile.active == null && activeProfile.profiles.isNotEmpty;
-
-    if (!hasNoActive && !activeProfile.requiresSelectionOnOpen(settingsService)) return;
-
-    await _pushProfileSelection();
+    await runInitialProfilePrompt(
+      activeProfile: activeProfile,
+      claimPrompt: () {
+        if (_isShowingProfileSelection) return false;
+        _isShowingProfileSelection = true;
+        return true;
+      },
+      releasePrompt: () => _isShowingProfileSelection = false,
+      isMounted: () => mounted,
+      isOfflineMode: widget.isOfflineMode,
+      hasConnections: () async => (await connections.list()).isNotEmpty,
+      settleSession: () => settleSessionAfterRemoval(SessionTeardownScope.of(context)),
+      pushProfileSelection: _pushProfileSelection,
+    );
   }
 
   /// Push the picker in "must choose" mode, suppressing the tvOS menu-button
