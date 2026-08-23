@@ -113,6 +113,17 @@ extension DvConversionModePreferenceNativeValue on DvConversionModePreference {
   };
 }
 
+/// Which demuxer parses direct-played files on Android. Wire values are read
+/// natively by `FfmpegDemuxerPolicy`; unknown values resolve to FFmpeg there.
+enum DemuxerPreference { ffmpeg, media3 }
+
+extension DemuxerPreferenceNativeValue on DemuxerPreference {
+  String get nativeValue => switch (this) {
+    DemuxerPreference.ffmpeg => 'ffmpeg',
+    DemuxerPreference.media3 => 'media3',
+  };
+}
+
 enum PlaybackBufferTier { auto, large, extraLarge }
 
 extension PlaybackBufferTierNativeValue on PlaybackBufferTier {
@@ -457,11 +468,16 @@ class SettingsService extends BaseSharedPreferencesService {
   static const enableDiscordRPC = BoolPref('enable_discord_rpc');
   static const enableTraktWatchedSync = BoolPref('enable_trakt_watched_sync', defaultValue: true);
   static const matchContentFrameRate = BoolPref('match_content_frame_rate');
-  static const tunneledPlayback = BoolPref('tunneled_playback', defaultValue: true);
+  static const tunneledPlayback = BoolPref('tunneled_playback', defaultValue: false);
   static const dvConversionMode = EnumPref<DvConversionModePreference>(
     'dv_conversion_mode',
     values: DvConversionModePreference.values,
     defaultValue: DvConversionModePreference.auto,
+  );
+  static const demuxerMode = EnumPref<DemuxerPreference>(
+    'demuxer_mode',
+    values: DemuxerPreference.values,
+    defaultValue: DemuxerPreference.ffmpeg,
   );
   static const defaultQualityPreset = EnumPref<TranscodeQualityPreset>(
     'default_quality_preset',
@@ -1003,6 +1019,7 @@ class SettingsService extends BaseSharedPreferencesService {
     specialsOrdering,
     useExoPlayer,
     startupSection,
+    demuxerMode,
     showExploreTab,
     alwaysKeepSidebarOpen,
     librariesSectionExpanded,
