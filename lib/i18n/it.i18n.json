@@ -291,6 +291,8 @@
     "autoPipDescription": "Attiva automaticamente la modalità Picture-in-Picture quando esci dall'app durante la riproduzione",
     "matchContentFrameRate": "Adatta la frequenza dei fotogrammi",
     "matchContentFrameRateDescription": "Adatta la frequenza di aggiornamento dello schermo al contenuto video",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Adatta la frequenza di aggiornamento",
     "matchRefreshRateDescription": "Adatta la frequenza di aggiornamento dello schermo in modalità a schermo intero",
     "matchDynamicRange": "Adatta la gamma dinamica",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Aggiornamento della guida richiesto",
     "rulesProcessRequested": "Rielaborazione delle regole richiesta",
     "recordShow": "Registra programma",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "Inizia tra ${minutes} min",
     "dayAtTime": "${day} alle ${time}",
     "invalidPlaybackData": "${product} ha restituito dati di riproduzione della TV in diretta non validi",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Usa il tuo dispositivo mobile per controllare questa app",
       "startServer": "Avvia server",
       "stopServer": "Arresta server",
-      "minimize": "Riduci"
+      "minimize": "Riduci",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "I dispositivi Plezy con lo stesso account Plex appaiono qui",

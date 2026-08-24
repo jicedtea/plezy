@@ -291,6 +291,8 @@
     "autoPipDescription": "Video ijro etilayotganda ilovadan chiqilganda avto-PiP rejimiga oʻtish",
     "matchContentFrameRate": "Kadrlar chastotasini moslashtirish",
     "matchContentFrameRateDescription": "Ekran chastotasini video kontentiga moslashtirish",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Yangilanish chastotasini moslashtirish",
     "matchRefreshRateDescription": "Toʻliq ekranda ekran chastotasini moslashtirish",
     "matchDynamicRange": "Dinamik diapazonni moslashtirish",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Jadvalni yangilash soʻraldi",
     "rulesProcessRequested": "Qoidalarni qayta baholash soʻraldi",
     "recordShow": "Shouni yozib olish",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "${minutes} daqiqadan keyin boshlanadi",
     "dayAtTime": "${day}, soat ${time} da",
     "invalidPlaybackData": "${product} Jonli TV ijrosi uchun notoʻgʻri maʼlumot qaytardi",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Ushbu ilovani boshqarish uchun telefoningizdan foydalaning",
       "startServer": "Serverni ishga tushirish",
       "stopServer": "Serverni toʻxtatish",
-      "minimize": "Yigʻish"
+      "minimize": "Yigʻish",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Bir xil Plex hisobidagi Plezy qurilmalari bu yerda koʻrinadi",

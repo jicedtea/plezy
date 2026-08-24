@@ -291,6 +291,8 @@
     "autoPipDescription": "播放期间离开应用时自动进入画中画模式",
     "matchContentFrameRate": "匹配内容帧率",
     "matchContentFrameRateDescription": "使显示器刷新率与视频帧率匹配",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "匹配刷新率",
     "matchRefreshRateDescription": "全屏时匹配显示刷新率",
     "matchDynamicRange": "匹配动态范围",
@@ -1332,6 +1334,16 @@
     "guideReloadRequested": "已请求更新节目指南",
     "rulesProcessRequested": "已请求重新评估规则",
     "recordShow": "录制节目",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "${minutes} 分钟后开始",
     "dayAtTime": "${day} ${time}",
     "invalidPlaybackData": "${product} 返回了无效的直播电视播放数据",
@@ -1635,7 +1647,8 @@
       "usePhoneToControl": "使用移动设备控制此应用",
       "startServer": "启动服务器",
       "stopServer": "停止服务器",
-      "minimize": "最小化"
+      "minimize": "最小化",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "使用同一 Plex 账号的 Plezy 设备会显示在这里",

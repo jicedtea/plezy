@@ -291,6 +291,8 @@
     "autoPipDescription": "Автоматически включать режим «картинка в картинке» при выходе из приложения во время воспроизведения",
     "matchContentFrameRate": "Соответствие частоты кадров контента",
     "matchContentFrameRateDescription": "Подстраивать частоту обновления экрана под видео",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Соответствие частоты обновления",
     "matchRefreshRateDescription": "Подстраивать частоту обновления в полноэкранном режиме",
     "matchDynamicRange": "Соответствие динамического диапазона",
@@ -1359,6 +1361,16 @@
     "guideReloadRequested": "Запрошено обновление гайда",
     "rulesProcessRequested": "Запрошен пересчёт правил",
     "recordShow": "Записать передачу",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "Начало через ${minutes} мин",
     "dayAtTime": "${day} в ${time}",
     "invalidPlaybackData": "${product} вернул некорректные данные для воспроизведения ТВ в прямом эфире",
@@ -1665,7 +1677,8 @@
       "usePhoneToControl": "Используйте мобильное устройство для управления этим приложением",
       "startServer": "Запустить сервер",
       "stopServer": "Остановить сервер",
-      "minimize": "Свернуть"
+      "minimize": "Свернуть",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Устройства Plezy с тем же аккаунтом Plex появятся здесь",

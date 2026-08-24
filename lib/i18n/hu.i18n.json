@@ -291,6 +291,8 @@
     "autoPipDescription": "Lejátszás közben az alkalmazás elhagyásakor automatikusan kép a képben módra vált",
     "matchContentFrameRate": "Képkockasebesség illesztése a tartalomhoz",
     "matchContentFrameRateDescription": "A kijelző frissítési frekvenciájának igazítása a videóhoz",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Frissítési frekvencia illesztése",
     "matchRefreshRateDescription": "A kijelző frissítési frekvenciájának igazítása teljes képernyőn",
     "matchDynamicRange": "Dinamikatartomány illesztése",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Műsorújság frissítése kérve",
     "rulesProcessRequested": "Szabályok újraértékelése kérve",
     "recordShow": "Műsor rögzítése",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "${minutes} perc múlva kezdődik",
     "dayAtTime": "${day}, ${time}",
     "invalidPlaybackData": "A(z) ${product} érvénytelen Élő TV-lejátszási adatokat adott vissza",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Használd a mobileszközödet az alkalmazás vezérléséhez",
       "startServer": "Szerver indítása",
       "stopServer": "Szerver leállítása",
-      "minimize": "Kis méret"
+      "minimize": "Kis méret",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Az azonos Plex-fiókot használó Plezy-eszközök itt jelennek meg",

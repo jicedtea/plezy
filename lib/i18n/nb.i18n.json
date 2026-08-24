@@ -291,6 +291,8 @@
     "autoPipDescription": "Åpne bilde-i-bilde når du forlater appen under avspilling",
     "matchContentFrameRate": "Tilpass innholdets bildefrekvens",
     "matchContentFrameRateDescription": "Tilpass skjermens oppdateringsfrekvens til videoinnhold",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Tilpass oppdateringsfrekvens",
     "matchRefreshRateDescription": "Tilpass skjermens oppdateringsfrekvens i fullskjerm",
     "matchDynamicRange": "Tilpass dynamikkområde",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Oppdatering av programguiden er forespurt",
     "rulesProcessRequested": "Ny vurdering av reglene er forespurt",
     "recordShow": "Ta opp program",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "Starter om ${minutes} min",
     "dayAtTime": "${day} kl. ${time}",
     "invalidPlaybackData": "${product} returnerte ugyldige avspillingsdata for direkte-TV",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Bruk mobilenheten din til å styre denne appen",
       "startServer": "Start server",
       "stopServer": "Stopp server",
-      "minimize": "Minimer"
+      "minimize": "Minimer",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Plezy-enheter med samme Plex-konto vises her",

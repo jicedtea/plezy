@@ -291,6 +291,8 @@
     "autoPipDescription": "Oynatma zamanı tətbiqdən çıxdıqda avtomatik PiP rejiminə keç",
     "matchContentFrameRate": "Kadr tezliyini uyğunlaşdır",
     "matchContentFrameRateDescription": "Ekran yenilənmə tezliyini video məzmununa uyğunlaşdır",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Yenilənmə tezliyini uyğunlaşdır",
     "matchRefreshRateDescription": "Tam ekranda ekran yenilənmə tezliyini uyğunlaşdır",
     "matchDynamicRange": "Dinamik diapazonu uyğunlaşdır",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Bələdçi yenilənməsi tələb olundu",
     "rulesProcessRequested": "Qaydaların yenidən qiymətləndirilməsi tələb olundu",
     "recordShow": "Şounu yaz",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "${minutes} dəq sonra başlayır",
     "dayAtTime": "${day}, saat ${time}",
     "invalidPlaybackData": "${product} etibarsız Canlı TV oynatma məlumatı qaytardı",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Bu tətbiqi idarə etmək üçün mobil cihazınızı istifadə edin",
       "startServer": "Serveri başlat",
       "stopServer": "Serveri dayandır",
-      "minimize": "Yığ"
+      "minimize": "Yığ",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Eyni Plex hesabına sahib Plezy cihazları burada görünür",

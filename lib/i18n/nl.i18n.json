@@ -291,6 +291,8 @@
     "autoPipDescription": "Schakel over naar beeld-in-beeld als je tijdens het afspelen de app verlaat",
     "matchContentFrameRate": "Inhoudsframesnelheid afstemmen",
     "matchContentFrameRateDescription": "Stem schermverversing af op videocontent",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Verversingssnelheid afstemmen",
     "matchRefreshRateDescription": "Stem schermverversing af in volledig scherm",
     "matchDynamicRange": "Dynamisch bereik afstemmen",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Vernieuwing van de gids aangevraagd",
     "rulesProcessRequested": "Nieuwe evaluatie van regels aangevraagd",
     "recordShow": "Programma opnemen",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "Begint over ${minutes} min",
     "dayAtTime": "${day} om ${time}",
     "invalidPlaybackData": "${product} heeft ongeldige afspeelgegevens voor Live-tv geretourneerd",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Gebruik je mobiele apparaat om deze app te bedienen",
       "startServer": "Server starten",
       "stopServer": "Server stoppen",
-      "minimize": "Minimaliseren"
+      "minimize": "Minimaliseren",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Plezy-apparaten met hetzelfde Plex-account verschijnen hier",

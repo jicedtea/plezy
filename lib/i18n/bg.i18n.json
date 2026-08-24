@@ -291,6 +291,8 @@
     "autoPipDescription": "Автоматично включвай режима картина в картината при излизане от приложението по време на възпроизвеждане",
     "matchContentFrameRate": "Напасване към кадровата честота на съдържанието",
     "matchContentFrameRateDescription": "Напасни честотата на опресняване на дисплея към видео съдържанието",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Напасване на честотата на опресняване",
     "matchRefreshRateDescription": "Напасни честотата на опресняване на дисплея при цял екран",
     "matchDynamicRange": "Напасване на динамичния диапазон",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Заявено е опресняване на ТВ програмата",
     "rulesProcessRequested": "Заявена е преоценка на правилата",
     "recordShow": "Запиши предаването",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "Започва след ${minutes} мин",
     "dayAtTime": "${day} в ${time}",
     "invalidPlaybackData": "${product} върна невалидни данни за възпроизвеждане на телевизия на живо",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Използвайте мобилното си устройство, за да управлявате това приложение",
       "startServer": "Стартирай сървър",
       "stopServer": "Спри сървър",
-      "minimize": "Минимизирай"
+      "minimize": "Минимизирай",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Plezy устройства със същия Plex акаунт се показват тук",

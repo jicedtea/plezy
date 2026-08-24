@@ -291,6 +291,8 @@
     "autoPipDescription": "再生中にアプリを離れると、自動的にピクチャーインピクチャーに切り替えます",
     "matchContentFrameRate": "コンテンツのフレームレートに合わせる",
     "matchContentFrameRateDescription": "表示のリフレッシュレートを動画コンテンツに合わせます",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "リフレッシュレートを合わせる",
     "matchRefreshRateDescription": "全画面時に表示のリフレッシュレートを合わせます",
     "matchDynamicRange": "ダイナミックレンジを合わせる",
@@ -1332,6 +1334,16 @@
     "guideReloadRequested": "番組表の更新をリクエストしました",
     "rulesProcessRequested": "録画ルールの再評価をリクエストしました",
     "recordShow": "番組を録画",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "${minutes}分後に開始",
     "dayAtTime": "${day} ${time}",
     "invalidPlaybackData": "${product}から無効なライブTV再生データが返されました",
@@ -1635,7 +1647,8 @@
       "usePhoneToControl": "モバイルデバイスでこのアプリを操作できます",
       "startServer": "サーバーを起動",
       "stopServer": "サーバーを停止",
-      "minimize": "最小化"
+      "minimize": "最小化",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "同じPlexアカウントを使用しているPlezyデバイスがここに表示されます",

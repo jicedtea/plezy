@@ -291,6 +291,8 @@
     "autoPipDescription": "Oynatma sırasında uygulamadan çıktığınızda otomatik olarak pencere içinde pencere moduna geç",
     "matchContentFrameRate": "İçerik Kare Hızını Eşitle",
     "matchContentFrameRateDescription": "Ekran yenileme hızını video içeriğiyle eşitle",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Yenileme Hızını Eşitle",
     "matchRefreshRateDescription": "Tam ekranda ekran yenileme hızını eşitle",
     "matchDynamicRange": "Dinamik Aralığı Eşitle",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Rehber yenilemesi istendi",
     "rulesProcessRequested": "Kuralın yeniden değerlendirilmesi istendi",
     "recordShow": "Programı kaydet",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "${minutes} dk içinde başlıyor",
     "dayAtTime": "${day} saat ${time}",
     "invalidPlaybackData": "${product} geçersiz Canlı TV oynatma verileri döndürdü",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Bu uygulamayı kontrol etmek için mobil cihazınızı kullanın",
       "startServer": "Sunucuyu Başlat",
       "stopServer": "Sunucuyu Durdur",
-      "minimize": "Küçült"
+      "minimize": "Küçült",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Aynı Plex hesabına sahip Plezy cihazları burada görünür",

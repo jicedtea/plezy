@@ -291,6 +291,8 @@
     "autoPipDescription": "播放影片時離開應用程式將自動進入子母畫面模式",
     "matchContentFrameRate": "符合影片影格率",
     "matchContentFrameRateDescription": "將顯示器更新率同步至影片影格率",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "同步螢幕更新率",
     "matchRefreshRateDescription": "全螢幕時同步顯示器更新率",
     "matchDynamicRange": "同步動態範圍",
@@ -1332,6 +1334,16 @@
     "guideReloadRequested": "已要求更新節目表指南",
     "rulesProcessRequested": "已要求重新評估規則",
     "recordShow": "錄製節目",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "${minutes} 分鐘後開始",
     "dayAtTime": "${day} ${time}",
     "invalidPlaybackData": "${product} 傳回了無效的直播電視播放資料",
@@ -1635,7 +1647,8 @@
       "usePhoneToControl": "使用行動裝置控制此應用程式",
       "startServer": "啟動伺服器",
       "stopServer": "停止伺服器",
-      "minimize": "最小化"
+      "minimize": "最小化",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "使用相同 Plex 帳戶的 Plezy 裝置會顯示在此處",

@@ -291,6 +291,8 @@
     "autoPipDescription": "Passer en mode image dans l’image si vous quittez l’application pendant la lecture",
     "matchContentFrameRate": "Adapter la fréquence d’images au contenu",
     "matchContentFrameRateDescription": "Adapter la fréquence de rafraîchissement de l’écran au contenu vidéo",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Adapter la fréquence de rafraîchissement",
     "matchRefreshRateDescription": "Adapter la fréquence d'affichage en plein écran",
     "matchDynamicRange": "Adapter la plage dynamique",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Mise à jour du guide demandée",
     "rulesProcessRequested": "Réévaluation des règles demandée",
     "recordShow": "Enregistrer l'émission",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "Commence dans ${minutes} min",
     "dayAtTime": "${day} à ${time}",
     "invalidPlaybackData": "${product} a renvoyé des données de lecture de TV en direct non valides",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Utilisez votre appareil mobile pour contrôler cette application",
       "startServer": "Démarrer le serveur",
       "stopServer": "Arrêter le serveur",
-      "minimize": "Réduire"
+      "minimize": "Réduire",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Les appareils Plezy avec le même compte Plex apparaissent ici",

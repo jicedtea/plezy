@@ -291,6 +291,8 @@
     "autoPipDescription": "Automatically enter picture-in-picture when you leave the app during playback",
     "matchContentFrameRate": "Match Content Frame Rate",
     "matchContentFrameRateDescription": "Match display refresh rate to video content",
+    "matchContentResolution": "Match Content Resolution",
+    "matchContentResolutionDescription": "Switch the display to the video's native resolution so your TV handles upscaling. Menus and subtitles are upscaled too during playback",
     "matchRefreshRate": "Match Refresh Rate",
     "matchRefreshRateDescription": "Match display refresh rate in fullscreen",
     "matchDynamicRange": "Match Dynamic Range",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Guide refresh requested",
     "rulesProcessRequested": "Rule re-evaluation requested",
     "recordShow": "Record show",
+    "recordSettings": {
+      "startEarly": "Start early (seconds)",
+      "endLate": "End late (seconds)",
+      "newOnly": "Only new episodes",
+      "anyChannel": "Record on any channel",
+      "anyTime": "Record at any time",
+      "skipInLibrary": "Skip episodes already in the library",
+      "keepUpTo": "Episodes to keep",
+      "keepUpToHint": "0 keeps every episode"
+    },
     "startingInMinutes": "Starting in ${minutes} min",
     "dayAtTime": "${day} at ${time}",
     "invalidPlaybackData": "${product} returned invalid Live TV playback data",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Use your mobile device to control this app",
       "startServer": "Start Server",
       "stopServer": "Stop Server",
-      "minimize": "Minimize"
+      "minimize": "Minimize",
+      "manualAddressHint": "Manual connection address:"
     },
     "pairing": {
       "discoveryDescription": "Plezy devices with the same Plex account appear here",

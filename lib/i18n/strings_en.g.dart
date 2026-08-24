@@ -951,6 +951,12 @@ class Translations$settings$en {
 	/// en: 'Match display refresh rate to video content'
 	String get matchContentFrameRateDescription => 'Match display refresh rate to video content';
 
+	/// en: 'Match Content Resolution'
+	String get matchContentResolution => 'Match Content Resolution';
+
+	/// en: 'Switch the display to the video's native resolution so your TV handles upscaling. Menus and subtitles are upscaled too during playback'
+	String get matchContentResolutionDescription => 'Switch the display to the video\'s native resolution so your TV handles upscaling. Menus and subtitles are upscaled too during playback';
+
 	/// en: 'Match Refresh Rate'
 	String get matchRefreshRate => 'Match Refresh Rate';
 
@@ -3469,6 +3475,8 @@ class Translations$liveTv$en {
 	/// en: 'Record show'
 	String get recordShow => 'Record show';
 
+	late final Translations$liveTv$recordSettings$en recordSettings = Translations$liveTv$recordSettings$en.internal(_root);
+
 	/// en: 'Starting in ${minutes} min'
 	String startingInMinutes({required Object minutes}) => 'Starting in ${minutes} min';
 
@@ -5981,6 +5989,39 @@ class Translations$explore$detail$en {
 	String get background => 'Background';
 }
 
+// Path: liveTv.recordSettings
+class Translations$liveTv$recordSettings$en {
+	Translations$liveTv$recordSettings$en.internal(this._root);
+
+	final Translations _root; // ignore: unused_field
+
+	// Translations
+
+	/// en: 'Start early (seconds)'
+	String get startEarly => 'Start early (seconds)';
+
+	/// en: 'End late (seconds)'
+	String get endLate => 'End late (seconds)';
+
+	/// en: 'Only new episodes'
+	String get newOnly => 'Only new episodes';
+
+	/// en: 'Record on any channel'
+	String get anyChannel => 'Record on any channel';
+
+	/// en: 'Record at any time'
+	String get anyTime => 'Record at any time';
+
+	/// en: 'Skip episodes already in the library'
+	String get skipInLibrary => 'Skip episodes already in the library';
+
+	/// en: 'Episodes to keep'
+	String get keepUpTo => 'Episodes to keep';
+
+	/// en: '0 keeps every episode'
+	String get keepUpToHint => '0 keeps every episode';
+}
+
 // Path: music.discography
 class Translations$music$discography$en {
 	Translations$music$discography$en.internal(this._root);
@@ -6126,6 +6167,9 @@ class Translations$companionRemote$session$en {
 
 	/// en: 'Minimize'
 	String get minimize => 'Minimize';
+
+	/// en: 'Manual connection address:'
+	String get manualAddressHint => 'Manual connection address:';
 }
 
 // Path: companionRemote.pairing
@@ -6721,6 +6765,8 @@ extension on Translations {
 			'settings.autoPipDescription' => 'Automatically enter picture-in-picture when you leave the app during playback',
 			'settings.matchContentFrameRate' => 'Match Content Frame Rate',
 			'settings.matchContentFrameRateDescription' => 'Match display refresh rate to video content',
+			'settings.matchContentResolution' => 'Match Content Resolution',
+			'settings.matchContentResolutionDescription' => 'Switch the display to the video\'s native resolution so your TV handles upscaling. Menus and subtitles are upscaled too during playback',
 			'settings.matchRefreshRate' => 'Match Refresh Rate',
 			'settings.matchRefreshRateDescription' => 'Match display refresh rate in fullscreen',
 			'settings.matchDynamicRange' => 'Match Dynamic Range',
@@ -6952,10 +6998,10 @@ extension on Translations {
 			'mediaMenu.deleteSeasonFromServer' => 'Delete season from server',
 			'mediaMenu.deleteShowFromServer' => 'Delete show from server',
 			'mediaMenu.deleteMovieFromServer' => 'Delete movie from server',
-			'mediaMenu.deleteEpisodeTitle' => 'Delete this episode?',
-			'mediaMenu.deleteSeasonTitle' => 'Delete this season?',
 			_ => null,
 		} ?? switch (path) {
+			'mediaMenu.deleteEpisodeTitle' => 'Delete this episode?',
+			'mediaMenu.deleteSeasonTitle' => 'Delete this season?',
 			'mediaMenu.deleteShowTitle' => 'Delete this show?',
 			'mediaMenu.deleteMovieTitle' => 'Delete this movie?',
 			'mediaMenu.deleteEpisodeConfirm' => 'Delete episode',
@@ -7466,10 +7512,10 @@ extension on Translations {
 			'explore.status.airing' => 'Airing',
 			'explore.status.ended' => 'Ended',
 			'explore.status.canceled' => 'Canceled',
-			'explore.status.upcoming' => 'Upcoming',
-			'explore.episodeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} episode', other: '${n} episodes', ), 
 			_ => null,
 		} ?? switch (path) {
+			'explore.status.upcoming' => 'Upcoming',
+			'explore.episodeCount' => ({required num n}) => (_root.$meta.cardinalResolver ?? PluralResolvers.cardinal('en'))(n, one: '${n} episode', other: '${n} episodes', ), 
 			'explore.cast' => 'Cast',
 			'explore.characters' => 'Characters',
 			'explore.addToWatchlist' => 'Add to Watchlist',
@@ -7661,6 +7707,14 @@ extension on Translations {
 			'liveTv.guideReloadRequested' => 'Guide refresh requested',
 			'liveTv.rulesProcessRequested' => 'Rule re-evaluation requested',
 			'liveTv.recordShow' => 'Record show',
+			'liveTv.recordSettings.startEarly' => 'Start early (seconds)',
+			'liveTv.recordSettings.endLate' => 'End late (seconds)',
+			'liveTv.recordSettings.newOnly' => 'Only new episodes',
+			'liveTv.recordSettings.anyChannel' => 'Record on any channel',
+			'liveTv.recordSettings.anyTime' => 'Record at any time',
+			'liveTv.recordSettings.skipInLibrary' => 'Skip episodes already in the library',
+			'liveTv.recordSettings.keepUpTo' => 'Episodes to keep',
+			'liveTv.recordSettings.keepUpToHint' => '0 keeps every episode',
 			'liveTv.startingInMinutes' => ({required Object minutes}) => 'Starting in ${minutes} min',
 			'liveTv.dayAtTime' => ({required Object day, required Object time}) => '${day} at ${time}',
 			'liveTv.invalidPlaybackData' => ({required Object product}) => '${product} returned invalid Live TV playback data',
@@ -7944,6 +7998,7 @@ extension on Translations {
 			'companionRemote.session.startServer' => 'Start Server',
 			'companionRemote.session.stopServer' => 'Stop Server',
 			'companionRemote.session.minimize' => 'Minimize',
+			'companionRemote.session.manualAddressHint' => 'Manual connection address:',
 			'companionRemote.pairing.discoveryDescription' => 'Plezy devices with the same Plex account appear here',
 			'companionRemote.pairing.hostAddressHint' => '192.168.1.100:48632',
 			'companionRemote.pairing.connecting' => 'Connecting...',
@@ -7971,6 +8026,8 @@ extension on Translations {
 			'companionRemote.remote.tabDiscover' => 'Discover',
 			'companionRemote.remote.tabLibraries' => 'Libraries',
 			'companionRemote.remote.tabSearch' => 'Search',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.tabDownloads' => 'Downloads',
 			'companionRemote.remote.tabSettings' => 'Settings',
 			'companionRemote.remote.previous' => 'Previous',
@@ -7982,8 +8039,6 @@ extension on Translations {
 			'companionRemote.remote.volume' => 'Volume',
 			'companionRemote.remote.volumeDown' => 'Down',
 			'companionRemote.remote.volumeUp' => 'Up',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.remote.fullscreen' => 'Fullscreen',
 			'companionRemote.remote.subtitles' => 'Subtitles',
 			'companionRemote.remote.audio' => 'Audio',

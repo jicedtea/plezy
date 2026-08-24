@@ -291,6 +291,8 @@
     "autoPipDescription": "Видео ойнап жатқанда қолданбадан шыққанда авто-PiP режиміне өту",
     "matchContentFrameRate": "Кадр жиілігін сәйкестендіру",
     "matchContentFrameRateDescription": "Экран жиілігін видео мазмұнына сәйкестендіру",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Жаңарту жиілігін сәйкестендіру",
     "matchRefreshRateDescription": "Толық экранда экран жаңарту жиілігін сәйкестендіру",
     "matchDynamicRange": "Динамикалық диапазонды сәйкестендіру",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Бағдарламаны жаңарту сұралды",
     "rulesProcessRequested": "Ережелерді қайта бағалау сұралды",
     "recordShow": "Шоуды жазу",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "${minutes} мин кейін басталады",
     "dayAtTime": "${day}, ${time}",
     "invalidPlaybackData": "${product} жарамсыз тікелей TV ойнату деректерін қайтарды",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Осы қолданбаны басқару үшін телефоныңызды пайдаланыңыз",
       "startServer": "Серверді іске қосу",
       "stopServer": "Серверді тоқтату",
-      "minimize": "Жию"
+      "minimize": "Жию",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Бірдей Plex тіркелгісіндегі Plezy құрылғылары мұнда көрінеді",

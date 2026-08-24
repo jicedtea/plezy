@@ -291,6 +291,8 @@
     "autoPipDescription": "Skift automatisk til billede-i-billede, når du forlader appen under afspilning",
     "matchContentFrameRate": "Tilpas billedhastigheden til indholdet",
     "matchContentFrameRateDescription": "Tilpas skærmens opdateringsfrekvens til videoindhold",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Tilpas opdateringsfrekvensen",
     "matchRefreshRateDescription": "Tilpas skærmens opdateringsfrekvens i fuld skærm",
     "matchDynamicRange": "Tilpas dynamikområdet",
@@ -1341,6 +1343,16 @@
     "guideReloadRequested": "Der er anmodet om en opdatering af guiden",
     "rulesProcessRequested": "Der er anmodet om en ny evaluering af reglerne",
     "recordShow": "Optag program",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "Starter om ${minutes} min",
     "dayAtTime": "${day} kl. ${time}",
     "invalidPlaybackData": "${product} returnerede ugyldige afspilningsdata for Live TV",
@@ -1645,7 +1657,8 @@
       "usePhoneToControl": "Brug din mobilenhed til at styre denne app",
       "startServer": "Start serveren",
       "stopServer": "Stop serveren",
-      "minimize": "Minimér"
+      "minimize": "Minimér",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Plezy-enheder med samme Plex-konto vises her",

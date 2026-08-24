@@ -291,6 +291,8 @@
     "autoPipDescription": "Automatycznie włączaj tryb obrazu w obrazie po opuszczeniu aplikacji podczas odtwarzania",
     "matchContentFrameRate": "Dopasuj częstotliwość klatek do treści",
     "matchContentFrameRateDescription": "Dopasuj częstotliwość odświeżania ekranu do wideo",
+    "matchContentResolution": "",
+    "matchContentResolutionDescription": "",
     "matchRefreshRate": "Dopasuj częstotliwość odświeżania",
     "matchRefreshRateDescription": "Dopasuj częstotliwość odświeżania w trybie pełnoekranowym",
     "matchDynamicRange": "Dopasuj zakres dynamiki",
@@ -1359,6 +1361,16 @@
     "guideReloadRequested": "Zażądano odświeżenia przewodnika",
     "rulesProcessRequested": "Zażądano ponownej oceny reguł",
     "recordShow": "Nagraj program",
+    "recordSettings": {
+      "startEarly": "",
+      "endLate": "",
+      "newOnly": "",
+      "anyChannel": "",
+      "anyTime": "",
+      "skipInLibrary": "",
+      "keepUpTo": "",
+      "keepUpToHint": ""
+    },
     "startingInMinutes": "Rozpocznie się za ${minutes} min",
     "dayAtTime": "${day} o ${time}",
     "invalidPlaybackData": "${product} zwrócił nieprawidłowe dane odtwarzania TV na żywo",
@@ -1665,7 +1677,8 @@
       "usePhoneToControl": "Użyj urządzenia mobilnego, aby sterować tą aplikacją",
       "startServer": "Uruchom serwer",
       "stopServer": "Zatrzymaj serwer",
-      "minimize": "Minimalizuj"
+      "minimize": "Minimalizuj",
+      "manualAddressHint": ""
     },
     "pairing": {
       "discoveryDescription": "Urządzenia Plezy z tym samym kontem Plex pojawią się tutaj",
