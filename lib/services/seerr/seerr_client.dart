@@ -30,8 +30,7 @@ typedef SeerrPlexTokenSupplier = Future<String?> Function();
 /// On 401 it re-logins silently via [SeerrAuthService.reauth] (password
 /// methods use the stored secret; plex uses [plexTokenSupplier]), swaps the
 /// cookie, and retries once. Concurrent re-auths coalesce per instance+user
-/// so a burst of in-flight 401s triggers a single login POST — the same
-/// shape as `TraktClient._refreshesByToken`.
+/// so a burst of in-flight 401s triggers a single login POST.
 class SeerrClient {
   static final KeyedFutureCoalescer<String, SeerrSession> _reauthsByIdentity = KeyedFutureCoalescer();
 
@@ -83,7 +82,13 @@ class SeerrClient {
   Future<SeerrPublicSettings> getPublicSettings() async {
     if (_publicSettingsCache case final SeerrPublicSettings cached) return cached;
     final data = await _request('GET', '/settings/public');
-    return _publicSettingsCache = SeerrPublicSettings.fromJson(data as Map<String, dynamic>);
+    final settings = SeerrPublicSettings.fromJson(data as Map<String, dynamic>);
+    _publicSettingsCache = settings;
+    // Every settings fetch re-derives the product discriminator (MediaStatus
+    // codes 6/7 decode per product) so legacy sessions persisted before the
+    // flag existed, and sessions whose instance changed product, converge.
+    if (settings.product != _session.product) _adopt(_session.copyWith(product: settings.product));
+    return settings;
   }
 
   // ---------- Discover / search ----------
@@ -211,7 +216,11 @@ class SeerrClient {
       res = await _http.send(method, path, query: query, body: body);
       if (res.statusCode == 401) {
         onSessionInvalidated();
-        throw const SeerrAuthException('Session rejected after successful re-auth', statusCode: 401);
+        throw SeerrAuthException(
+          'Session rejected after successful re-auth',
+          statusCode: 401,
+          display: t.seerr.sessionRejectedAfterReauth,
+        );
       }
     }
     SeerrHttpClient.throwForStatus(res);
@@ -245,8 +254,16 @@ class SeerrClient {
   /// runtime check when a caller hands us a `Future<String> Function()`.
   Future<String?> _resolvePlexToken() async => plexTokenSupplier == null ? null : await plexTokenSupplier!();
 
+  /// Adopt a refreshed session, merging the product discriminator instead of
+  /// wholesale-replacing it: a re-auth completes from the snapshot taken when
+  /// it started, so a concurrent [getPublicSettings] adoption would otherwise
+  /// be overwritten — and the settings cache means it would never be
+  /// reapplied. Cached settings are authoritative; failing that, a known
+  /// product never downgrades to unknown.
   void _adopt(SeerrSession next) {
-    updateSession(next);
-    onSessionUpdated?.call(next);
+    final product = _publicSettingsCache?.product ?? _session.product;
+    final merged = product == SeerrProduct.unknown || product == next.product ? next : next.copyWith(product: product);
+    updateSession(merged);
+    onSessionUpdated?.call(merged);
   }
 }

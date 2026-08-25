@@ -22,8 +22,8 @@ enum MediaBrowserDialect {
   jellyfin,
   emby;
 
-  /// Stable wire/persistence id. Matches the [MediaBackend] and
-  /// `ConnectionKind` ids for the same server kind.
+  /// Stable wire/persistence id. Matches the [MediaBackend] ids for the
+  /// same server kind.
   String get id => switch (this) {
     MediaBrowserDialect.jellyfin => 'jellyfin',
     MediaBrowserDialect.emby => 'emby',
@@ -81,8 +81,10 @@ enum MediaBrowserDialect {
 
   /// `/Videos/{id}/Trickplay/{width}/{n}.jpg` sprite sheets and the
   /// `Trickplay` item field (Jellyfin 10.9+). Emby 404s on the route and never
-  /// fills the field; its own preview transports are unwired — see
-  /// [ServerCapabilities.emby].
+  /// fills the field; its scrub previews ride a Roku-format BIF at
+  /// `/Videos/{id}/index.bif` instead (see [ServerCapabilities.emby]), parsed
+  /// by the shared BIF service. This flag gates only the Jellyfin manifest
+  /// transport, not Emby scrub previews.
   bool get supportsTrickplay => this == MediaBrowserDialect.jellyfin;
 
   /// `/MediaSegments/{itemId}` intro/outro/credit markers (Jellyfin 10.10+).
@@ -107,6 +109,14 @@ enum MediaBrowserDialect {
   /// measured 200 on Emby 4.9.5 (the row leaves `/Users/{uid}/Items/Resume`
   /// while `UserData.PlaybackPositionTicks` survives), and 404 on Jellyfin
   /// 10.11 for both that spelling and `/UserItems/{id}/HideFromResume`.
+  ///
+  /// The dedicated resume route is the *only* listing that honours the flag:
+  /// `/Items?Filters=IsResumable` and `/Shows/NextUp?SeriesId=` keep returning
+  /// hidden rows, and no public filter or `UserData` field exposes the flag
+  /// (#2003), which is why every Emby playback shelf reads that route — see
+  /// [resumeReturnsOnlyStartedItems]. Reporting new playback clears the flag
+  /// server-side, so a removed item legitimately returns once the user resumes
+  /// it.
   bool get supportsContinueWatchingRemoval => this == MediaBrowserDialect.emby;
 
   /// `POST /Items/{id}` persists genre and tag edits from the `GenreItems` /
@@ -132,17 +142,26 @@ enum MediaBrowserDialect {
   /// shelf has to be reconstructed client-side from recently played episodes.
   bool get supportsGlobalNextUp => this == MediaBrowserDialect.jellyfin;
 
-  /// The resume route returns only items with a saved playback position.
+  /// `GET /Shows/NextUp` understands `EnableRewatching`, which keeps a finished
+  /// series in Next Up while the user rewatches it.
   ///
-  /// Jellyfin-only. Measured with one in-progress movie and 30 started series:
-  /// Jellyfin's `/UserItems/Resume` returned exactly the movie, while Emby's
-  /// `/Users/{uid}/Items/Resume` returned 30 rows — the movie plus 29
-  /// zero-position *next* episodes — and `Filters=IsResumable` did not remove
-  /// them. Emby's own UI merges both into one shelf; Plezy models Continue
-  /// Watching and Next Up as separate rows, so the Emby resume leg is filtered
-  /// to genuine progress and the next-up rows come from the Next Up path
-  /// instead. Without the filter a started series occupies both rows and can
-  /// push the real in-progress item out of a limited one.
+  /// Jellyfin-only: the parameter arrived with Jellyfin's own rewatching
+  /// support (jellyfin#7253, 10.8) and has no Emby counterpart, so sending it
+  /// there would be a silently ignored query parameter at best.
+  bool get supportsNextUpRewatching => this == MediaBrowserDialect.jellyfin;
+
+  /// The dedicated resume route returns only items with a saved playback
+  /// position.
+  ///
+  /// Jellyfin-only. Measured on Emby 4.9.5: `/Users/{uid}/Items/Resume`
+  /// returns the genuinely in-progress items *and* one zero-position next
+  /// episode per started series — Emby's own home merges both into one shelf —
+  /// and no `Filters` value removes the extra rows. Plezy models Continue
+  /// Watching and Next Up as separate rows, so the Emby client splits the
+  /// response by `UserData.PlaybackPositionTicks` instead: positive rows feed
+  /// Continue Watching, zero-position episode rows feed Next Up. The route has
+  /// to be read despite the conflation because it is the only listing that
+  /// honours `HideFromResume` — see [supportsContinueWatchingRemoval].
   bool get resumeReturnsOnlyStartedItems => this == MediaBrowserDialect.jellyfin;
 
   /// `/Sessions/Playing` and `/Sessions/Playing/Progress` reject a body with no

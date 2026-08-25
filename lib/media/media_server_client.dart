@@ -7,6 +7,7 @@ import '../utils/app_logger.dart';
 import '../utils/media_server_http_client.dart' show AbortController, MediaServerResponse, throwIfHttpError;
 import '../utils/external_ids.dart';
 import '../utils/watch_state_notifier.dart';
+import 'artist_discography.dart';
 import 'download_resolution.dart';
 import 'ids.dart';
 import 'library_filter_result.dart';
@@ -70,6 +71,42 @@ abstract interface class GracefullyCloseable {
   Future<void> closeGracefully({Duration drainTimeout});
 }
 
+/// Per-leg outcome sink for hub fetches.
+///
+/// Home rows are best-effort by design: a hub leg that fails degrades to an
+/// empty list rather than sinking the screen. That makes "this server has no
+/// rows" and "every row request failed" indistinguishable at the aggregation
+/// boundary, so a totally failed refresh was reported to the user as a
+/// success (#1829).
+///
+/// Callers that need to tell them apart pass a sink and the backend records
+/// each leg it degraded. A sink rather than a widened return type keeps every
+/// existing caller untouched, and lets a response carry *partial* rows
+/// alongside a failure — which throwing cannot.
+///
+/// Deliberately not recorded: legs whose degradation is intentional rather
+/// than a fault, i.e. Emby's series-reconstruction deadline and its
+/// per-series probes.
+class HubFetchDiagnostics {
+  var _failed = false;
+  var _cancelled = false;
+
+  /// A leg failed for a reason that is not a client-side abort.
+  bool get failed => _failed;
+
+  /// A leg was aborted client-side. Cancellation is not failure: a disrupted
+  /// pass says nothing about the server's actual content.
+  bool get cancelled => _cancelled;
+
+  void recordFailure(Object error) {
+    if (error is MediaServerHttpException && error.isCancellation) {
+      _cancelled = true;
+    } else {
+      _failed = true;
+    }
+  }
+}
+
 abstract class MediaServerClient {
   ServerId get serverId;
   String? get serverName;
@@ -104,10 +141,6 @@ abstract class MediaServerClient {
   ApiCache get cache;
 
   Future<List<MediaLibrary>> fetchLibraries();
-
-  /// Page through items in [libraryId] using the neutral [query]. Backends
-  /// translate sort/filter clauses into their own DSL.
-  Future<LibraryPage<MediaItem>> fetchLibraryContent(String libraryId, LibraryQuery query);
 
   /// Backend-aware paginated content fetch.
   ///
@@ -172,15 +205,15 @@ abstract class MediaServerClient {
   /// HTTP status throws.
   ///
   /// Plex bundles both via `/library/metadata/{id}?includeOnDeck=1`. Jellyfin
-  /// has no equivalent endpoint and needs a second request for on-deck, so it
-  /// would otherwise hold the item behind a round trip the detail screen does
-  /// not need in order to paint.
+  /// has no equivalent endpoint and chains further round trips — library
+  /// attribution via `/Items/{id}/Ancestors`, on-deck for shows — that the
+  /// detail screen does not need in order to paint.
   ///
   /// [onItemReady] exists for exactly that case: implementations invoke it as
-  /// soon as the item is known, *if* that is strictly before the on-deck
-  /// lookup finishes. Backends that return both together never invoke it, and
-  /// neither does a null item. Callers must therefore treat it as an optional
-  /// early paint and still handle the returned record.
+  /// soon as the item is known, *if* that is strictly before the full lookup
+  /// settles. Backends that resolve everything in one round trip never invoke
+  /// it, and neither does a null item. Callers must therefore treat it as an
+  /// optional early paint and still handle the returned record.
   Future<({MediaItem? item, MediaItem? onDeckEpisode})> fetchItemWithOnDeck(
     String id, {
     void Function(MediaItem item)? onItemReady,
@@ -257,6 +290,20 @@ abstract class MediaServerClient {
   /// `/Items?AlbumArtistIds={id}&IncludeItemTypes=MusicAlbum`.
   Future<List<MediaItem>> fetchArtistAlbums(MediaItem artist);
 
+  /// The artist's discography split into release-format sections (albums,
+  /// singles & EPs, live, compilations), in display order. Plex follows the
+  /// album listing with one batched by-id metadata request for the
+  /// `Format`/`Subformat` tags (listing rows never carry them) and classifies
+  /// each album; if the tag fetch fails it degrades to a single flat
+  /// `albums` group.
+  ///
+  /// Jellyfin/Emby `BaseItemDto`s carry no single/EP/live/compilation
+  /// taxonomy, so the MediaBrowser family always returns exactly one
+  /// `albums` group. No [ServerCapabilities] flag gates this: support is
+  /// encoded in the result shape (one group = no wire taxonomy) and no UI
+  /// affordance would consult a flag, so a flag would be dead weight.
+  Future<List<ArtistDiscographyGroup>> fetchArtistDiscography(MediaItem artist);
+
   /// Tracks of album [albumId] in disc/track order. Plex:
   /// `/library/metadata/{id}/children`; Jellyfin:
   /// `/Items?AlbumIds={id}&IncludeItemTypes=Audio&SortBy=ParentIndexNumber,IndexNumber`
@@ -302,7 +349,14 @@ abstract class MediaServerClient {
 
   /// Curated home-screen hubs across all libraries (Plex Discover; Jellyfin
   /// synthesizes `Latest` plus optional `Resume` + `NextUp`).
-  Future<List<MediaHub>> fetchGlobalHubs({int limit = defaultHubPreviewLimit, bool includePlaybackHubs = true});
+  ///
+  /// [diagnostics], when supplied, receives every leg this call degraded to
+  /// empty, so the caller can tell an empty home from a failed one (#1829).
+  Future<List<MediaHub>> fetchGlobalHubs({
+    int limit = defaultHubPreviewLimit,
+    bool includePlaybackHubs = true,
+    HubFetchDiagnostics? diagnostics,
+  });
 
   /// Hubs scoped to a single library section. [libraryName] is baked into
   /// the title of synthetic hubs (Jellyfin) so per-library "Recently Added"
@@ -310,12 +364,14 @@ abstract class MediaServerClient {
   /// [includePlaybackHubs] lets surfaces that already render Continue
   /// Watching skip duplicate playback rows. [libraryKind] lets backends avoid
   /// irrelevant expensive probes, e.g. Jellyfin `NextUp` for movie libraries.
+  /// [diagnostics] carries degraded legs as in [fetchGlobalHubs].
   Future<List<MediaHub>> fetchLibraryHubs(
     String libraryId, {
     required String libraryName,
     int limit = defaultHubPreviewLimit,
     bool includePlaybackHubs = true,
     MediaKind? libraryKind,
+    HubFetchDiagnostics? diagnostics,
   });
 
   /// "More like this" recommendations for [id].
@@ -348,6 +404,14 @@ abstract class MediaServerClient {
   /// emission (and tracker fan-out); the offline sync replay calls this
   /// directly precisely because the event already fired when the action was
   /// queued.
+  ///
+  /// Postcondition: once this completes the backend must no longer treat
+  /// [item] as resumable, so it cannot come back from [fetchContinueWatching].
+  /// Plex gets this for free (PMS filters watched items out of its on-deck
+  /// hub). MediaBrowser derives Continue Watching membership purely from
+  /// `UserData.PlaybackPositionTicks > 0`, so its implementation must ensure
+  /// the resume position is cleared rather than assume the played flag did it
+  /// (#1812).
   Future<void> markWatched(MediaItem item);
 
   /// Mark [item] as unwatched. Transport only — see [markWatched].
@@ -502,7 +566,10 @@ abstract class MediaServerClient {
   /// artwork drawn with [BoxFit.contain] (clear logos), where the overshoot is
   /// decoded and thrown away: a 4313×1035 logo asked for at 1200×360 comes back
   /// 1500×360 covering versus 1200×288 fitting, for ~20-30% more bytes and no
-  /// extra rendered detail. Neither mode crops or changes the aspect ratio.
+  /// extra rendered detail. Neither mode crops, distorts, or upscales past the
+  /// source: Plex requests are built with `upscale=0` so oversized requests
+  /// return native resolution, and Jellyfin's `MaxWidth`/`MaxHeight` never
+  /// enlarge.
   String thumbnailUrl(String? path, {int? width, int? height, bool cover = true});
 
   /// Proxy an absolute external image URL through the server's transcoder
@@ -761,10 +828,18 @@ extension MediaServerClientScope on MediaServerClient {
   /// In-player sessions that *did* give the backend an observable crossing use
   /// [notifyWatchedFromPlaybackSession] instead.
   Future<void> markWatchedFromPlaybackStop(MediaItem item) async {
-    if (!marksWatchedOnPlaybackStopped) {
+    final performedExplicitMark = !marksWatchedOnPlaybackStopped;
+    if (performedExplicitMark) {
       await markWatched(item);
     }
-    WatchStateNotifier().notifyWatched(item: item, isNowWatched: true, cacheServerId: cacheServerId);
+    WatchStateNotifier().notifyWatched(
+      item: item,
+      isNowWatched: true,
+      cacheServerId: cacheServerId,
+      // A successful report cannot prove that the backend marked the item
+      // played; only the explicit mutation settles this patch.
+      serverAcknowledged: performedExplicitMark,
+    );
   }
 
   /// Emit the local watched event for [item] without touching the server.
@@ -778,8 +853,17 @@ extension MediaServerClientScope on MediaServerClient {
   /// records the same watch twice — a second Trakt-plugin scrobble on Jellyfin
   /// (#1287), a second Play History row and an inflated `viewCount` on Plex
   /// (#1740).
-  void notifyWatchedFromPlaybackSession(MediaItem item) {
-    WatchStateNotifier().notifyWatched(item: item, isNowWatched: true, cacheServerId: cacheServerId);
+  ///
+  /// The event remains unacknowledged because reporting success proves only
+  /// receipt, not that the server classified the item as played. The caller
+  /// keeps the returned patch id so a later explicit mark can promote it.
+  WatchPatchId? notifyWatchedFromPlaybackSession(MediaItem item) {
+    return WatchStateNotifier().notifyWatched(
+      item: item,
+      isNowWatched: true,
+      cacheServerId: cacheServerId,
+      serverAcknowledged: false,
+    );
   }
 }
 
@@ -823,6 +907,12 @@ abstract interface class MediaDeletionPermissionClient {
   /// and on throw.
   Future<bool?> fetchDeletePermission(MediaItem item);
 }
+
+/// Bounds how old a cached metadata row may be to be served without a network
+/// round trip on playback start. Sized to cover the detail-screen-visit →
+/// play-tap gap while keeping stale-file risk (replaced/deleted media parts)
+/// negligible.
+const Duration playbackMetadataCacheFreshness = Duration(minutes: 5);
 
 /// Cache-aware fetch helpers shared by both backends so the offline-first /
 /// network-then-cache pattern lives in one place.

@@ -6,6 +6,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import '../../i18n/strings.g.dart';
 import '../../models/audio_quality_preset.dart';
 import '../../models/transcode_quality_preset.dart';
+import '../../models/player_setting_scope.dart';
 import '../../mpv/player/platform/player_android.dart';
 import '../../utils/quality_preset_labels.dart';
 import '../../services/companion_remote/companion_remote_host_controller.dart';
@@ -18,7 +19,6 @@ import '../../widgets/setting_tile.dart';
 import '../../widgets/settings_builder.dart';
 import '../../widgets/settings_page.dart';
 import '../../widgets/settings_section.dart';
-import 'atmos_diagnostics_screen.dart';
 import 'external_player_screen.dart';
 import 'mpv_config_screen.dart';
 import 'settings_utils.dart';
@@ -57,6 +57,7 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
         SettingsService.matchRefreshRate,
         SettingsService.matchDynamicRange,
         SettingsService.matchContentFrameRate,
+        SettingsService.matchContentResolution,
         SettingsService.audioDownmix,
       ],
       builder: (context) {
@@ -67,7 +68,8 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
             PlatformDetector.isAppleTV() ||
             (Platform.isWindows &&
                 (svc.read(SettingsService.matchRefreshRate) || svc.read(SettingsService.matchDynamicRange))) ||
-            (Platform.isAndroid && svc.read(SettingsService.matchContentFrameRate));
+            (Platform.isAndroid &&
+                (svc.read(SettingsService.matchContentFrameRate) || svc.read(SettingsService.matchContentResolution)));
 
         return SettingsPage(
           title: Text(t.settings.videoPlayback),
@@ -80,6 +82,7 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
                 _hardwareDecodingTile(),
                 if (PlatformDetector.supportsPictureInPicture()) _autoPipTile(),
                 if (Platform.isAndroid) _matchContentFrameRateTile(),
+                if (Platform.isAndroid && PlatformDetector.isTV()) _matchContentResolutionTile(),
                 if (Platform.isWindows) _matchRefreshRateTile(),
                 if (Platform.isWindows) _matchDynamicRangeTile(),
                 if (showDisplaySwitchDelay) _displaySwitchDelayTile(),
@@ -88,9 +91,10 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
                 _audioDownmixTile(),
                 if (downmixOn) _downmixCenterBoostTile(),
                 if (downmixOn) _downmixNormalizeTile(),
-                if (PlatformDetector.isAppleTV()) _atmosDiagnosticsTile(),
+                if (exoActive) _demuxerModeTile(),
                 if (exoActive) _dvConversionModeTile(),
                 _bufferSizeTile(),
+                if (exoActive) _playbackBufferTile(),
                 _defaultQualityTile(),
                 _musicQualityTile(),
               ],
@@ -111,6 +115,7 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
 
             _seekAndTimingGroup(),
             _behaviorGroup(context, isMobile),
+            _rememberPlayerChangesGroup(),
             _autoSkipGroup(),
             const SizedBox(height: 24),
           ],
@@ -177,6 +182,51 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
     ],
   );
 
+  Widget _rememberPlayerChangesGroup() => SettingsGroup(
+    title: t.settings.rememberPlayerChanges,
+    children: [
+      _playerScopeTile(
+        pref: SettingsService.playbackSpeedScope,
+        icon: Symbols.speed_rounded,
+        title: t.settings.scopePlaybackSpeed,
+      ),
+      _playerScopeTile(
+        pref: SettingsService.shaderPresetScope,
+        icon: Symbols.auto_fix_high_rounded,
+        title: t.settings.scopeShaderPreset,
+      ),
+      _playerScopeTile(
+        pref: SettingsService.boxFitScope,
+        icon: Symbols.aspect_ratio_rounded,
+        title: t.settings.scopeAspectRatio,
+      ),
+      _playerScopeTile(
+        pref: SettingsService.syncOffsetScope,
+        icon: Symbols.sync_rounded,
+        title: t.settings.scopeSyncOffsets,
+      ),
+    ],
+  );
+
+  Widget _playerScopeTile({
+    required EnumPref<PlayerSettingScope> pref,
+    required IconData icon,
+    required String title,
+  }) => SettingSelectionTile<PlayerSettingScope>(
+    pref: pref,
+    icon: icon,
+    title: title,
+    subtitleBuilder: (scope) => '${_playerScopeLabel(scope)} · ${t.settings.rememberPlayerChangesDescription}',
+    options: PlayerSettingScope.values.map((s) => DialogOption(value: s, title: _playerScopeLabel(s))).toList(),
+  );
+
+  String _playerScopeLabel(PlayerSettingScope scope) => switch (scope) {
+    PlayerSettingScope.off => t.settings.playerScopeOff,
+    PlayerSettingScope.global => t.settings.playerScopeGlobal,
+    PlayerSettingScope.library => t.settings.playerScopeLibrary,
+    PlayerSettingScope.title => t.settings.playerScopeTitle,
+  };
+
   Widget _behaviorGroup(BuildContext context, bool isMobile) => SettingsGroup(
     title: t.settings.behavior,
     children: [
@@ -214,6 +264,13 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
         title: t.settings.showChapterMarkersOnTimeline,
         subtitle: t.settings.showChapterMarkersOnTimelineDescription,
       ),
+      SettingSelectionTile<SpecialsOrdering>(
+        pref: SettingsService.specialsOrdering,
+        icon: Symbols.low_priority_rounded,
+        title: t.settings.specialsOrdering,
+        subtitleBuilder: (mode) => '${_specialsOrderingLabel(mode)} · ${t.settings.specialsOrderingDescription}',
+        options: SpecialsOrdering.values.map((m) => DialogOption(value: m, title: _specialsOrderingLabel(m))).toList(),
+      ),
       if (!isMobile)
         SettingSwitchTile(
           pref: SettingsService.clickVideoTogglesPlayback,
@@ -223,6 +280,12 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
         ),
     ],
   );
+
+  String _specialsOrderingLabel(SpecialsOrdering mode) => switch (mode) {
+    SpecialsOrdering.respectServer => t.settings.specialsOrderingServer,
+    SpecialsOrdering.airDate => t.settings.specialsOrderingAirDate,
+    SpecialsOrdering.specialsLast => t.settings.specialsOrderingLast,
+  };
 
   Widget _autoSkipGroup() => SettingsGroup(
     title: t.settings.autoSkip,
@@ -320,6 +383,16 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
     subtitle: t.settings.matchContentFrameRateDescription,
   );
 
+  // Android TV only: on phone/tablet panels "match the video's resolution"
+  // would downshift the panel below native for most content, which is
+  // surprising rather than useful. The native switch path itself is generic.
+  Widget _matchContentResolutionTile() => SettingSwitchTile(
+    pref: SettingsService.matchContentResolution,
+    icon: Symbols.aspect_ratio_rounded,
+    title: t.settings.matchContentResolution,
+    subtitle: t.settings.matchContentResolutionDescription,
+  );
+
   Widget _matchRefreshRateTile() => SettingSwitchTile(
     pref: SettingsService.matchRefreshRate,
     icon: Symbols.display_settings_rounded,
@@ -368,13 +441,6 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
     subtitle: t.settings.audioDownmixNormalizeDescription,
   );
 
-  Widget _atmosDiagnosticsTile() => SettingNavigationTile(
-    icon: Symbols.spatial_audio_rounded,
-    title: t.settings.atmosDiagnostics,
-    subtitle: t.settings.atmosDiagnosticsDescription,
-    destinationBuilder: (_) => const AtmosDiagnosticsScreen(),
-  );
-
   // Visibility for this and the three tiles below is decided by the hoisted
   // SettingsBuilder in build().
   Widget _displaySwitchDelayTile() => SettingNumberTile(
@@ -412,6 +478,19 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
     DvConversionModePreference.hevcStrip => t.settings.dvConversionHevcStrip,
   };
 
+  Widget _demuxerModeTile() => SettingSelectionTile<DemuxerPreference>(
+    pref: SettingsService.demuxerMode,
+    icon: Symbols.schema_rounded,
+    title: t.settings.demuxer,
+    subtitleBuilder: (mode) => '${_demuxerModeLabel(mode)} · ${t.settings.demuxerDescription}',
+    options: DemuxerPreference.values.map((m) => DialogOption(value: m, title: _demuxerModeLabel(m))).toList(),
+  );
+
+  String _demuxerModeLabel(DemuxerPreference mode) => switch (mode) {
+    DemuxerPreference.ffmpeg => t.settings.demuxerFfmpeg,
+    DemuxerPreference.media3 => t.settings.demuxerMedia3,
+  };
+
   Widget _bufferSizeTile() {
     final bufferOptions = const [0, 64, 128, 256, 512, 1024];
     return SettingSelectionTile<int>(
@@ -432,6 +511,22 @@ class _PlaybackSettingsScreenState extends State<PlaybackSettingsScreen> {
       },
     );
   }
+
+  Widget _playbackBufferTile() => SettingSelectionTile<PlaybackBufferTier>(
+    pref: SettingsService.playbackBufferTier,
+    icon: Symbols.hourglass_top_rounded,
+    title: t.settings.playbackBuffer,
+    subtitleBuilder: (tier) => '${_playbackBufferLabel(tier)} · ${t.settings.playbackBufferDescription}',
+    options: PlaybackBufferTier.values
+        .map((tier) => DialogOption(value: tier, title: _playbackBufferLabel(tier)))
+        .toList(),
+  );
+
+  String _playbackBufferLabel(PlaybackBufferTier tier) => switch (tier) {
+    PlaybackBufferTier.auto => t.settings.playbackBufferAuto,
+    PlaybackBufferTier.large => t.settings.playbackBufferLarge,
+    PlaybackBufferTier.extraLarge => t.settings.playbackBufferExtraLarge,
+  };
 
   Widget _defaultQualityTile() => SettingSelectionTile<TranscodeQualityPreset>(
     pref: SettingsService.defaultQualityPreset,

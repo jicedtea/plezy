@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../connection/connection.dart';
+import '../media/account_preferences.dart';
+import '../media/artist_discography.dart';
 import '../media/episode_collection.dart';
 import '../media/library_filter_result.dart';
 import '../media/library_first_character.dart';
@@ -30,10 +33,15 @@ import '../media/media_server_client.dart';
 import '../media/playback_report_metadata.dart';
 import '../media/server_capabilities.dart';
 import '../models/audio_quality_preset.dart';
+import '../models/jellyfin/jellyfin_account_preferences.dart';
+import '../models/jellyfin/jellyfin_display_preferences.dart';
 import '../models/jellyfin/jellyfin_user_profile.dart';
 import '../models/livetv_capture_buffer.dart';
 import '../models/livetv_channel.dart';
 import '../models/livetv_program.dart';
+import '../models/livetv_dvr.dart';
+import '../models/media_grab_operation.dart';
+import '../models/media_subscription.dart';
 import '../media/media_source_info.dart';
 import '../media/media_sort.dart';
 import '../media/media_version.dart';
@@ -56,6 +64,7 @@ import 'jellyfin_auth_header.dart';
 import 'jellyfin_endpoint_discovery.dart';
 import '../media/download_resolution.dart';
 import 'api_cache.dart';
+import 'bif_thumbnail_service.dart';
 import 'download_artwork_helpers.dart';
 import 'jellyfin_api_cache.dart';
 import 'jellyfin_mappers.dart';
@@ -66,10 +75,13 @@ import 'jellyfin_trickplay_service.dart';
 import 'media_browser_paths.dart';
 import 'playback_initialization_types.dart';
 import 'scrub_preview_source.dart';
+import 'settings_service.dart' show SpecialsOrdering;
 import 'subtitle_preference.dart';
 import 'track_selection_service.dart';
 import '../mpv/mpv.dart';
+import '../utils/codec_utils.dart';
 
+part 'jellyfin_client/parts/account_preferences.dart';
 part 'jellyfin_client/parts/browse.dart';
 part 'jellyfin_client/parts/music.dart';
 part 'jellyfin_client/parts/playback.dart';
@@ -78,6 +90,7 @@ part 'jellyfin_client/parts/playlists.dart';
 part 'jellyfin_client/parts/collections.dart';
 part 'jellyfin_client/parts/file_info.dart';
 part 'jellyfin_client/parts/live_tv.dart';
+part 'jellyfin_client/parts/live_tv_dvr.dart';
 part 'jellyfin_client/parts/images_downloads.dart';
 part 'jellyfin_client/parts/metadata_edit.dart';
 
@@ -92,9 +105,57 @@ mixin _JellyfinClientInternals on MediaServerCacheMixin {
   MediaBrowserDialect get dialect;
   MediaBrowserPaths get paths;
   FailoverHttpClient get _http;
+
+  /// Cached `DisplayPreferences` value: whether `/Shows/NextUp` requests carry
+  /// `EnableRewatching=true`. Written by the account-preferences part, read by
+  /// the browse part on every Next Up request, so it is declared here.
+  bool _rewatchingInNextUp = false;
+
+  /// Whether this server both understands the parameter and has it switched on
+  /// for this account.
+  bool get sendNextUpRewatching => _rewatchingInNextUp && dialect.supportsNextUpRewatching;
+
   MediaItem? _mapItem(Map<String, dynamic> json);
   List<MediaItem> _mapItems(Iterable<Map<String, dynamic>> items);
   String? _absolutizeImagePath(String? path);
+  Future<JellyfinPlaybackBundle?> fetchPlaybackBundle(
+    String itemId, {
+    int sourceIndex = 0,
+    String? sourceId,
+    String? preferredSignature,
+  });
+  String buildDirectStreamUrl(
+    String itemId, {
+    String? container,
+    String? mediaSourceId,
+    String? playSessionId,
+    String? liveStreamId,
+    int? audioStreamIndex,
+  });
+  String buildAudioDirectStreamUrl(String itemId, {String? container, String? mediaSourceId});
+  Future<Map<String, dynamic>> getPlaybackInfo(
+    String itemId, {
+    int? maxStreamingBitrate = 100_000_000,
+    String? mediaSourceId,
+    String? liveStreamId,
+    int? startTimeTicks,
+    int? audioStreamIndex,
+    int? subtitleStreamIndex,
+    bool? autoOpenLiveStream,
+    bool? enableDirectPlay,
+    bool? enableDirectStream,
+    bool? enableTranscoding,
+    bool? allowVideoStreamCopy,
+    bool? allowAudioStreamCopy,
+    bool audioProfile,
+    bool burnSubtitles,
+  });
+  String _withApiKey(String urlOrPath);
+
+  /// Positional core of the tolerant `/Items` array fetch. The browse part's
+  /// implementation widens it with optional retry/abort/diagnostics knobs that
+  /// only its own call sites pass.
+  Future<List<Map<String, dynamic>>> _safeFetchItemsArray(String path, Map<String, dynamic> queryParameters);
 
   /// Row metadata Jellyfin volunteers on `/Items` list responses but Emby
   /// withholds unless it is named in `Fields`.
@@ -166,6 +227,7 @@ class JellyfinClient
     with
         MediaServerCacheMixin,
         _JellyfinClientInternals,
+        _JellyfinAccountPreferencesMethods,
         _JellyfinBrowseMethods,
         _JellyfinMusicMethods,
         _JellyfinPlaybackMethods,

@@ -10,6 +10,7 @@ import 'package:plezy/database/app_database.dart';
 import 'package:plezy/focus/focusable_wrapper.dart';
 import 'package:plezy/focus/input_mode_tracker.dart';
 import 'package:plezy/i18n/strings.g.dart';
+import 'package:plezy/models/plex/plex_home_user.dart';
 import 'package:plezy/profiles/active_profile_provider.dart';
 import 'package:plezy/profiles/plex_home_service.dart';
 import 'package:plezy/profiles/profile.dart';
@@ -17,6 +18,8 @@ import 'package:plezy/profiles/profile_avatar.dart';
 import 'package:plezy/profiles/profile_connection.dart';
 import 'package:plezy/profiles/profile_connection_registry.dart';
 import 'package:plezy/profiles/profile_registry.dart';
+import 'package:plezy/screens/profile/pin_entry_dialog.dart';
+import 'package:plezy/screens/profile/profile_detail_screen.dart';
 import 'package:plezy/screens/profile/profile_switch_screen.dart';
 import 'package:plezy/services/storage_service.dart';
 import 'package:plezy/theme/mono_theme.dart';
@@ -40,7 +43,7 @@ void main() {
     final connections = _FakeConnectionRegistry(db);
     final profileConnections = _FakeProfileConnectionRegistry(db);
     final storage = await StorageService.getInstance();
-    final plexHome = PlexHomeService(
+    final plexHome = _NoTimerPlexHomeService(
       connections: connections,
       profileConnections: profileConnections,
       storage: storage,
@@ -59,6 +62,8 @@ void main() {
       await db.close();
     });
 
+    // Boot initializes the provider before the picker is reachable; mirror that.
+    await activeProfile.initialize();
     await tester.pumpWidget(
       TranslationProvider(
         child: MultiProvider(
@@ -104,7 +109,7 @@ void main() {
     final profileConnections = _FakeProfileConnectionRegistry(db);
     final storage = await StorageService.getInstance();
     await storage.markProfileUsed('local-kids', DateTime(2026, 1, 3));
-    final plexHome = PlexHomeService(
+    final plexHome = _NoTimerPlexHomeService(
       connections: connections,
       profileConnections: profileConnections,
       storage: storage,
@@ -123,6 +128,7 @@ void main() {
       await db.close();
     });
 
+    await activeProfile.initialize();
     await tester.pumpWidget(
       TranslationProvider(
         child: MultiProvider(
@@ -172,7 +178,7 @@ void main() {
     final connections = _FakeConnectionRegistry(db, [jellyfin]);
     final profileConnections = _FakeProfileConnectionRegistry(db, [link]);
     final storage = await StorageService.getInstance();
-    final plexHome = PlexHomeService(
+    final plexHome = _NoTimerPlexHomeService(
       connections: connections,
       profileConnections: profileConnections,
       storage: storage,
@@ -191,6 +197,7 @@ void main() {
       await db.close();
     });
 
+    await activeProfile.initialize();
     await tester.pumpWidget(
       TranslationProvider(
         child: MultiProvider(
@@ -235,7 +242,7 @@ void main() {
     final profileConnections = _FakeProfileConnectionRegistry(db);
     final storage = await StorageService.getInstance();
     await storage.markProfileUsed('local-kids', DateTime(2026, 1, 3));
-    final plexHome = PlexHomeService(
+    final plexHome = _NoTimerPlexHomeService(
       connections: connections,
       profileConnections: profileConnections,
       storage: storage,
@@ -254,6 +261,7 @@ void main() {
       await db.close();
     });
 
+    await activeProfile.initialize();
     await tester.pumpWidget(
       TranslationProvider(
         child: MultiProvider(
@@ -303,7 +311,7 @@ void main() {
     final connections = _FakeConnectionRegistry(db);
     final profileConnections = _FakeProfileConnectionRegistry(db);
     final storage = await StorageService.getInstance();
-    final plexHome = PlexHomeService(
+    final plexHome = _NoTimerPlexHomeService(
       connections: connections,
       profileConnections: profileConnections,
       storage: storage,
@@ -323,6 +331,7 @@ void main() {
       await db.close();
     });
 
+    await activeProfile.initialize();
     await tester.pumpWidget(
       InputModeTracker(
         child: TranslationProvider(
@@ -368,6 +377,371 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pump();
   });
+
+  testWidgets('names the Plex Home user and the account together, not the account alone', (tester) async {
+    await _pumpPicker(
+      tester,
+      profiles: [
+        Profile.plexHome(
+          id: 'home-alice',
+          displayName: 'Alice',
+          parentConnectionId: 'plex-account',
+          plexHomeUserUuid: 'alice-uuid',
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+      connections: [_plexAccount('Bob')],
+    );
+
+    expect(find.text('Alice'), findsOneWidget);
+    expect(
+      _relationChip(tester, tile: _tileFor('Alice'), first: 'Alice', second: 'Bob'),
+      t.profiles.plexAccountUserChip(user: 'Alice', account: 'Bob'),
+    );
+    expect(find.text('Bob'), findsNothing, reason: 'the owner name alone reads as being signed in as the owner');
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('names the borrowed Home user and the account it came from', (tester) async {
+    await _pumpPicker(
+      tester,
+      profiles: [Profile.local(id: 'local-alice', displayName: 'Alice', createdAt: DateTime(2026, 1, 1))],
+      connections: [_plexAccount('Bob')],
+      profileConnections: const [
+        ProfileConnection(
+          profileId: 'local-alice',
+          connectionId: 'plex-account',
+          userToken: 'borrowed-token',
+          userIdentifier: 'charlie-uuid',
+        ),
+      ],
+      homeUsers: [_homeUser('charlie-uuid', 'Charlie')],
+    );
+
+    expect(
+      _relationChip(tester, tile: _tileFor('Alice'), first: 'Charlie', second: 'Bob'),
+      t.profiles.plexAccountUserChip(user: 'Charlie', account: 'Bob'),
+    );
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('falls back to naming the account when the Home user cannot be resolved', (tester) async {
+    await _pumpPicker(
+      tester,
+      profiles: [Profile.local(id: 'local-alice', displayName: 'Alice', createdAt: DateTime(2026, 1, 1))],
+      connections: [_plexAccount('Bob')],
+      profileConnections: const [
+        ProfileConnection(
+          profileId: 'local-alice',
+          connectionId: 'plex-account',
+          userToken: 'borrowed-token',
+          userIdentifier: 'departed-uuid',
+        ),
+      ],
+    );
+
+    expect(find.text(t.profiles.plexAccountChip(account: 'Bob')), findsOneWidget);
+    expect(find.text('Bob'), findsNothing);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('lets a locale put the account before the user', (tester) async {
+    // ja renders the relation as `${account}経由の${user}`. Splitting the two
+    // halves across widgets — or across two translated fragments — would pin
+    // them to English order; this is the assertion that keeps them in one
+    // translated string.
+    // `runAsync`: a deferred locale library loads on the real event loop,
+    // which the widget tester's fake async would otherwise never pump.
+    await tester.runAsync(() => LocaleSettings.setLocale(AppLocale.ja));
+    addTearDown(() => LocaleSettings.setLocaleSync(AppLocale.en));
+    await _pumpPicker(
+      tester,
+      profiles: [
+        Profile.plexHome(
+          id: 'home-alice',
+          displayName: 'Alice',
+          parentConnectionId: 'plex-account',
+          plexHomeUserUuid: 'alice-uuid',
+          createdAt: DateTime(2026, 1, 1),
+        ),
+      ],
+      connections: [_plexAccount('Bob')],
+    );
+
+    final label = _relationChip(tester, tile: _tileFor('Alice'), first: 'Alice', second: 'Bob');
+    expect(label, t.profiles.plexAccountUserChip(user: 'Alice', account: 'Bob'));
+    expect(label.indexOf('Bob'), lessThan(label.indexOf('Alice')));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+  });
+
+  testWidgets('Manage on a PIN-protected non-active local profile requires its PIN', (tester) async {
+    await _pumpPicker(
+      tester,
+      profiles: [
+        Profile.local(id: 'local-owner', displayName: 'Owner', createdAt: DateTime(2026, 1, 1)),
+        Profile.local(
+          id: 'local-kids',
+          displayName: 'Kids',
+          pinHash: computePinHash('1234'),
+          createdAt: DateTime(2026, 1, 2),
+        ),
+      ],
+      connections: const [],
+      activeProfileId: 'local-owner',
+    );
+
+    // Bounded pumps whenever the PIN dialog is open: its autofocused field's
+    // cursor blink keeps scheduling frames, so pumpAndSettle never settles.
+    await _openTileMenu(tester, 'Kids');
+    await tester.tap(find.text(t.profiles.manage));
+    await _pumpBounded(tester);
+
+    expect(find.byType(PinEntryDialog), findsOneWidget, reason: 'Manage on a protected profile must ask for its PIN');
+    expect(find.byType(ProfileDetailScreen), findsNothing);
+
+    // A wrong PIN re-prompts with the retry error and never navigates.
+    await tester.enterText(find.byType(TextField), '9999');
+    await _pumpBounded(tester);
+
+    expect(find.byType(PinEntryDialog), findsOneWidget);
+    expect(find.text(t.profiles.incorrectPinTryAgain), findsOneWidget);
+    expect(find.byType(ProfileDetailScreen), findsNothing);
+
+    // Backing out of the retry leaves the picker unnavigated.
+    await tester.tap(find.text(t.common.cancel));
+    await _pumpBounded(tester);
+
+    expect(find.byType(PinEntryDialog), findsNothing);
+    expect(find.byType(ProfileDetailScreen), findsNothing);
+
+    // The right PIN proceeds to the detail screen. Bounded pumps only from
+    // here: the mounted detail screen never settles (indeterminate chrome),
+    // so pumpAndSettle would run into the test timeout.
+    await _openTileMenu(tester, 'Kids');
+    await tester.tap(find.text(t.profiles.manage));
+    await _pumpBounded(tester);
+    await tester.enterText(find.byType(TextField), '1234');
+    await _pumpBounded(tester);
+
+    expect(find.byType(ProfileDetailScreen), findsOneWidget);
+
+    // Pop the detail route before the shrink teardown so its subtree disposes
+    // inside a live navigator rather than during a whole-tree unmount.
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    // A duration pump: the detail screen's Drift stream builders schedule a
+    // zero-duration close timer on unmount, and a bare pump does not elapse
+    // fake time, so the timer would still be pending at the end-of-test check.
+    await tester.pump(const Duration(milliseconds: 100));
+  });
+
+  testWidgets('Delete on a PIN-protected non-active local profile requires its PIN', (tester) async {
+    await _pumpPicker(
+      tester,
+      profiles: [
+        Profile.local(id: 'local-owner', displayName: 'Owner', createdAt: DateTime(2026, 1, 1)),
+        Profile.local(
+          id: 'local-kids',
+          displayName: 'Kids',
+          pinHash: computePinHash('1234'),
+          createdAt: DateTime(2026, 1, 2),
+        ),
+      ],
+      connections: const [],
+      activeProfileId: 'local-owner',
+    );
+
+    // Bounded pumps while the PIN dialog is open — see the manage test.
+    await _openTileMenu(tester, 'Kids');
+    await tester.tap(find.text(t.profiles.delete));
+    await _pumpBounded(tester);
+
+    expect(find.byType(PinEntryDialog), findsOneWidget, reason: 'Delete on a protected profile must ask for its PIN');
+    expect(find.text(t.profiles.deleteThisProfileTitle), findsNothing);
+
+    // Cancelling the PIN prompt blocks the delete confirmation entirely.
+    await tester.tap(find.text(t.common.cancel));
+    await _pumpBounded(tester);
+
+    expect(find.byType(PinEntryDialog), findsNothing);
+    expect(find.text(t.profiles.deleteThisProfileTitle), findsNothing);
+
+    // The right PIN reaches the confirmation; close it without deleting.
+    await _openTileMenu(tester, 'Kids');
+    await tester.tap(find.text(t.profiles.delete));
+    await _pumpBounded(tester);
+    await tester.enterText(find.byType(TextField), '1234');
+    await _pumpBounded(tester);
+
+    expect(find.text(t.profiles.deleteThisProfileTitle), findsOneWidget);
+
+    await tester.tap(find.text(t.common.cancel));
+    await _pumpBounded(tester);
+    expect(find.text('Kids'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 100));
+  });
+
+  testWidgets('Manage on an unprotected profile opens the detail screen without a PIN prompt', (tester) async {
+    await _pumpPicker(
+      tester,
+      profiles: [Profile.local(id: 'local-owner', displayName: 'Owner', createdAt: DateTime(2026, 1, 1))],
+      connections: const [],
+    );
+
+    await _openTileMenu(tester, 'Owner');
+    await tester.tap(find.text(t.profiles.manage));
+    // Bounded pumps only: the mounted detail screen never settles.
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump(const Duration(milliseconds: 400));
+
+    expect(find.byType(PinEntryDialog), findsNothing);
+    expect(find.byType(ProfileDetailScreen), findsOneWidget);
+
+    tester.state<NavigatorState>(find.byType(Navigator).first).pop();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump(const Duration(milliseconds: 100));
+  });
+}
+
+/// Three bounded pumps covering a dialog/route transition without requiring
+/// quiescence: a focused text field's cursor blink and a mounted
+/// [ProfileDetailScreen] both keep scheduling work, so [WidgetTester
+/// .pumpAndSettle] would hang until the test timeout.
+Future<void> _pumpBounded(WidgetTester tester) async {
+  await tester.pump();
+  await tester.pump(const Duration(milliseconds: 400));
+  await tester.pump(const Duration(milliseconds: 400));
+}
+
+/// Boots the picker over a fixed profile/connection set. [homeUsers] seeds the
+/// live Plex Home cache, which is what turns a borrowed connection's
+/// `userIdentifier` uuid into a name.
+Future<void> _pumpPicker(
+  WidgetTester tester, {
+  required List<Profile> profiles,
+  required List<Connection> connections,
+  List<ProfileConnection> profileConnections = const [],
+  List<PlexHomeUser> homeUsers = const [],
+  String? activeProfileId,
+}) async {
+  final db = AppDatabase.forTesting(NativeDatabase.memory());
+  final profileRegistry = _FakeProfileRegistry(db, profiles);
+  final connectionRegistry = _FakeConnectionRegistry(db, connections);
+  final profileConnectionRegistry = _FakeProfileConnectionRegistry(db, profileConnections);
+  final storage = await StorageService.getInstance();
+  if (activeProfileId != null) {
+    await storage.setActiveProfileId(activeProfileId);
+  }
+  final plexHome = _NoTimerPlexHomeService(
+    connections: connectionRegistry,
+    profileConnections: profileConnectionRegistry,
+    storage: storage,
+    plexHomeUserFetcher: (_) async => homeUsers,
+  );
+  final activeProfile = ActiveProfileProvider(
+    registry: profileRegistry,
+    plexHome: plexHome,
+    connections: connectionRegistry,
+    profileConnections: profileConnectionRegistry,
+    storage: storage,
+  );
+  addTearDown(() async {
+    activeProfile.dispose();
+    await plexHome.dispose();
+    await db.close();
+  });
+  if (homeUsers.isNotEmpty) {
+    for (final connection in connections.whereType<PlexAccountConnection>()) {
+      expect(await plexHome.refresh(connection), isTrue);
+    }
+  }
+
+  // Boot initializes the provider before the picker is reachable; mirror that.
+  await activeProfile.initialize();
+  await tester.pumpWidget(
+    TranslationProvider(
+      child: MultiProvider(
+        providers: [
+          Provider<StorageService>.value(value: storage),
+          Provider<ProfileRegistry>.value(value: profileRegistry),
+          Provider<ProfileConnectionRegistry>.value(value: profileConnectionRegistry),
+          Provider<ConnectionRegistry>.value(value: connectionRegistry),
+          Provider<PlexHomeService>.value(value: plexHome),
+          ChangeNotifierProvider<ActiveProfileProvider>.value(value: activeProfile),
+        ],
+        child: MaterialApp(theme: monoTheme(dark: true), home: const ProfileSwitchScreen()),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
+PlexAccountConnection _plexAccount(String accountLabel) {
+  return PlexAccountConnection(
+    id: 'plex-account',
+    accountToken: 'token',
+    clientIdentifier: 'client',
+    accountLabel: accountLabel,
+    createdAt: DateTime(2026, 1, 1),
+  );
+}
+
+PlexHomeUser _homeUser(String uuid, String title) {
+  return PlexHomeUser(
+    id: 1,
+    uuid: uuid,
+    title: title,
+    thumb: '',
+    hasPassword: false,
+    restricted: false,
+    updatedAt: null,
+    admin: false,
+    guest: false,
+    protected: false,
+  );
+}
+
+Finder _tileFor(String displayName) {
+  return find.ancestor(of: find.text(displayName), matching: find.byType(FocusableWrapper));
+}
+
+/// Opens the actions menu on the tile named [name] via its trailing button.
+Future<void> _openTileMenu(WidgetTester tester, String name) async {
+  await tester.tap(find.descendant(of: _tileFor(name), matching: find.byTooltip(t.profiles.manage)));
+  await tester.pumpAndSettle();
+}
+
+/// The single chip label inside [tile] that names both [first] and [second].
+///
+/// Asserting that exactly one text node carries both halves is the point: two
+/// nodes, or one node plus a neighbouring label, would mean the relation is
+/// assembled in Dart and no locale could reorder it.
+String _relationChip(WidgetTester tester, {required Finder tile, required String first, required String second}) {
+  final labels = tester
+      .widgetList<Text>(find.descendant(of: tile, matching: find.byType(Text)))
+      .map((text) => text.data)
+      .whereType<String>()
+      .where((label) => label.contains(first) && label.contains(second))
+      .toList();
+  expect(labels, hasLength(1), reason: 'both halves must render as one translated string');
+  return labels.single;
 }
 
 /// Tile labels in painted order. Only the two names the reorder tests seed are
@@ -392,8 +766,10 @@ bool _tileIsHighlighted(WidgetTester tester, String name) {
     find.descendant(of: wrapper, matching: find.byType(AnimatedContainer)),
   );
   return containers.any((container) {
-    final border = (container.decoration as BoxDecoration?)?.border?.top;
-    return border != null && border.style != BorderStyle.none && border.color.a > 0;
+    final decoration = container.decoration as BoxDecoration?;
+    final border = decoration?.border?.top;
+    final fill = decoration?.color;
+    return (border != null && border.style != BorderStyle.none && border.color.a > 0) || (fill != null && fill.a > 0);
   });
 }
 
@@ -444,6 +820,9 @@ class _FakeConnectionRegistry extends ConnectionRegistry {
 
   @override
   Future<List<Connection>> list() async => _connections;
+
+  @override
+  Future<Connection?> get(String id) async => _connections.where((conn) => conn.id == id).firstOrNull;
 }
 
 class _FakeProfileConnectionRegistry extends ProfileConnectionRegistry {
@@ -453,4 +832,20 @@ class _FakeProfileConnectionRegistry extends ProfileConnectionRegistry {
 
   @override
   Stream<List<ProfileConnection>> watchAll() => Stream.value(_profileConnections);
+}
+
+/// Real [PlexHomeService] cache/refresh behavior, minus `start()`'s periodic
+/// refresh timer: `ActiveProfileProvider.initialize` starts the service, and
+/// a pending `Timer.periodic` trips `testWidgets`' end-of-test invariant.
+/// Tests seed the cache explicitly through [PlexHomeService.refresh].
+class _NoTimerPlexHomeService extends PlexHomeService {
+  _NoTimerPlexHomeService({
+    required super.connections,
+    required super.profileConnections,
+    required super.storage,
+    super.plexHomeUserFetcher,
+  });
+
+  @override
+  Future<void> start() async {}
 }

@@ -38,9 +38,9 @@ Package managers:
   brew tap edde746/plezy https://github.com/edde746/plezy
   brew install --cask plezy
   ```
-- [AUR](https://aur.archlinux.org/packages/plezy-bin) (Arch Linux) - Community maintained by [@jianglai](https://github.com/jianglai):
+- [Pacman](https://archlinux.org/packages/extra/x86_64/plezy/) (Arch Linux) - Official package:
   ```bash
-  yay -S plezy-bin
+  sudo pacman -S plezy
   ```
 - **WinGet** (Windows):
   ```bash
@@ -132,7 +132,7 @@ Package managers:
 [^mb]: Jellyfin and Emby only.
 [^plex]: Plex only.
 [^connect]: Requires connecting the service under Settings > Services.
-[^hdr]: In-app HDR toggle on Windows, macOS, iOS, and tvOS. Dolby Vision on Android and Apple TV.
+[^hdr]: In-app HDR toggle on Windows, macOS, iOS, tvOS, and Linux — Linux needs a colour-managed Wayland compositor. Dolby Vision on Android and Apple TV.
 [^pass]: Desktop, Android TV, and Apple TV.
 [^mpv]: Requires the mpv player backend — unavailable on iOS and tvOS, and Android defaults to ExoPlayer.
 [^pip]: Android, iOS, and macOS — not on Android TV or Apple TV.
@@ -148,7 +148,7 @@ Package managers:
 ## Building from Source
 
 ### Prerequisites
-- Flutter SDK 3.44.0+
+- Flutter SDK 3.47.0+
 - A Plex account, or a Jellyfin or Emby server with user credentials
 
 ### Setup
@@ -190,7 +190,7 @@ scripts/setup_hooks.sh
 End-to-end tests (Android emulator plus a Dockerized Jellyfin fixture):
 
 ```bash
-python3 scripts/run_maestro.py basic
+python3 scripts/maestro/run_maestro.py basic
 ```
 
 ## Contributing

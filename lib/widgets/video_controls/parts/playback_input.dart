@@ -550,18 +550,33 @@ extension _PlexVideoControlsPlaybackInputMethods on _PlexVideoControlsState {
     _handleEdgeAdjustmentEvent(_edgeAdjustmentTracker.cancel());
   }
 
-  /// Timing-based double-click detection: avoids `onDoubleTap`'s ~300 ms
-  /// tap-resolution delay and the arena competition it introduces.
   void _handleOuterTap() {
-    if (PlatformDetector.isMobile(context) && _isTouchTapSuppressed) return;
+    if (PlatformDetector.isMobile(context)) {
+      if (_isTouchTapSuppressed) return;
+      // Mobile taps get the single-tap action only; the skip zones own touch
+      // double taps.
+      if (widget.canControl && _clickVideoTogglesPlayback) {
+        _playOrPause();
+      } else {
+        _toggleControls();
+      }
+      return;
+    }
 
+    _handleDesktopClickToggle();
+  }
+
+  /// Desktop click contract shared by the outer video surface and the controls
+  /// overlay: the single-click action fires immediately and a second click
+  /// within [kDoubleTapTimeout] toggles fullscreen. Timing-based detection
+  /// avoids `onDoubleTap`'s ~300 ms tap-resolution delay and the arena
+  /// competition it introduces.
+  void _handleDesktopClickToggle() {
     if (widget.canControl && _clickVideoTogglesPlayback) {
       _playOrPause();
     } else {
       _toggleControls();
     }
-
-    if (PlatformDetector.isMobile(context)) return;
 
     final now = DateTime.now();
     if (_lastSkipTapTime != null && now.difference(_lastSkipTapTime!) < kDoubleTapTimeout) {
@@ -618,14 +633,55 @@ extension _PlexVideoControlsPlaybackInputMethods on _PlexVideoControlsState {
   /// into one running total; a direction flip restarts the count.
   void _registerSkipFeedback({required bool isForward, required int seconds}) {
     final stacking = _showDoubleTapFeedback && _lastDoubleTapWasForward == isForward;
-    _accumulatedSkipSeconds = stacking ? _accumulatedSkipSeconds + seconds : seconds;
+    _accumulatedSkipSeconds.value = stacking ? _accumulatedSkipSeconds.value + seconds : seconds;
     _showSkipFeedback(isForward: isForward);
+  }
+
+  /// Wrap an absolute live action so it takes down the badge a pending live
+  /// skip raised.
+  ///
+  /// Live relative skips bypass [_hiddenSeek] for the parent's epoch
+  /// accumulator (#1253), so the jump the reopen announces finds no pending
+  /// target here and nothing retires the readout. The absolute action cancels
+  /// that queued skip, so its promised total is no longer going anywhere.
+  ValueChanged<int>? _liveSeekAbandoningBurst(ValueChanged<int>? onLiveSeek) {
+    if (onLiveSeek == null) return null;
+    return (offset) {
+      _dismissSkipFeedback();
+      onLiveSeek(offset);
+    };
+  }
+
+  /// Wrap an action that replaces what is playing — a live channel switch, the
+  /// next or previous item — so the badge goes with the timeline it described.
+  ///
+  /// The pending skip is cancelled by the switch itself (live keeps its offset
+  /// in the parent accumulator, video re-keys on the new item), but neither
+  /// route runs through [_hiddenSeek], so nothing else takes the readout down.
+  VoidCallback? _abandoningBurst(VoidCallback? action) {
+    if (action == null) return null;
+    return () {
+      // Cancel as well as hide: a held-arrow target stays armed across the
+      // asynchronous switch and would otherwise debounce into a seek on the
+      // outgoing player before the new item re-keys the controls. The focused
+      // desktop timeline coalesces into its own accumulator, so it needs the
+      // same treatment.
+      _hiddenSeek.cancel();
+      _desktopControlsKey.currentState?.abandonPendingSeek();
+      _dismissSkipFeedback();
+      action();
+    };
   }
 
   /// Handle a completed skip-zone double tap.
   void _handleDoubleTapSkip({required bool isForward}) {
     if (!widget.canControl) return;
 
+    // This tap supersedes any burst the keyboard/D-pad left pending, and it
+    // shares the badge with it. Retire that burst first, or its abandonment —
+    // triggered by this tap's own seek — would take down the readout this tap
+    // is about to put up.
+    _hiddenSeek.cancel();
     _registerSkipFeedback(isForward: isForward, seconds: _seekTimeSmall);
 
     final delta = Duration(seconds: isForward ? _seekTimeSmall : -_seekTimeSmall);
@@ -642,17 +698,24 @@ extension _PlexVideoControlsPlaybackInputMethods on _PlexVideoControlsState {
 
   /// Show animated visual feedback for skip gesture
   void _showSkipFeedback({required bool isForward}) {
+    // Reads `tokens(context)` below, so a caller reaching here after disposal
+    // would touch a defunct element rather than merely no-op.
+    if (!mounted) return;
     // Cancel BOTH timers: a skip landing during the fade-out window must not
     // leave the old hide timer pending, or it kills the fresh readout and zeroes
     // the accumulated count mid-display.
     _feedbackTimer?.cancel();
     _feedbackHideTimer?.cancel();
 
-    _setControlsState(() {
-      _lastDoubleTapWasForward = isForward;
-      _showDoubleTapFeedback = true;
-      _doubleTapFeedbackOpacity = 1.0;
-    });
+    final feedbackAlreadyVisible =
+        _showDoubleTapFeedback && _lastDoubleTapWasForward == isForward && _doubleTapFeedbackOpacity == 1.0;
+    if (!feedbackAlreadyVisible) {
+      _setControlsState(() {
+        _lastDoubleTapWasForward = isForward;
+        _showDoubleTapFeedback = true;
+        _doubleTapFeedbackOpacity = 1.0;
+      });
+    }
 
     // Capture duration before timer to avoid context access in callback
     final slowDuration = tokens(context).slow;
@@ -667,40 +730,34 @@ extension _PlexVideoControlsPlaybackInputMethods on _PlexVideoControlsState {
           if (mounted) {
             _setControlsState(() {
               _showDoubleTapFeedback = false;
-              _accumulatedSkipSeconds = 0; // Reset when feedback hides
             });
+            _accumulatedSkipSeconds.value = 0;
           }
         });
       }
     });
   }
 
+  /// Take the skip readout down at once, because the burst it was counting will
+  /// never be committed. Fading it out would keep showing a total the player is
+  /// not going to seek to; zeroing it without hiding would flash `0s`.
+  void _dismissSkipFeedback() {
+    _feedbackTimer?.cancel();
+    _feedbackTimer = null;
+    _feedbackHideTimer?.cancel();
+    _feedbackHideTimer = null;
+    if (!mounted || (!_showDoubleTapFeedback && _accumulatedSkipSeconds.value == 0)) return;
+    _setControlsState(() {
+      _showDoubleTapFeedback = false;
+      _doubleTapFeedbackOpacity = 0.0;
+    });
+    _accumulatedSkipSeconds.value = 0;
+  }
+
   /// Handle tap on controls overlay - route to skip zones or toggle controls
   void _handleControlsOverlayTap(TapUpDetails details, Size size) {
-    final isMobile = PlatformDetector.isMobile(context);
-
-    if (!isMobile) {
-      final DateTime now = DateTime.now();
-
-      // Always perform the single-click behavior immediately
-      if (widget.canControl && _clickVideoTogglesPlayback) {
-        _playOrPause();
-      } else {
-        _toggleControls();
-      }
-
-      final bool isDoubleClick = _lastSkipTapTime != null && now.difference(_lastSkipTapTime!) < kDoubleTapTimeout;
-
-      if (isDoubleClick) {
-        _lastSkipTapTime = null;
-
-        _toggleFullscreen();
-
-        return;
-      }
-
-      // Record this click as a candidate for double-click detection
-      _lastSkipTapTime = now;
+    if (!PlatformDetector.isMobile(context)) {
+      _handleDesktopClickToggle();
       return;
     }
 
