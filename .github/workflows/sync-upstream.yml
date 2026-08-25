@@ -38,7 +38,7 @@ env:
   # can never install over or masquerade as an update to the real app.
   ANDROID_APPLICATION_ID: "cn.kuwo.player"
   # Keep in step with build.yml's FLUTTER_VERSION.
-  FLUTTER_VERSION: "3.44.0"
+  FLUTTER_VERSION: "3.47.0"
   # Fork builds get no Sentry DSN and no symbol upload, so obfuscation and
   # split debug info are left off to keep crash traces readable.
   RELEASE_DART_DEFINES: --dart-define=ENABLE_UPDATE_CHECK=true --dart-define=ENABLE_DONATIONS=true --dart-define=SENTRY_ENVIRONMENT=github
