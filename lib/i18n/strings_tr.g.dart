@@ -292,10 +292,6 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get mpv => 'mpv';
 	@override String get hardwareDecoding => 'Donanım Çözme';
 	@override String get hardwareDecodingDescription => 'Mümkün olduğunda donanım hızlandırmasını kullan';
-	@override String get bufferSize => 'Arabellek Boyutu';
-	@override String bufferSizeMB({required Object size}) => '${size}MB';
-	@override String get bufferSizeAuto => 'Otomatik (Önerilen)';
-	@override String bufferSizeWarning({required Object heap, required Object size}) => '${heap}MB bellek mevcut. ${size}MB arabellek oynatmayı etkileyebilir.';
 	@override String get playbackBuffer => 'Oynatma Tamponu';
 	@override String get playbackBufferAuto => 'Otomatik (Önerilen)';
 	@override String get playbackBufferLarge => 'Büyük';
@@ -443,10 +439,6 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Yerel DV7\'yi zorla ve DV dönüştürme yeniden denemesini engelle';
 	@override String get dvConversionDv81Description => 'Dolby Vision profile 8.1\'e satır içi RPU dönüştürmeyi zorla';
 	@override String get dvConversionHevcStripDescription => 'Dolby Vision RPU/EL katmanlarını soy ve düz HEVC olarak sun';
-	@override String get demuxer => 'Kapsayıcı demux çözücü';
-	@override String get demuxerDescription => 'Doğrudan oynatılan dosyaları hangi demux çözücünün ayrıştıracağı. Bir dosya sorun çıkarırsa media3\'e geçin.';
-	@override String get demuxerFfmpeg => 'FFmpeg (Önerilen)';
-	@override String get demuxerMedia3 => 'media3';
 	@override String get requireProfileSelectionOnOpen => 'Uygulama açılışında profil sor';
 	@override String get requireProfileSelectionOnOpenDescription => 'Uygulama her açıldığında profil seçimini göster';
 	@override String get forceTvMode => 'TV modunu zorla';
@@ -2946,10 +2938,6 @@ extension on TranslationsTr {
 			'settings.mpv' => 'mpv',
 			'settings.hardwareDecoding' => 'Donanım Çözme',
 			'settings.hardwareDecodingDescription' => 'Mümkün olduğunda donanım hızlandırmasını kullan',
-			'settings.bufferSize' => 'Arabellek Boyutu',
-			'settings.bufferSizeMB' => ({required Object size}) => '${size}MB',
-			'settings.bufferSizeAuto' => 'Otomatik (Önerilen)',
-			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap}MB bellek mevcut. ${size}MB arabellek oynatmayı etkileyebilir.',
 			'settings.playbackBuffer' => 'Oynatma Tamponu',
 			'settings.playbackBufferAuto' => 'Otomatik (Önerilen)',
 			'settings.playbackBufferLarge' => 'Büyük',
@@ -3097,10 +3085,6 @@ extension on TranslationsTr {
 			'settings.dvConversionNativeDescription' => 'Yerel DV7\'yi zorla ve DV dönüştürme yeniden denemesini engelle',
 			'settings.dvConversionDv81Description' => 'Dolby Vision profile 8.1\'e satır içi RPU dönüştürmeyi zorla',
 			'settings.dvConversionHevcStripDescription' => 'Dolby Vision RPU/EL katmanlarını soy ve düz HEVC olarak sun',
-			'settings.demuxer' => 'Kapsayıcı demux çözücü',
-			'settings.demuxerDescription' => 'Doğrudan oynatılan dosyaları hangi demux çözücünün ayrıştıracağı. Bir dosya sorun çıkarırsa media3\'e geçin.',
-			'settings.demuxerFfmpeg' => 'FFmpeg (Önerilen)',
-			'settings.demuxerMedia3' => 'media3',
 			'settings.requireProfileSelectionOnOpen' => 'Uygulama açılışında profil sor',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Uygulama her açıldığında profil seçimini göster',
 			'settings.forceTvMode' => 'TV modunu zorla',
@@ -3288,8 +3272,6 @@ extension on TranslationsTr {
 			'fileInfo.flagOriginal' => 'Orijinal',
 			'fileInfo.channelsMono' => 'Mono',
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => 'Profil ${profile}',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.markAsWatched' => 'İzlendi Olarak İşaretle',
 			'mediaMenu.markAsUnwatched' => 'İzlenmedi Olarak İşaretle',
 			'mediaMenu.removeFromContinueWatching' => 'İzlemeye Devam Et\'ten Kaldır',
@@ -3298,6 +3280,8 @@ extension on TranslationsTr {
 			'mediaMenu.shufflePlay' => 'Karışık Oynat',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Karışık oynatma çevrimdışıyken kullanılamaz',
 			'mediaMenu.fileInfo' => 'Dosya Bilgisi',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteEpisodeFromServer' => 'Bölümü sunucudan sil',
 			'mediaMenu.deleteSeasonFromServer' => 'Sezonu sunucudan sil',
 			'mediaMenu.deleteShowFromServer' => 'Diziyi sunucudan sil',
@@ -3802,8 +3786,6 @@ extension on TranslationsTr {
 			'explore.rows.watchlist' => 'İzleme Listesi',
 			'explore.rows.recommendedMovies' => 'Önerilen Filmler',
 			'explore.rows.recommendedShows' => 'Önerilen Diziler',
-			_ => null,
-		} ?? switch (path) {
 			'explore.rows.trendingMovies' => 'Trend Filmler',
 			'explore.rows.trendingShows' => 'Trend Diziler',
 			'explore.rows.popularMovies' => 'Popüler Filmler',
@@ -3812,6 +3794,8 @@ extension on TranslationsTr {
 			'explore.rows.suggestedAnime' => 'Önerilen Animeler',
 			'explore.rows.airingAnime' => 'En İyi Yayınlanan Animeler',
 			'explore.rows.popularAnime' => 'En Popüler Animeler',
+			_ => null,
+		} ?? switch (path) {
 			'explore.rows.trending' => 'Trendler',
 			'explore.rows.upcomingMovies' => 'Gelecek Filmler',
 			'explore.rows.upcomingShows' => 'Gelecek Diziler',
@@ -4316,8 +4300,6 @@ extension on TranslationsTr {
 			'companionRemote.pairing.availableDevices' => 'Kullanılabilir Cihazlar',
 			'companionRemote.pairing.manualConnection' => 'Manuel Bağlantı',
 			'companionRemote.pairing.cryptoInitFailed' => 'Güvenli bağlantı başlatılamadı. Önce Plex\'e giriş yapın.',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.validationHostRequired' => 'Lütfen ana bilgisayar adresini girin',
 			'companionRemote.pairing.validationHostFormat' => 'Biçim IP:port şeklinde olmalıdır (ör. 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'Bağlantı zaman aşımına uğradı. Her iki cihazda da aynı ağı kullanın.',
@@ -4326,6 +4308,8 @@ extension on TranslationsTr {
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Bağlantı başarısız: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Uzaktan kumanda oturumundan ayrılmak istiyor musunuz?',
 			'companionRemote.remote.reconnecting' => 'Yeniden bağlanılıyor...',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.attemptOf' => ({required Object current}) => 'Deneme ${current} / 5',
 			'companionRemote.remote.retryNow' => 'Şimdi Tekrar Dene',
 			'companionRemote.remote.tabRemote' => 'Kumanda',

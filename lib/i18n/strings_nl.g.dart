@@ -292,10 +292,6 @@ class _Translations$settings$nl extends Translations$settings$en {
 	@override String get mpv => 'mpv';
 	@override String get hardwareDecoding => 'Hardwaredecodering';
 	@override String get hardwareDecodingDescription => 'Gebruik hardwareversnelling indien beschikbaar';
-	@override String get bufferSize => 'Buffergrootte';
-	@override String bufferSizeMB({required Object size}) => '${size}MB';
-	@override String get bufferSizeAuto => 'Automatisch (aanbevolen)';
-	@override String bufferSizeWarning({required Object heap, required Object size}) => '${heap}MB geheugen beschikbaar. Een buffer van ${size}MB kan afspelen beïnvloeden.';
 	@override String get playbackBuffer => 'Afspeelbuffer';
 	@override String get playbackBufferAuto => 'Auto (aanbevolen)';
 	@override String get playbackBufferLarge => 'Groot';
@@ -443,10 +439,6 @@ class _Translations$settings$nl extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Dwing native DV7 af en voorkom een nieuwe poging met DV-conversie';
 	@override String get dvConversionDv81Description => 'Dwing directe RPU-conversie naar Dolby Vision-profiel 8.1 af';
 	@override String get dvConversionHevcStripDescription => 'Verwijder Dolby Vision RPU/EL-lagen en bied gewone HEVC aan';
-	@override String get demuxer => 'Container-demuxer';
-	@override String get demuxerDescription => 'Welke demuxer direct afgespeelde bestanden inleest. Schakel over naar media3 als een bestand zich vreemd gedraagt.';
-	@override String get demuxerFfmpeg => 'FFmpeg (aanbevolen)';
-	@override String get demuxerMedia3 => 'media3';
 	@override String get requireProfileSelectionOnOpen => 'Vraag om profiel bij openen';
 	@override String get requireProfileSelectionOnOpenDescription => 'Toon profielselectie telkens wanneer de app wordt geopend';
 	@override String get forceTvMode => 'Tv-modus afdwingen';
@@ -2946,10 +2938,6 @@ extension on TranslationsNl {
 			'settings.mpv' => 'mpv',
 			'settings.hardwareDecoding' => 'Hardwaredecodering',
 			'settings.hardwareDecodingDescription' => 'Gebruik hardwareversnelling indien beschikbaar',
-			'settings.bufferSize' => 'Buffergrootte',
-			'settings.bufferSizeMB' => ({required Object size}) => '${size}MB',
-			'settings.bufferSizeAuto' => 'Automatisch (aanbevolen)',
-			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap}MB geheugen beschikbaar. Een buffer van ${size}MB kan afspelen beïnvloeden.',
 			'settings.playbackBuffer' => 'Afspeelbuffer',
 			'settings.playbackBufferAuto' => 'Auto (aanbevolen)',
 			'settings.playbackBufferLarge' => 'Groot',
@@ -3097,10 +3085,6 @@ extension on TranslationsNl {
 			'settings.dvConversionNativeDescription' => 'Dwing native DV7 af en voorkom een nieuwe poging met DV-conversie',
 			'settings.dvConversionDv81Description' => 'Dwing directe RPU-conversie naar Dolby Vision-profiel 8.1 af',
 			'settings.dvConversionHevcStripDescription' => 'Verwijder Dolby Vision RPU/EL-lagen en bied gewone HEVC aan',
-			'settings.demuxer' => 'Container-demuxer',
-			'settings.demuxerDescription' => 'Welke demuxer direct afgespeelde bestanden inleest. Schakel over naar media3 als een bestand zich vreemd gedraagt.',
-			'settings.demuxerFfmpeg' => 'FFmpeg (aanbevolen)',
-			'settings.demuxerMedia3' => 'media3',
 			'settings.requireProfileSelectionOnOpen' => 'Vraag om profiel bij openen',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Toon profielselectie telkens wanneer de app wordt geopend',
 			'settings.forceTvMode' => 'Tv-modus afdwingen',
@@ -3288,8 +3272,6 @@ extension on TranslationsNl {
 			'fileInfo.flagOriginal' => 'Origineel',
 			'fileInfo.channelsMono' => 'Mono',
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => 'Profiel ${profile}',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.markAsWatched' => 'Als bekeken markeren',
 			'mediaMenu.markAsUnwatched' => 'Als ongekeken markeren',
 			'mediaMenu.removeFromContinueWatching' => 'Uit \'Doorgaan met kijken\' verwijderen',
@@ -3298,6 +3280,8 @@ extension on TranslationsNl {
 			'mediaMenu.shufflePlay' => 'Willekeurig afspelen',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Willekeurig afspelen is offline niet beschikbaar',
 			'mediaMenu.fileInfo' => 'Bestandsinformatie',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteEpisodeFromServer' => 'Aflevering verwijderen van server',
 			'mediaMenu.deleteSeasonFromServer' => 'Seizoen verwijderen van server',
 			'mediaMenu.deleteShowFromServer' => 'Serie verwijderen van server',
@@ -3802,8 +3786,6 @@ extension on TranslationsNl {
 			'explore.rows.watchlist' => 'Kijklijst',
 			'explore.rows.recommendedMovies' => 'Aanbevolen films',
 			'explore.rows.recommendedShows' => 'Aanbevolen series',
-			_ => null,
-		} ?? switch (path) {
 			'explore.rows.trendingMovies' => 'Trending films',
 			'explore.rows.trendingShows' => 'Trending series',
 			'explore.rows.popularMovies' => 'Populaire films',
@@ -3812,6 +3794,8 @@ extension on TranslationsNl {
 			'explore.rows.suggestedAnime' => 'Aanbevolen anime',
 			'explore.rows.airingAnime' => 'Beste lopende anime',
 			'explore.rows.popularAnime' => 'Populairste anime',
+			_ => null,
+		} ?? switch (path) {
 			'explore.rows.trending' => 'Trending',
 			'explore.rows.upcomingMovies' => 'Aankomende films',
 			'explore.rows.upcomingShows' => 'Aankomende series',
@@ -4316,8 +4300,6 @@ extension on TranslationsNl {
 			'companionRemote.pairing.availableDevices' => 'Beschikbare apparaten',
 			'companionRemote.pairing.manualConnection' => 'Handmatige verbinding',
 			'companionRemote.pairing.cryptoInitFailed' => 'Kon beveiligde verbinding niet starten. Log eerst in bij Plex.',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.validationHostRequired' => 'Voer het hostadres in',
 			'companionRemote.pairing.validationHostFormat' => 'Formaat moet IP:poort zijn (bijv. 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'Er is een time-out opgetreden. Gebruik op beide apparaten hetzelfde netwerk.',
@@ -4326,6 +4308,8 @@ extension on TranslationsNl {
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Kan niet verbinden: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Wil je de verbinding met de externe sessie verbreken?',
 			'companionRemote.remote.reconnecting' => 'Opnieuw verbinden...',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.attemptOf' => ({required Object current}) => 'Poging ${current} van 5',
 			'companionRemote.remote.retryNow' => 'Nu opnieuw proberen',
 			'companionRemote.remote.tabRemote' => 'Afstandsbediening',

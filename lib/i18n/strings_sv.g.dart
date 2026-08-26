@@ -292,10 +292,6 @@ class _Translations$settings$sv extends Translations$settings$en {
 	@override String get mpv => 'mpv';
 	@override String get hardwareDecoding => 'Hårdvaruavkodning';
 	@override String get hardwareDecodingDescription => 'Använd hårdvaruacceleration när tillgängligt';
-	@override String get bufferSize => 'Buffertstorlek';
-	@override String bufferSizeMB({required Object size}) => '${size} MB';
-	@override String get bufferSizeAuto => 'Automatiskt (rekommenderas)';
-	@override String bufferSizeWarning({required Object heap, required Object size}) => '${heap} MB minne är tillgängligt. En buffert på ${size} MB kan påverka uppspelningen.';
 	@override String get playbackBuffer => 'Uppspelningsbuffert';
 	@override String get playbackBufferAuto => 'Auto (rekommenderas)';
 	@override String get playbackBufferLarge => 'Stor';
@@ -443,10 +439,6 @@ class _Translations$settings$sv extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Tvinga inbyggd DV7 och förhindra nya försök med DV-konvertering';
 	@override String get dvConversionDv81Description => 'Tvinga direkt RPU-konvertering till Dolby Vision-profil 8.1';
 	@override String get dvConversionHevcStripDescription => 'Ta bort Dolby Visions RPU-/EL-lager och använd vanlig HEVC';
-	@override String get demuxer => 'Container-demuxer';
-	@override String get demuxerDescription => 'Vilken demuxer som läser direktuppspelade filer. Byt till media3 om en fil krånglar.';
-	@override String get demuxerFfmpeg => 'FFmpeg (rekommenderas)';
-	@override String get demuxerMedia3 => 'media3';
 	@override String get requireProfileSelectionOnOpen => 'Fråga efter profil vid appstart';
 	@override String get requireProfileSelectionOnOpenDescription => 'Visa profilval varje gång appen öppnas';
 	@override String get forceTvMode => 'Tvinga TV-läge';
@@ -2946,10 +2938,6 @@ extension on TranslationsSv {
 			'settings.mpv' => 'mpv',
 			'settings.hardwareDecoding' => 'Hårdvaruavkodning',
 			'settings.hardwareDecodingDescription' => 'Använd hårdvaruacceleration när tillgängligt',
-			'settings.bufferSize' => 'Buffertstorlek',
-			'settings.bufferSizeMB' => ({required Object size}) => '${size} MB',
-			'settings.bufferSizeAuto' => 'Automatiskt (rekommenderas)',
-			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap} MB minne är tillgängligt. En buffert på ${size} MB kan påverka uppspelningen.',
 			'settings.playbackBuffer' => 'Uppspelningsbuffert',
 			'settings.playbackBufferAuto' => 'Auto (rekommenderas)',
 			'settings.playbackBufferLarge' => 'Stor',
@@ -3097,10 +3085,6 @@ extension on TranslationsSv {
 			'settings.dvConversionNativeDescription' => 'Tvinga inbyggd DV7 och förhindra nya försök med DV-konvertering',
 			'settings.dvConversionDv81Description' => 'Tvinga direkt RPU-konvertering till Dolby Vision-profil 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Ta bort Dolby Visions RPU-/EL-lager och använd vanlig HEVC',
-			'settings.demuxer' => 'Container-demuxer',
-			'settings.demuxerDescription' => 'Vilken demuxer som läser direktuppspelade filer. Byt till media3 om en fil krånglar.',
-			'settings.demuxerFfmpeg' => 'FFmpeg (rekommenderas)',
-			'settings.demuxerMedia3' => 'media3',
 			'settings.requireProfileSelectionOnOpen' => 'Fråga efter profil vid appstart',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Visa profilval varje gång appen öppnas',
 			'settings.forceTvMode' => 'Tvinga TV-läge',
@@ -3288,8 +3272,6 @@ extension on TranslationsSv {
 			'fileInfo.flagOriginal' => 'Original',
 			'fileInfo.channelsMono' => 'Mono',
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => 'Profil ${profile}',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.markAsWatched' => 'Markera som sedd',
 			'mediaMenu.markAsUnwatched' => 'Markera som osedd',
 			'mediaMenu.removeFromContinueWatching' => 'Ta bort från Fortsätt titta',
@@ -3298,6 +3280,8 @@ extension on TranslationsSv {
 			'mediaMenu.shufflePlay' => 'Blanda uppspelning',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Blandad uppspelning är inte tillgänglig offline',
 			'mediaMenu.fileInfo' => 'Filinformation',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteEpisodeFromServer' => 'Ta bort avsnitt från servern',
 			'mediaMenu.deleteSeasonFromServer' => 'Ta bort säsong från servern',
 			'mediaMenu.deleteShowFromServer' => 'Ta bort serie från servern',
@@ -3802,8 +3786,6 @@ extension on TranslationsSv {
 			'explore.rows.watchlist' => 'Bevakningslista',
 			'explore.rows.recommendedMovies' => 'Rekommenderade filmer',
 			'explore.rows.recommendedShows' => 'Rekommenderade serier',
-			_ => null,
-		} ?? switch (path) {
 			'explore.rows.trendingMovies' => 'Populära filmer just nu',
 			'explore.rows.trendingShows' => 'Populära serier just nu',
 			'explore.rows.popularMovies' => 'Populära filmer',
@@ -3812,6 +3794,8 @@ extension on TranslationsSv {
 			'explore.rows.suggestedAnime' => 'Föreslagen anime',
 			'explore.rows.airingAnime' => 'Bästa anime som sänds nu',
 			'explore.rows.popularAnime' => 'Mest populära anime',
+			_ => null,
+		} ?? switch (path) {
 			'explore.rows.trending' => 'Trendar nu',
 			'explore.rows.upcomingMovies' => 'Kommande filmer',
 			'explore.rows.upcomingShows' => 'Kommande serier',
@@ -4316,8 +4300,6 @@ extension on TranslationsSv {
 			'companionRemote.pairing.availableDevices' => 'Tillgängliga enheter',
 			'companionRemote.pairing.manualConnection' => 'Manuell anslutning',
 			'companionRemote.pairing.cryptoInitFailed' => 'Kunde inte starta säker anslutning. Logga in på Plex först.',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.validationHostRequired' => 'Ange värdadress',
 			'companionRemote.pairing.validationHostFormat' => 'Formatet måste vara IP:port (t.ex. 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'Anslutningen tog för lång tid. Använd samma nätverk på båda enheterna.',
@@ -4326,6 +4308,8 @@ extension on TranslationsSv {
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Kunde inte ansluta: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Vill du koppla från fjärrsessionen?',
 			'companionRemote.remote.reconnecting' => 'Återansluter...',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.attemptOf' => ({required Object current}) => 'Försök ${current} av 5',
 			'companionRemote.remote.retryNow' => 'Försök nu',
 			'companionRemote.remote.tabRemote' => 'Fjärrkontroll',

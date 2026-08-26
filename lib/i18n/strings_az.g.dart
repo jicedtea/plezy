@@ -292,10 +292,6 @@ class _Translations$settings$az extends Translations$settings$en {
 	@override String get mpv => 'mpv';
 	@override String get hardwareDecoding => 'Avadanlıq kod açılması';
 	@override String get hardwareDecodingDescription => 'Mümkün olduqda avadanlıq sürətləndirməsini istifadə et';
-	@override String get bufferSize => 'Bufer həcmi';
-	@override String bufferSizeMB({required Object size}) => '${size}MB';
-	@override String get bufferSizeAuto => 'Avtomatik (Tövsiyə olunan)';
-	@override String bufferSizeWarning({required Object heap, required Object size}) => '${heap}MB yaddaş əlçatandır. ${size}MB bufer oynatmaya təsir edə bilər.';
 	@override String get playbackBuffer => 'Oxutma buferi';
 	@override String get playbackBufferAuto => 'Avtomatik (tövsiyə olunur)';
 	@override String get playbackBufferLarge => 'Böyük';
@@ -443,10 +439,6 @@ class _Translations$settings$az extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Daxili DV7-ni məcburi et';
 	@override String get dvConversionDv81Description => 'Dolby Vision profile 8.1-ə çevrilməni məcburi et';
 	@override String get dvConversionHevcStripDescription => 'Dolby Vision təbəqələrini sil və sadə HEVC kimi təqdim et';
-	@override String get demuxer => 'Konteyner demukseri';
-	@override String get demuxerDescription => 'Birbaşa oxudulan faylları hansı demukserin təhlil edəcəyi. Fayl düzgün işləmirsə, media3-ə keçin.';
-	@override String get demuxerFfmpeg => 'FFmpeg (Tövsiyə olunan)';
-	@override String get demuxerMedia3 => 'media3';
 	@override String get requireProfileSelectionOnOpen => 'Açılışda profil soruş';
 	@override String get requireProfileSelectionOnOpenDescription => 'Tətbiq hər dəfə açıldıqda profil seçimini göstər';
 	@override String get forceTvMode => 'TV rejimini məcburi et';
@@ -2946,10 +2938,6 @@ extension on TranslationsAz {
 			'settings.mpv' => 'mpv',
 			'settings.hardwareDecoding' => 'Avadanlıq kod açılması',
 			'settings.hardwareDecodingDescription' => 'Mümkün olduqda avadanlıq sürətləndirməsini istifadə et',
-			'settings.bufferSize' => 'Bufer həcmi',
-			'settings.bufferSizeMB' => ({required Object size}) => '${size}MB',
-			'settings.bufferSizeAuto' => 'Avtomatik (Tövsiyə olunan)',
-			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap}MB yaddaş əlçatandır. ${size}MB bufer oynatmaya təsir edə bilər.',
 			'settings.playbackBuffer' => 'Oxutma buferi',
 			'settings.playbackBufferAuto' => 'Avtomatik (tövsiyə olunur)',
 			'settings.playbackBufferLarge' => 'Böyük',
@@ -3097,10 +3085,6 @@ extension on TranslationsAz {
 			'settings.dvConversionNativeDescription' => 'Daxili DV7-ni məcburi et',
 			'settings.dvConversionDv81Description' => 'Dolby Vision profile 8.1-ə çevrilməni məcburi et',
 			'settings.dvConversionHevcStripDescription' => 'Dolby Vision təbəqələrini sil və sadə HEVC kimi təqdim et',
-			'settings.demuxer' => 'Konteyner demukseri',
-			'settings.demuxerDescription' => 'Birbaşa oxudulan faylları hansı demukserin təhlil edəcəyi. Fayl düzgün işləmirsə, media3-ə keçin.',
-			'settings.demuxerFfmpeg' => 'FFmpeg (Tövsiyə olunan)',
-			'settings.demuxerMedia3' => 'media3',
 			'settings.requireProfileSelectionOnOpen' => 'Açılışda profil soruş',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Tətbiq hər dəfə açıldıqda profil seçimini göstər',
 			'settings.forceTvMode' => 'TV rejimini məcburi et',
@@ -3288,8 +3272,6 @@ extension on TranslationsAz {
 			'fileInfo.flagOriginal' => 'Orijinal',
 			'fileInfo.channelsMono' => 'Mono',
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => 'Profil ${profile}',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.markAsWatched' => 'Baxıldı olaraq işarələ',
 			'mediaMenu.markAsUnwatched' => 'Baxılmadı olaraq işarələ',
 			'mediaMenu.removeFromContinueWatching' => 'İzləməyə davam et-dən sil',
@@ -3298,6 +3280,8 @@ extension on TranslationsAz {
 			'mediaMenu.shufflePlay' => 'Qarışıq oynat',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Qarışıq oynatma oflayn rejimdə əlçatan deyil',
 			'mediaMenu.fileInfo' => 'Fayl məlumatı',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteEpisodeFromServer' => 'Seriyanı serverdən sil',
 			'mediaMenu.deleteSeasonFromServer' => 'Mövsümü serverdən sil',
 			'mediaMenu.deleteShowFromServer' => 'Serialı serverdən sil',
@@ -3802,8 +3786,6 @@ extension on TranslationsAz {
 			'explore.rows.watchlist' => 'İzləmə siyahısı',
 			'explore.rows.recommendedMovies' => 'Tövsiyə olunan kinolar',
 			'explore.rows.recommendedShows' => 'Tövsiyə olunan seriallar',
-			_ => null,
-		} ?? switch (path) {
 			'explore.rows.trendingMovies' => 'Trend kinolar',
 			'explore.rows.trendingShows' => 'Trend seriallar',
 			'explore.rows.popularMovies' => 'Məşhur kinolar',
@@ -3812,6 +3794,8 @@ extension on TranslationsAz {
 			'explore.rows.suggestedAnime' => 'Tövsiyə olunan animelər',
 			'explore.rows.airingAnime' => 'Ən yaxşı yayımlanan animelər',
 			'explore.rows.popularAnime' => 'Ən məşhur animelər',
+			_ => null,
+		} ?? switch (path) {
 			'explore.rows.trending' => 'Trendlər',
 			'explore.rows.upcomingMovies' => 'Gələcək kinolar',
 			'explore.rows.upcomingShows' => 'Gələcək seriallar',
@@ -4316,8 +4300,6 @@ extension on TranslationsAz {
 			'companionRemote.pairing.availableDevices' => 'Əlçatan cihazlar',
 			'companionRemote.pairing.manualConnection' => 'Əl ilə qoşulma',
 			'companionRemote.pairing.cryptoInitFailed' => 'Təhlükəsiz qoşulma başladılarkən xəta. Əvvəlcə Plex-ə daxil olun.',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.validationHostRequired' => 'Lütfən əsas cihaz ünvanını daxil edin',
 			'companionRemote.pairing.validationHostFormat' => 'Format IP:port şəklində olmalıdır',
 			'companionRemote.pairing.connectionTimedOut' => 'Qoşulma vaxtı bitdi.',
@@ -4326,6 +4308,8 @@ extension on TranslationsAz {
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Qoşulma uğursuz oldu: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Pult seansından ayrılmaq istəyirsiniz?',
 			'companionRemote.remote.reconnecting' => 'Yenidən qoşulunur...',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.attemptOf' => ({required Object current}) => 'Cəhd ${current} / 5',
 			'companionRemote.remote.retryNow' => 'İndi təzədən cəhd et',
 			'companionRemote.remote.tabRemote' => 'Pult',

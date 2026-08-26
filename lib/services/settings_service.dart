@@ -113,17 +113,6 @@ extension DvConversionModePreferenceNativeValue on DvConversionModePreference {
   };
 }
 
-/// Which demuxer parses direct-played files on Android. Wire values are read
-/// natively by `FfmpegDemuxerPolicy`; unknown values resolve to FFmpeg there.
-enum DemuxerPreference { ffmpeg, media3 }
-
-extension DemuxerPreferenceNativeValue on DemuxerPreference {
-  String get nativeValue => switch (this) {
-    DemuxerPreference.ffmpeg => 'ffmpeg',
-    DemuxerPreference.media3 => 'media3',
-  };
-}
-
 enum PlaybackBufferTier { auto, large, extraLarge }
 
 extension PlaybackBufferTierNativeValue on PlaybackBufferTier {
@@ -135,24 +124,10 @@ extension PlaybackBufferTierNativeValue on PlaybackBufferTier {
 }
 
 const String _bufferSizeMigratedKey = 'buffer_size_migrated_to_auto';
+const String _legacyBufferSizeKey = 'buffer_size';
+const String _legacyDemuxerModeKey = 'demuxer_mode';
 const String _legacyUseSeasonPosterKey = 'use_season_poster';
 const String _legacyMpvConfigEntriesKey = 'mpv_config_entries';
-
-/// One-time auto-reset migration for buffer size.
-class _BufferSizePref extends IntPref {
-  const _BufferSizePref() : super('buffer_size');
-
-  @override
-  int readFrom(BaseSharedPreferencesService svc) {
-    // SharedPreferences updates in-memory cache synchronously, so the
-    // unawaited disk-flush futures are safe here (idempotent if re-run).
-    if (svc.readNullableBool(_bufferSizeMigratedKey) != true) {
-      svc.prefs.remove(key);
-      svc.prefs.setBool(_bufferSizeMigratedKey, true);
-    }
-    return super.readFrom(svc);
-  }
-}
 
 /// Migrates from the legacy enum-string format and clamps to 1..5.
 class _LibraryDensityPref extends Pref<int> {
@@ -282,12 +257,16 @@ class _AudioPassthroughPref extends Pref<bool> {
   bool readFrom(BaseSharedPreferencesService svc) {
     final stored = svc.readNullableBool(key);
     if (stored != null) return stored;
-    // Android TV on ExoPlayer defaults to bitstreaming AC3/EAC3/DTS to the TV/AVR
-    // (Media3 picks bitstream vs PCM via AudioCapabilities), preserving surround.
-    // Scoped to ExoPlayer — the mpv backend force-sets audio-spdif with no decode
-    // fallback. (#1458)
+    // Android TV defaults to bitstreaming Dolby/DTS to the TV/AVR, preserving
+    // surround. Both backends decide from the same source — the sink's
+    // advertised capabilities: Media3 via AudioCapabilities, mpv via the
+    // route-probed audio-spdif list (supportedMpvSpdifCodecs), which names
+    // only codecs the live route accepts rather than forcing the whole set.
+    // That probe is the only safety net on the mpv path: ao_audiotrack fails
+    // the open outright when a route lied about a format, with no decode
+    // fallback behind it (#1458, #1703).
     // TODO: Default Apple TV to on once the #1300 Atmos sink is hardware-verified.
-    return Platform.isAndroid && PlatformDetector.isTV() && svc.read(SettingsService.useExoPlayer);
+    return Platform.isAndroid && PlatformDetector.isTV();
   }
 
   @override
@@ -504,11 +483,6 @@ class SettingsService extends BaseSharedPreferencesService {
     values: DvConversionModePreference.values,
     defaultValue: DvConversionModePreference.auto,
   );
-  static const demuxerMode = EnumPref<DemuxerPreference>(
-    'demuxer_mode',
-    values: DemuxerPreference.values,
-    defaultValue: DemuxerPreference.ffmpeg,
-  );
   static const defaultQualityPreset = EnumPref<TranscodeQualityPreset>(
     'default_quality_preset',
     values: TranscodeQualityPreset.values,
@@ -535,7 +509,10 @@ class SettingsService extends BaseSharedPreferencesService {
     values: SpecialsOrdering.values,
     defaultValue: SpecialsOrdering.respectServer,
   );
-  static const useExoPlayer = BoolPref('use_exoplayer', defaultValue: true);
+
+  /// mpv is the default Android backend; ExoPlayer remains selectable as the
+  /// escape hatch while it still ships.
+  static const useExoPlayer = BoolPref('use_exoplayer');
   static const startupSection = EnumPref<NavigationTabId>(
     'startup_section',
     values: NavigationTabId.values,
@@ -645,7 +622,6 @@ class SettingsService extends BaseSharedPreferencesService {
   static const startInFullscreen = BoolPref('start_in_fullscreen');
   static const exitFullscreenOnPlayerClose = BoolPref('exit_fullscreen_on_player_close');
 
-  static const bufferSize = _BufferSizePref();
   static const playbackBufferTier = EnumPref<PlaybackBufferTier>(
     'playback_buffer_tier',
     values: PlaybackBufferTier.values,
@@ -1071,7 +1047,6 @@ class SettingsService extends BaseSharedPreferencesService {
     specialsOrdering,
     useExoPlayer,
     startupSection,
-    demuxerMode,
     showExploreTab,
     alwaysKeepSidebarOpen,
     librariesSectionExpanded,
@@ -1105,7 +1080,6 @@ class SettingsService extends BaseSharedPreferencesService {
     scopedPlayerPrefValues,
     themeMode,
     videoPlayerNavigationEnabled,
-    bufferSize,
     playbackBufferTier,
     libraryDensity,
     automotiveUiScale,
@@ -1182,6 +1156,8 @@ class SettingsService extends BaseSharedPreferencesService {
       // Legacy migration sentinels — removed alongside the keys they guarded.
       prefs.remove(_legacyUseSeasonPosterKey),
       prefs.remove(_legacyMpvConfigEntriesKey),
+      prefs.remove(_legacyBufferSizeKey),
+      prefs.remove(_legacyDemuxerModeKey),
       prefs.remove(_bufferSizeMigratedKey),
     ]);
     refreshListenables();

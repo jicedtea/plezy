@@ -292,10 +292,6 @@ class _Translations$settings$it extends Translations$settings$en {
 	@override String get mpv => 'mpv';
 	@override String get hardwareDecoding => 'Decodifica hardware';
 	@override String get hardwareDecodingDescription => 'Utilizza l\'accelerazione hardware quando disponibile';
-	@override String get bufferSize => 'Dimensione buffer';
-	@override String bufferSizeMB({required Object size}) => '${size}MB';
-	@override String get bufferSizeAuto => 'Automatica (consigliata)';
-	@override String bufferSizeWarning({required Object heap, required Object size}) => '${heap}MB di memoria disponibile. Un buffer di ${size}MB può influire sulla riproduzione.';
 	@override String get playbackBuffer => 'Buffer di riproduzione';
 	@override String get playbackBufferAuto => 'Auto (consigliato)';
 	@override String get playbackBufferLarge => 'Grande';
@@ -443,10 +439,6 @@ class _Translations$settings$it extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Forza il DV7 nativo e impedisce nuovi tentativi di conversione DV';
 	@override String get dvConversionDv81Description => 'Forza la conversione RPU diretta al profilo Dolby Vision 8.1';
 	@override String get dvConversionHevcStripDescription => 'Rimuove i livelli RPU/EL di Dolby Vision e riproduce il video come semplice HEVC';
-	@override String get demuxer => 'Demuxer del contenitore';
-	@override String get demuxerDescription => 'Quale demuxer analizza i file riprodotti in diretta. Passa a media3 se un file dà problemi.';
-	@override String get demuxerFfmpeg => 'FFmpeg (consigliato)';
-	@override String get demuxerMedia3 => 'media3';
 	@override String get requireProfileSelectionOnOpen => 'Chiedi di scegliere il profilo all\'apertura';
 	@override String get requireProfileSelectionOnOpenDescription => 'Mostra la selezione del profilo ogni volta che l\'app viene aperta';
 	@override String get forceTvMode => 'Forza modalità TV';
@@ -2946,10 +2938,6 @@ extension on TranslationsIt {
 			'settings.mpv' => 'mpv',
 			'settings.hardwareDecoding' => 'Decodifica hardware',
 			'settings.hardwareDecodingDescription' => 'Utilizza l\'accelerazione hardware quando disponibile',
-			'settings.bufferSize' => 'Dimensione buffer',
-			'settings.bufferSizeMB' => ({required Object size}) => '${size}MB',
-			'settings.bufferSizeAuto' => 'Automatica (consigliata)',
-			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap}MB di memoria disponibile. Un buffer di ${size}MB può influire sulla riproduzione.',
 			'settings.playbackBuffer' => 'Buffer di riproduzione',
 			'settings.playbackBufferAuto' => 'Auto (consigliato)',
 			'settings.playbackBufferLarge' => 'Grande',
@@ -3097,10 +3085,6 @@ extension on TranslationsIt {
 			'settings.dvConversionNativeDescription' => 'Forza il DV7 nativo e impedisce nuovi tentativi di conversione DV',
 			'settings.dvConversionDv81Description' => 'Forza la conversione RPU diretta al profilo Dolby Vision 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Rimuove i livelli RPU/EL di Dolby Vision e riproduce il video come semplice HEVC',
-			'settings.demuxer' => 'Demuxer del contenitore',
-			'settings.demuxerDescription' => 'Quale demuxer analizza i file riprodotti in diretta. Passa a media3 se un file dà problemi.',
-			'settings.demuxerFfmpeg' => 'FFmpeg (consigliato)',
-			'settings.demuxerMedia3' => 'media3',
 			'settings.requireProfileSelectionOnOpen' => 'Chiedi di scegliere il profilo all\'apertura',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Mostra la selezione del profilo ogni volta che l\'app viene aperta',
 			'settings.forceTvMode' => 'Forza modalità TV',
@@ -3288,8 +3272,6 @@ extension on TranslationsIt {
 			'fileInfo.flagOriginal' => 'Originale',
 			'fileInfo.channelsMono' => 'Mono',
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => 'Profilo ${profile}',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.markAsWatched' => 'Segna come visto',
 			'mediaMenu.markAsUnwatched' => 'Segna come non visto',
 			'mediaMenu.removeFromContinueWatching' => 'Rimuovi da Continua a guardare',
@@ -3298,6 +3280,8 @@ extension on TranslationsIt {
 			'mediaMenu.shufflePlay' => 'Riproduzione casuale',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Riproduzione casuale non disponibile offline',
 			'mediaMenu.fileInfo' => 'Info sul file',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteEpisodeFromServer' => 'Elimina episodio dal server',
 			'mediaMenu.deleteSeasonFromServer' => 'Elimina stagione dal server',
 			'mediaMenu.deleteShowFromServer' => 'Elimina serie dal server',
@@ -3802,8 +3786,6 @@ extension on TranslationsIt {
 			'explore.rows.watchlist' => 'Lista da guardare',
 			'explore.rows.recommendedMovies' => 'Film consigliati',
 			'explore.rows.recommendedShows' => 'Serie TV consigliate',
-			_ => null,
-		} ?? switch (path) {
 			'explore.rows.trendingMovies' => 'Film di tendenza',
 			'explore.rows.trendingShows' => 'Serie TV di tendenza',
 			'explore.rows.popularMovies' => 'Film popolari',
@@ -3812,6 +3794,8 @@ extension on TranslationsIt {
 			'explore.rows.suggestedAnime' => 'Anime suggeriti',
 			'explore.rows.airingAnime' => 'Migliori anime in onda',
 			'explore.rows.popularAnime' => 'Anime più popolari',
+			_ => null,
+		} ?? switch (path) {
 			'explore.rows.trending' => 'Di tendenza',
 			'explore.rows.upcomingMovies' => 'Film in arrivo',
 			'explore.rows.upcomingShows' => 'Serie TV in arrivo',
@@ -4316,8 +4300,6 @@ extension on TranslationsIt {
 			'companionRemote.pairing.availableDevices' => 'Dispositivi disponibili',
 			'companionRemote.pairing.manualConnection' => 'Connessione manuale',
 			'companionRemote.pairing.cryptoInitFailed' => 'Impossibile avviare la connessione sicura. Accedi prima a Plex.',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.validationHostRequired' => 'Inserisci l\'indirizzo host',
 			'companionRemote.pairing.validationHostFormat' => 'Il formato deve essere IP:porta (es. 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'Tempo scaduto per la connessione. Usa la stessa rete su entrambi i dispositivi.',
@@ -4326,6 +4308,8 @@ extension on TranslationsIt {
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Connessione non riuscita: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Vuoi disconnetterti dalla sessione remota?',
 			'companionRemote.remote.reconnecting' => 'Riconnessione...',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.attemptOf' => ({required Object current}) => 'Tentativo ${current} di 5',
 			'companionRemote.remote.retryNow' => 'Riprova ora',
 			'companionRemote.remote.tabRemote' => 'Telecomando',

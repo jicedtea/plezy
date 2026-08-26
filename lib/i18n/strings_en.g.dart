@@ -594,18 +594,6 @@ class Translations$settings$en {
 	/// en: 'Use hardware acceleration when available'
 	String get hardwareDecodingDescription => 'Use hardware acceleration when available';
 
-	/// en: 'Buffer Size'
-	String get bufferSize => 'Buffer Size';
-
-	/// en: '${size}MB'
-	String bufferSizeMB({required Object size}) => '${size}MB';
-
-	/// en: 'Auto (Recommended)'
-	String get bufferSizeAuto => 'Auto (Recommended)';
-
-	/// en: '${heap}MB memory available. A ${size}MB buffer may affect playback.'
-	String bufferSizeWarning({required Object heap, required Object size}) => '${heap}MB memory available. A ${size}MB buffer may affect playback.';
-
 	/// en: 'Playback Buffer'
 	String get playbackBuffer => 'Playback Buffer';
 
@@ -1020,8 +1008,8 @@ class Translations$settings$en {
 	/// en: 'Dolby Vision Conversion'
 	String get dvConversionMode => 'Dolby Vision Conversion';
 
-	/// en: 'Choose how ExoPlayer handles Dolby Vision Profile 7 files.'
-	String get dvConversionModeDescription => 'Choose how ExoPlayer handles Dolby Vision Profile 7 files.';
+	/// en: 'Choose how Dolby Vision Profile 7 files are handled.'
+	String get dvConversionModeDescription => 'Choose how Dolby Vision Profile 7 files are handled.';
 
 	/// en: 'Auto'
 	String get dvConversionAuto => 'Auto';
@@ -1046,18 +1034,6 @@ class Translations$settings$en {
 
 	/// en: 'Strip Dolby Vision RPU/EL layers and present plain HEVC'
 	String get dvConversionHevcStripDescription => 'Strip Dolby Vision RPU/EL layers and present plain HEVC';
-
-	/// en: 'Container Demuxer'
-	String get demuxer => 'Container Demuxer';
-
-	/// en: 'Which demuxer parses direct-played files. Switch to media3 if a file misbehaves.'
-	String get demuxerDescription => 'Which demuxer parses direct-played files. Switch to media3 if a file misbehaves.';
-
-	/// en: 'FFmpeg (Recommended)'
-	String get demuxerFfmpeg => 'FFmpeg (Recommended)';
-
-	/// en: 'media3'
-	String get demuxerMedia3 => 'media3';
 
 	/// en: 'Ask for profile on app open'
 	String get requireProfileSelectionOnOpen => 'Ask for profile on app open';
@@ -6992,10 +6968,6 @@ extension on Translations {
 			'settings.mpv' => 'mpv',
 			'settings.hardwareDecoding' => 'Hardware Decoding',
 			'settings.hardwareDecodingDescription' => 'Use hardware acceleration when available',
-			'settings.bufferSize' => 'Buffer Size',
-			'settings.bufferSizeMB' => ({required Object size}) => '${size}MB',
-			'settings.bufferSizeAuto' => 'Auto (Recommended)',
-			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '${heap}MB memory available. A ${size}MB buffer may affect playback.',
 			'settings.playbackBuffer' => 'Playback Buffer',
 			'settings.playbackBufferAuto' => 'Auto (Recommended)',
 			'settings.playbackBufferLarge' => 'Large',
@@ -7134,7 +7106,7 @@ extension on Translations {
 			'settings.audioDownmixNormalize' => 'Normalize Volume on Downmix',
 			'settings.audioDownmixNormalizeDescription' => 'Lower the mix to prevent clipping. Turn off to keep the original volume (may distort loud scenes).',
 			'settings.dvConversionMode' => 'Dolby Vision Conversion',
-			'settings.dvConversionModeDescription' => 'Choose how ExoPlayer handles Dolby Vision Profile 7 files.',
+			'settings.dvConversionModeDescription' => 'Choose how Dolby Vision Profile 7 files are handled.',
 			'settings.dvConversionAuto' => 'Auto',
 			'settings.dvConversionNative' => 'Native / Disabled',
 			'settings.dvConversionDv81' => 'P7 → P8.1',
@@ -7143,10 +7115,6 @@ extension on Translations {
 			'settings.dvConversionNativeDescription' => 'Force native DV7 and suppress DV conversion retry',
 			'settings.dvConversionDv81Description' => 'Force inline RPU conversion to Dolby Vision profile 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Strip Dolby Vision RPU/EL layers and present plain HEVC',
-			'settings.demuxer' => 'Container Demuxer',
-			'settings.demuxerDescription' => 'Which demuxer parses direct-played files. Switch to media3 if a file misbehaves.',
-			'settings.demuxerFfmpeg' => 'FFmpeg (Recommended)',
-			'settings.demuxerMedia3' => 'media3',
 			'settings.requireProfileSelectionOnOpen' => 'Ask for profile on app open',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Show profile selection every time the app is opened',
 			'settings.forceTvMode' => 'Force TV mode',
@@ -7333,8 +7301,6 @@ extension on Translations {
 			'fileInfo.flagDub' => 'Dub',
 			'fileInfo.flagOriginal' => 'Original',
 			'fileInfo.channelsMono' => 'Mono',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => 'Profile ${profile}',
 			'mediaMenu.markAsWatched' => 'Mark as Watched',
 			'mediaMenu.markAsUnwatched' => 'Mark as Unwatched',
@@ -7343,6 +7309,8 @@ extension on Translations {
 			'mediaMenu.goToSeries' => 'Go to series',
 			'mediaMenu.shufflePlay' => 'Shuffle Play',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Shuffle not available offline',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.fileInfo' => 'File Info',
 			'mediaMenu.deleteEpisodeFromServer' => 'Delete episode from server',
 			'mediaMenu.deleteSeasonFromServer' => 'Delete season from server',
@@ -7847,8 +7815,6 @@ extension on Translations {
 			'libraries.sortLabels.latestEpisodeAirDate' => 'Latest Episode Air Date',
 			'libraries.sortLabels.lastEpisodeDateAdded' => 'Last Episode Date Added',
 			'about.title' => 'About',
-			_ => null,
-		} ?? switch (path) {
 			'about.openSourceLicenses' => 'Open Source Licenses',
 			'about.versionLabel' => ({required Object version}) => 'Version ${version}',
 			'about.appDescription' => 'A beautiful Plex, Jellyfin, and Emby client for Flutter',
@@ -7857,6 +7823,8 @@ extension on Translations {
 			'serverSelection.failedToLoadServers' => ({required Object error}) => 'Failed to load servers: ${error}',
 			'serverSelection.noValidServers' => 'No usable servers were found on this account',
 			'hubDetail.title' => 'Title',
+			_ => null,
+		} ?? switch (path) {
 			'hubDetail.releaseYear' => 'Release Year',
 			'hubDetail.dateAdded' => 'Date Added',
 			'hubDetail.rating' => 'Rating',
@@ -8361,8 +8329,6 @@ extension on Translations {
 			'downloads.backgroundWarning.stillNotWorking' => 'Device-specific help',
 			'downloads.backgroundWarning.stillNotWorkingDescription' => 'See steps for your device, or send a log from Settings › View Logs if the issue continues.',
 			'downloads.backgroundWarning.dialogTitle' => 'Downloads may not finish',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.backgroundWarning.dialogDownloadAnyway' => 'Download anyway',
 			'downloads.backgroundWarning.dialogFixFirst' => 'Fix this first',
 			'downloads.backgroundWarning.statusTile' => 'Background downloads',
@@ -8371,6 +8337,8 @@ extension on Translations {
 			'downloads.backgroundWarning.statusDegraded' => 'Limited by system settings',
 			'downloads.backgroundWarning.statusUnknown' => 'Not checked yet',
 			'downloads.backgroundWarning.settingsUnavailable' => 'Couldn\'t open system settings on this device',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.backgroundWarning.linkUnavailable' => 'Couldn\'t open dontkillmyapp.com on this device',
 			'downloads.unknownShow' => 'Unknown Show',
 			'downloads.unknownSeason' => 'Unknown Season',

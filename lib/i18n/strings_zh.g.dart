@@ -292,10 +292,6 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get mpv => 'mpv';
 	@override String get hardwareDecoding => '硬件解码';
 	@override String get hardwareDecodingDescription => '如果可用，使用硬件加速';
-	@override String get bufferSize => '缓冲区大小';
-	@override String bufferSizeMB({required Object size}) => '${size}MB';
-	@override String get bufferSizeAuto => '自动（推荐）';
-	@override String bufferSizeWarning({required Object heap, required Object size}) => '可用内存 ${heap}MB。${size}MB 缓冲可能影响播放。';
 	@override String get playbackBuffer => '播放缓冲';
 	@override String get playbackBufferAuto => '自动（推荐）';
 	@override String get playbackBufferLarge => '大';
@@ -443,10 +439,6 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => '强制原生 DV7 并禁止重试 DV 转换';
 	@override String get dvConversionDv81Description => '强制内联 RPU 转换为 Dolby Vision Profile 8.1';
 	@override String get dvConversionHevcStripDescription => '移除 Dolby Vision RPU/EL 层并呈现普通 HEVC';
-	@override String get demuxer => '容器解复用器';
-	@override String get demuxerDescription => '由哪个解复用器解析直接播放的文件。若某个文件播放异常，可切换为 media3。';
-	@override String get demuxerFfmpeg => 'FFmpeg（推荐）';
-	@override String get demuxerMedia3 => 'media3';
 	@override String get requireProfileSelectionOnOpen => '打开应用时选择用户资料';
 	@override String get requireProfileSelectionOnOpenDescription => '每次打开应用时都显示用户资料选择界面';
 	@override String get forceTvMode => '强制 TV 模式';
@@ -2936,10 +2928,6 @@ extension on TranslationsZh {
 			'settings.mpv' => 'mpv',
 			'settings.hardwareDecoding' => '硬件解码',
 			'settings.hardwareDecodingDescription' => '如果可用，使用硬件加速',
-			'settings.bufferSize' => '缓冲区大小',
-			'settings.bufferSizeMB' => ({required Object size}) => '${size}MB',
-			'settings.bufferSizeAuto' => '自动（推荐）',
-			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => '可用内存 ${heap}MB。${size}MB 缓冲可能影响播放。',
 			'settings.playbackBuffer' => '播放缓冲',
 			'settings.playbackBufferAuto' => '自动（推荐）',
 			'settings.playbackBufferLarge' => '大',
@@ -3087,10 +3075,6 @@ extension on TranslationsZh {
 			'settings.dvConversionNativeDescription' => '强制原生 DV7 并禁止重试 DV 转换',
 			'settings.dvConversionDv81Description' => '强制内联 RPU 转换为 Dolby Vision Profile 8.1',
 			'settings.dvConversionHevcStripDescription' => '移除 Dolby Vision RPU/EL 层并呈现普通 HEVC',
-			'settings.demuxer' => '容器解复用器',
-			'settings.demuxerDescription' => '由哪个解复用器解析直接播放的文件。若某个文件播放异常，可切换为 media3。',
-			'settings.demuxerFfmpeg' => 'FFmpeg（推荐）',
-			'settings.demuxerMedia3' => 'media3',
 			'settings.requireProfileSelectionOnOpen' => '打开应用时选择用户资料',
 			'settings.requireProfileSelectionOnOpenDescription' => '每次打开应用时都显示用户资料选择界面',
 			'settings.forceTvMode' => '强制 TV 模式',
@@ -3278,8 +3262,6 @@ extension on TranslationsZh {
 			'fileInfo.flagOriginal' => '原声',
 			'fileInfo.channelsMono' => '单声道',
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => '编码配置 ${profile}',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.markAsWatched' => '标记为已观看',
 			'mediaMenu.markAsUnwatched' => '标记为未观看',
 			'mediaMenu.removeFromContinueWatching' => '从继续观看中移除',
@@ -3288,6 +3270,8 @@ extension on TranslationsZh {
 			'mediaMenu.shufflePlay' => '随机播放',
 			'mediaMenu.shuffleNotAvailableOffline' => '离线时无法随机播放',
 			'mediaMenu.fileInfo' => '文件信息',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteEpisodeFromServer' => '从服务器删除单集',
 			'mediaMenu.deleteSeasonFromServer' => '从服务器删除季度',
 			'mediaMenu.deleteShowFromServer' => '从服务器删除剧集',
@@ -3792,8 +3776,6 @@ extension on TranslationsZh {
 			'explore.rows.watchlist' => '想看列表',
 			'explore.rows.recommendedMovies' => '推荐电影',
 			'explore.rows.recommendedShows' => '推荐剧集',
-			_ => null,
-		} ?? switch (path) {
 			'explore.rows.trendingMovies' => '近期热门电影',
 			'explore.rows.trendingShows' => '近期热门剧集',
 			'explore.rows.popularMovies' => '人气电影',
@@ -3802,6 +3784,8 @@ extension on TranslationsZh {
 			'explore.rows.suggestedAnime' => '推荐动画',
 			'explore.rows.airingAnime' => '热门连载动画',
 			'explore.rows.popularAnime' => '最受欢迎动画',
+			_ => null,
+		} ?? switch (path) {
 			'explore.rows.trending' => '近期热门',
 			'explore.rows.upcomingMovies' => '即将上映的电影',
 			'explore.rows.upcomingShows' => '即将播出的剧集',
@@ -4306,8 +4290,6 @@ extension on TranslationsZh {
 			'companionRemote.pairing.availableDevices' => '可用设备',
 			'companionRemote.pairing.manualConnection' => '手动连接',
 			'companionRemote.pairing.cryptoInitFailed' => '无法启动安全连接。请先登录 Plex。',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.validationHostRequired' => '请输入主机地址',
 			'companionRemote.pairing.validationHostFormat' => '格式必须为 IP:端口（例如 192.168.1.100:48632）',
 			'companionRemote.pairing.connectionTimedOut' => '连接超时。请在两台设备上使用同一网络。',
@@ -4316,6 +4298,8 @@ extension on TranslationsZh {
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => '连接失败：${error}',
 			'companionRemote.remote.disconnectConfirm' => '确定要断开遥控会话吗？',
 			'companionRemote.remote.reconnecting' => '正在重新连接…',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.attemptOf' => ({required Object current}) => '第 ${current} 次尝试，共 5 次',
 			'companionRemote.remote.retryNow' => '立即重试',
 			'companionRemote.remote.tabRemote' => '遥控器',

@@ -292,10 +292,6 @@ class _Translations$settings$ru extends Translations$settings$en {
 	@override String get mpv => 'mpv';
 	@override String get hardwareDecoding => 'Аппаратное декодирование';
 	@override String get hardwareDecodingDescription => 'Использовать аппаратное ускорение, когда доступно';
-	@override String get bufferSize => 'Размер буфера';
-	@override String bufferSizeMB({required Object size}) => '${size}МБ';
-	@override String get bufferSizeAuto => 'Авто (Рекомендуется)';
-	@override String bufferSizeWarning({required Object heap, required Object size}) => 'Доступно памяти: ${heap} МБ. Буфер размером ${size} МБ может повлиять на воспроизведение.';
 	@override String get playbackBuffer => 'Буфер воспроизведения';
 	@override String get playbackBufferAuto => 'Авто (рекомендуется)';
 	@override String get playbackBufferLarge => 'Большой';
@@ -443,10 +439,6 @@ class _Translations$settings$ru extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Принудительно использовать нативный DV7 и не повторять DV-конвертацию';
 	@override String get dvConversionDv81Description => 'Принудительно выполнять inline-конвертацию RPU в Dolby Vision профиль 8.1';
 	@override String get dvConversionHevcStripDescription => 'Удалять слои Dolby Vision RPU/EL и передавать обычный HEVC';
-	@override String get demuxer => 'Демультиплексор контейнера';
-	@override String get demuxerDescription => 'Какой демультиплексор разбирает файлы при прямом воспроизведении. Переключитесь на media3, если файл воспроизводится неправильно.';
-	@override String get demuxerFfmpeg => 'FFmpeg (рекомендуется)';
-	@override String get demuxerMedia3 => 'media3';
 	@override String get requireProfileSelectionOnOpen => 'Запрашивать профиль при запуске';
 	@override String get requireProfileSelectionOnOpenDescription => 'Показывать выбор профиля при каждом открытии приложения';
 	@override String get forceTvMode => 'Принудительный режим ТВ';
@@ -2966,10 +2958,6 @@ extension on TranslationsRu {
 			'settings.mpv' => 'mpv',
 			'settings.hardwareDecoding' => 'Аппаратное декодирование',
 			'settings.hardwareDecodingDescription' => 'Использовать аппаратное ускорение, когда доступно',
-			'settings.bufferSize' => 'Размер буфера',
-			'settings.bufferSizeMB' => ({required Object size}) => '${size}МБ',
-			'settings.bufferSizeAuto' => 'Авто (Рекомендуется)',
-			'settings.bufferSizeWarning' => ({required Object heap, required Object size}) => 'Доступно памяти: ${heap} МБ. Буфер размером ${size} МБ может повлиять на воспроизведение.',
 			'settings.playbackBuffer' => 'Буфер воспроизведения',
 			'settings.playbackBufferAuto' => 'Авто (рекомендуется)',
 			'settings.playbackBufferLarge' => 'Большой',
@@ -3117,10 +3105,6 @@ extension on TranslationsRu {
 			'settings.dvConversionNativeDescription' => 'Принудительно использовать нативный DV7 и не повторять DV-конвертацию',
 			'settings.dvConversionDv81Description' => 'Принудительно выполнять inline-конвертацию RPU в Dolby Vision профиль 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Удалять слои Dolby Vision RPU/EL и передавать обычный HEVC',
-			'settings.demuxer' => 'Демультиплексор контейнера',
-			'settings.demuxerDescription' => 'Какой демультиплексор разбирает файлы при прямом воспроизведении. Переключитесь на media3, если файл воспроизводится неправильно.',
-			'settings.demuxerFfmpeg' => 'FFmpeg (рекомендуется)',
-			'settings.demuxerMedia3' => 'media3',
 			'settings.requireProfileSelectionOnOpen' => 'Запрашивать профиль при запуске',
 			'settings.requireProfileSelectionOnOpenDescription' => 'Показывать выбор профиля при каждом открытии приложения',
 			'settings.forceTvMode' => 'Принудительный режим ТВ',
@@ -3308,8 +3292,6 @@ extension on TranslationsRu {
 			'fileInfo.flagOriginal' => 'Оригинал',
 			'fileInfo.channelsMono' => 'Моно',
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => 'Профиль ${profile}',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.markAsWatched' => 'Отметить как просмотренное',
 			'mediaMenu.markAsUnwatched' => 'Отметить как непросмотренное',
 			'mediaMenu.removeFromContinueWatching' => 'Удалить из «Продолжить просмотр»',
@@ -3318,6 +3300,8 @@ extension on TranslationsRu {
 			'mediaMenu.shufflePlay' => 'Случайное воспроизведение',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Перемешивание недоступно офлайн',
 			'mediaMenu.fileInfo' => 'Информация о файле',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.deleteEpisodeFromServer' => 'Удалить эпизод с сервера',
 			'mediaMenu.deleteSeasonFromServer' => 'Удалить сезон с сервера',
 			'mediaMenu.deleteShowFromServer' => 'Удалить сериал с сервера',
@@ -3822,8 +3806,6 @@ extension on TranslationsRu {
 			'explore.rows.watchlist' => 'Список для просмотра',
 			'explore.rows.recommendedMovies' => 'Рекомендуемые фильмы',
 			'explore.rows.recommendedShows' => 'Рекомендуемые сериалы',
-			_ => null,
-		} ?? switch (path) {
 			'explore.rows.trendingMovies' => 'Фильмы в тренде',
 			'explore.rows.trendingShows' => 'Сериалы в тренде',
 			'explore.rows.popularMovies' => 'Популярные фильмы',
@@ -3832,6 +3814,8 @@ extension on TranslationsRu {
 			'explore.rows.suggestedAnime' => 'Рекомендуемые аниме',
 			'explore.rows.airingAnime' => 'Топ выходящих аниме',
 			'explore.rows.popularAnime' => 'Самые популярные аниме',
+			_ => null,
+		} ?? switch (path) {
 			'explore.rows.trending' => 'В тренде',
 			'explore.rows.upcomingMovies' => 'Ожидаемые фильмы',
 			'explore.rows.upcomingShows' => 'Ожидаемые сериалы',
@@ -4336,8 +4320,6 @@ extension on TranslationsRu {
 			'companionRemote.pairing.availableDevices' => 'Доступные устройства',
 			'companionRemote.pairing.manualConnection' => 'Ручное подключение',
 			'companionRemote.pairing.cryptoInitFailed' => 'Не удалось установить защищённое соединение. Сначала войдите в Plex.',
-			_ => null,
-		} ?? switch (path) {
 			'companionRemote.pairing.validationHostRequired' => 'Введите адрес хоста',
 			'companionRemote.pairing.validationHostFormat' => 'Формат должен быть IP:порт (например, 192.168.1.100:48632)',
 			'companionRemote.pairing.connectionTimedOut' => 'Время подключения истекло. Используйте одну сеть на обоих устройствах.',
@@ -4346,6 +4328,8 @@ extension on TranslationsRu {
 			'companionRemote.pairing.failedToConnect' => ({required Object error}) => 'Не удалось подключиться: ${error}',
 			'companionRemote.remote.disconnectConfirm' => 'Отключиться от удалённой сессии?',
 			'companionRemote.remote.reconnecting' => 'Переподключение...',
+			_ => null,
+		} ?? switch (path) {
 			'companionRemote.remote.attemptOf' => ({required Object current}) => 'Попытка ${current} из 5',
 			'companionRemote.remote.retryNow' => 'Повторить сейчас',
 			'companionRemote.remote.tabRemote' => 'Пульт',
