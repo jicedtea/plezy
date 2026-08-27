@@ -45,6 +45,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
             _themeSelector(),
             _languageSelector(context),
             _densitySelector(),
+            _gridSpacingSelector(),
             if (PlatformDetector.isAutomotive()) _displayScaleSelector(),
             _viewModeSelector(),
             _episodePosterModeSelector(),
@@ -242,7 +243,7 @@ class AppearanceSettingsScreen extends StatelessWidget {
       subtitle: Text(_getLanguageDisplayName(LocaleSettings.currentLocale)),
       trailing: const AppIcon(Symbols.chevron_right_rounded, fill: 1),
       onTap: () async {
-        final value = await showSelectionDialog<AppLocale>(
+        final picked = await showSelectionDialog<AppLocale>(
           context: context,
           title: t.settings.language,
           options: AppLocale.values
@@ -250,7 +251,8 @@ class AppearanceSettingsScreen extends StatelessWidget {
               .toList(),
           currentValue: LocaleSettings.currentLocale,
         );
-        if (value != null) {
+        if (picked != null) {
+          final value = picked.value;
           await SettingsService.instance.write(SettingsService.appLocale, value);
           unawaited(LocaleSettings.setLocale(value));
           if (context.mounted) {
@@ -343,6 +345,17 @@ class AppearanceSettingsScreen extends StatelessWidget {
     segments: [
       ButtonSegment(value: ViewMode.grid, label: Text(t.settings.gridView)),
       ButtonSegment(value: ViewMode.list, label: Text(t.settings.listView)),
+    ],
+  );
+
+  Widget _gridSpacingSelector() => SettingSegmentedTile<GridSpacing>(
+    pref: SettingsService.gridSpacing,
+    icon: Symbols.padding_rounded,
+    title: t.settings.gridSpacing,
+    segments: [
+      ButtonSegment(value: GridSpacing.tight, label: Text(t.settings.gridSpacingTight)),
+      ButtonSegment(value: GridSpacing.normal, label: Text(t.settings.gridSpacingNormal)),
+      ButtonSegment(value: GridSpacing.spacious, label: Text(t.settings.gridSpacingSpacious)),
     ],
   );
 

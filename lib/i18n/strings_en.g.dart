@@ -465,6 +465,18 @@ class Translations$settings$en {
 	/// en: 'Comfortable'
 	String get comfortable => 'Comfortable';
 
+	/// en: 'Grid Spacing'
+	String get gridSpacing => 'Grid Spacing';
+
+	/// en: 'Tight'
+	String get gridSpacingTight => 'Tight';
+
+	/// en: 'Normal'
+	String get gridSpacingNormal => 'Normal';
+
+	/// en: 'Spacious'
+	String get gridSpacingSpacious => 'Spacious';
+
 	/// en: 'Corner Spotlight Backdrop'
 	String get tvCornerSpotlightBackdrop => 'Corner Spotlight Backdrop';
 
@@ -611,6 +623,12 @@ class Translations$settings$en {
 
 	/// en: 'Default Quality'
 	String get defaultQualityTitle => 'Default Quality';
+
+	/// en: 'Default Quality on Cellular'
+	String get cellularQualityTitle => 'Default Quality on Cellular';
+
+	/// en: 'Same as Default Quality'
+	String get cellularQualitySameAsDefault => 'Same as Default Quality';
 
 	/// en: 'Music Quality'
 	String get musicQualityTitle => 'Music Quality';
@@ -6925,6 +6943,10 @@ extension on Translations {
 			'settings.displayScale' => 'Display Scale',
 			'settings.compact' => 'Compact',
 			'settings.comfortable' => 'Comfortable',
+			'settings.gridSpacing' => 'Grid Spacing',
+			'settings.gridSpacingTight' => 'Tight',
+			'settings.gridSpacingNormal' => 'Normal',
+			'settings.gridSpacingSpacious' => 'Spacious',
 			'settings.tvCornerSpotlightBackdrop' => 'Corner Spotlight Backdrop',
 			'settings.tvCornerSpotlightBackdropDescription' => 'Show spotlight artwork in the top-right corner instead of filling the screen',
 			'settings.viewMode' => 'View Mode',
@@ -6974,6 +6996,8 @@ extension on Translations {
 			'settings.playbackBufferExtraLarge' => 'Extra Large',
 			'settings.playbackBufferDescription' => 'Buffer more against unstable connections. Also limited by Buffer Size.',
 			'settings.defaultQualityTitle' => 'Default Quality',
+			'settings.cellularQualityTitle' => 'Default Quality on Cellular',
+			'settings.cellularQualitySameAsDefault' => 'Same as Default Quality',
 			'settings.musicQualityTitle' => 'Music Quality',
 			'settings.subtitleStyling' => 'Subtitle Styling',
 			'settings.subtitleStylingDescription' => 'Customize subtitle appearance',
@@ -7303,14 +7327,14 @@ extension on Translations {
 			'fileInfo.channelsMono' => 'Mono',
 			'fileInfo.dolbyVisionProfile' => ({required Object profile}) => 'Profile ${profile}',
 			'mediaMenu.markAsWatched' => 'Mark as Watched',
+			_ => null,
+		} ?? switch (path) {
 			'mediaMenu.markAsUnwatched' => 'Mark as Unwatched',
 			'mediaMenu.removeFromContinueWatching' => 'Remove from Continue Watching',
 			'mediaMenu.viewDetails' => 'View details',
 			'mediaMenu.goToSeries' => 'Go to series',
 			'mediaMenu.shufflePlay' => 'Shuffle Play',
 			'mediaMenu.shuffleNotAvailableOffline' => 'Shuffle not available offline',
-			_ => null,
-		} ?? switch (path) {
 			'mediaMenu.fileInfo' => 'File Info',
 			'mediaMenu.deleteEpisodeFromServer' => 'Delete episode from server',
 			'mediaMenu.deleteSeasonFromServer' => 'Delete season from server',
@@ -7817,14 +7841,14 @@ extension on Translations {
 			'about.title' => 'About',
 			'about.openSourceLicenses' => 'Open Source Licenses',
 			'about.versionLabel' => ({required Object version}) => 'Version ${version}',
+			_ => null,
+		} ?? switch (path) {
 			'about.appDescription' => 'A beautiful Plex, Jellyfin, and Emby client for Flutter',
 			'about.viewLicensesDescription' => 'View licenses of third-party libraries',
 			'serverSelection.noServersFoundForAccount' => ({required Object username, required Object email}) => 'No servers found for ${username} (${email})',
 			'serverSelection.failedToLoadServers' => ({required Object error}) => 'Failed to load servers: ${error}',
 			'serverSelection.noValidServers' => 'No usable servers were found on this account',
 			'hubDetail.title' => 'Title',
-			_ => null,
-		} ?? switch (path) {
 			'hubDetail.releaseYear' => 'Release Year',
 			'hubDetail.dateAdded' => 'Date Added',
 			'hubDetail.rating' => 'Rating',
@@ -8331,14 +8355,14 @@ extension on Translations {
 			'downloads.backgroundWarning.dialogTitle' => 'Downloads may not finish',
 			'downloads.backgroundWarning.dialogDownloadAnyway' => 'Download anyway',
 			'downloads.backgroundWarning.dialogFixFirst' => 'Fix this first',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.backgroundWarning.statusTile' => 'Background downloads',
 			'downloads.backgroundWarning.statusOk' => 'Allowed to run in the background',
 			'downloads.backgroundWarning.statusBlocked' => 'Blocked by system settings',
 			'downloads.backgroundWarning.statusDegraded' => 'Limited by system settings',
 			'downloads.backgroundWarning.statusUnknown' => 'Not checked yet',
 			'downloads.backgroundWarning.settingsUnavailable' => 'Couldn\'t open system settings on this device',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.backgroundWarning.linkUnavailable' => 'Couldn\'t open dontkillmyapp.com on this device',
 			'downloads.unknownShow' => 'Unknown Show',
 			'downloads.unknownSeason' => 'Unknown Season',

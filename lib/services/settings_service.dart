@@ -19,7 +19,17 @@ import 'sensitive_prefs.dart';
 import 'device_performance.dart';
 import 'shortcut_action.dart';
 export 'base_shared_preferences_service.dart'
-    show Pref, BoolPref, IntPref, DoublePref, StringPref, NullableStringPref, StringListPref, EnumPref, JsonPref;
+    show
+        Pref,
+        BoolPref,
+        IntPref,
+        DoublePref,
+        StringPref,
+        NullableStringPref,
+        StringListPref,
+        EnumPref,
+        NullableEnumPref,
+        JsonPref;
 import '../models/audio_quality_preset.dart';
 import '../models/transcode_quality_preset.dart';
 import '../navigation/navigation_tabs.dart';
@@ -39,6 +49,28 @@ class LibraryDensity {
 
   /// Returns a 0.0–1.0 factor for interpolation (0 = most compact, 1 = most comfortable).
   static double factor(int density) => (density.clamp(min, max) - min) / (max - min);
+}
+
+/// Gap between cards in media grids (#2083, #1597). [tight] is the
+/// pre-setting look, so nothing moves on update.
+enum GridSpacing { tight, normal, spacious }
+
+extension GridSpacingMetrics on GridSpacing {
+  /// Inter-card gutter fed to the grid delegate's cross/main axis spacing.
+  double get gridGap => switch (this) {
+    GridSpacing.tight => 0,
+    GridSpacing.normal => 6,
+    GridSpacing.spacious => 12,
+  };
+
+  /// Vertical gap between the poster and the title inside a standard grid
+  /// card. Only grid cells (Expanded poster) apply this; fixed-height hub-row
+  /// cards keep the legacy 2px because their text band cannot absorb more.
+  double get posterTitleGap => switch (this) {
+    GridSpacing.tight => 2,
+    GridSpacing.normal => 4,
+    GridSpacing.spacious => 6,
+  };
 }
 
 enum ViewMode { grid, list }
@@ -488,6 +520,14 @@ class SettingsService extends BaseSharedPreferencesService {
     values: TranscodeQualityPreset.values,
     defaultValue: TranscodeQualityPreset.original,
   );
+
+  /// Startup quality cap applied instead of [defaultQualityPreset] when the
+  /// device is on a cellular-only connection. Null = follow
+  /// [defaultQualityPreset].
+  static const cellularQualityPreset = NullableEnumPref<TranscodeQualityPreset>(
+    'cellular_quality_preset',
+    values: TranscodeQualityPreset.values,
+  );
   static const musicQualityPreset = EnumPref<AudioQualityPreset>(
     'music_quality_preset',
     values: AudioQualityPreset.values,
@@ -628,6 +668,11 @@ class SettingsService extends BaseSharedPreferencesService {
     defaultValue: PlaybackBufferTier.auto,
   );
   static const libraryDensity = _LibraryDensityPref();
+  static const gridSpacing = EnumPref<GridSpacing>(
+    'grid_spacing',
+    values: GridSpacing.values,
+    defaultValue: GridSpacing.tight,
+  );
   static const automotiveUiScale = _AutomotiveUiScalePref();
   static const tvCornerSpotlightBackdrop = BoolPref('tv_corner_spotlight_backdrop');
   static const episodePosterMode = _EpisodePosterModePref();
@@ -1082,6 +1127,7 @@ class SettingsService extends BaseSharedPreferencesService {
     videoPlayerNavigationEnabled,
     playbackBufferTier,
     libraryDensity,
+    gridSpacing,
     automotiveUiScale,
     tvCornerSpotlightBackdrop,
     episodePosterMode,
@@ -1117,6 +1163,7 @@ class SettingsService extends BaseSharedPreferencesService {
     creditsPattern,
     autoRemoveWatchedDownloads,
     defaultQualityPreset,
+    cellularQualityPreset,
     musicQualityPreset,
     liveTvDefaultFavorites,
     matchRefreshRate,
