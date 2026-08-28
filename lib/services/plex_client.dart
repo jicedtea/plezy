@@ -335,6 +335,8 @@ mixin _PlexClientInternals on MediaServerCacheMixin {
     bool allowEndpointFailover = true,
   });
 
+  Future<MediaServerResponse> _postWithFailover(String path, {Map<String, dynamic>? queryParameters});
+
   Map<String, dynamic>? _getMediaContainer(MediaServerResponse response);
 
   Map<String, dynamic> _buildPaginationParams(int? start, int? size);
@@ -599,6 +601,17 @@ class PlexClient
       abort: abort,
       allowEndpointFailover: allowEndpointFailover,
     );
+    throwIfHttpError(response);
+    return response;
+  }
+
+  /// POST twin of [_getWithFailover] for the rare replay-safe mutation (see
+  /// [FailoverHttpClient]'s class doc): the same endpoint failover and non-2xx
+  /// throw policy, opted into per call site because replaying most POSTs
+  /// risks double-application.
+  @override
+  Future<MediaServerResponse> _postWithFailover(String path, {Map<String, dynamic>? queryParameters}) async {
+    final response = await _http.post(path, queryParameters: queryParameters, allowEndpointFailover: true);
     throwIfHttpError(response);
     return response;
   }
@@ -3564,11 +3577,13 @@ class PlexClient
   /// station uri's trailing `?type=10` (track results) is part of the
   /// station path and rides inside the encoded uri value. Consumed as a
   /// plain track list — music playback is queue-managed client-side.
+  /// Failures propagate (matching the Jellyfin implementation) so callers
+  /// can tell a failed mix from a genuinely empty one.
   @override
   Future<List<MediaItem>> fetchInstantMix(String itemId, {int limit = 100}) async {
     final stationUri = '${await buildMetadataUri(itemId)}/station/${const Uuid().v4()}?type=${PlexMetadataType.track}';
     final queue = await createPlayQueue(uri: stationUri, type: 'audio');
-    final tracks = queue?.items ?? const <MediaItem>[];
+    final tracks = queue.items ?? const <MediaItem>[];
     return tracks.length > limit ? tracks.sublist(0, limit) : tracks;
   }
 
@@ -3665,7 +3680,7 @@ class PlexClient
       // (resolution/videoQuality) and is ignored for audio.
       final isTrack = options.metadata.kind == MediaKind.track;
       final audioPreset = options.audioQualityPreset ?? AudioQualityPreset.original;
-      final wantTranscode = isTrack ? !audioPreset.isOriginal : !options.qualityPreset.isOriginal;
+      final wantTranscode = isTrack ? !audioPreset.isOriginal : _presetNeedsTranscode(options.qualityPreset, data);
       if (wantTranscode && options.sessionIdentifier != null && options.transcodeSessionId != null) {
         if (isTrack) {
           final result = await buildMusicTranscodeStartPath(
@@ -3753,6 +3768,29 @@ class PlexClient
       if (error is PlaybackException) rethrow;
       Error.throwWithStackTrace(classifyPlaybackFailure(error), stackTrace);
     }
+  }
+
+  /// Whether [preset] asks for anything the selected version does not already
+  /// deliver. A preset is a ceiling, so a version that fits under it is served
+  /// by the file itself and playback direct plays instead of paying for an
+  /// encode that can only cost more (issue #2152).
+  ///
+  /// The comparison cannot be left to the server: PMS answers `directPlay=1`
+  /// with "Direct play OK" whatever bitrate cap the request carries (measured
+  /// on 1.43 with a 65 Mbps 4K source under a 10 Mbps cap), so asking its MDE
+  /// to arbitrate would cap nothing at all. Plex Web decides it client-side
+  /// too, folding the preset's bitrate into its own direct-play profile.
+  bool _presetNeedsTranscode(TranscodeQualityPreset preset, PlexVideoPlaybackData data) {
+    if (preset.isOriginal) return false;
+    final version = data.selectedMediaIndex < data.availableVersions.length
+        ? data.availableVersions[data.selectedMediaIndex]
+        : null;
+    if (!preset.coversSource(bitrateKbps: version?.bitrate, heightPx: version?.resolutionHeight)) return true;
+    appLogger.i(
+      'Preset ${preset.name} covers the source (${version?.bitrate} kbps, '
+      '${version?.resolutionHeight}p); playing the file directly',
+    );
+    return false;
   }
 
   /// Direct-play result for a transcode decision that fell back (failed or
