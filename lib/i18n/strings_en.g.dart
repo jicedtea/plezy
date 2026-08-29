@@ -269,6 +269,9 @@ class Translations$common$en {
 	/// en: 'Off'
 	String get off => 'Off';
 
+	/// en: 'Options'
+	String get options => 'Options';
+
 	/// en: 'Season ${number}'
 	String seasonNumber({required Object number}) => 'Season ${number}';
 
@@ -3483,6 +3486,21 @@ class Translations$liveTv$en {
 
 	/// en: 'Reload Guide'
 	String get reloadGuide => 'Reload Guide';
+
+	/// en: 'Search Guide'
+	String get searchGuide => 'Search Guide';
+
+	/// en: 'Search channels & programs'
+	String get searchHint => 'Search channels & programs';
+
+	/// en: 'No matches for "${query}"'
+	String searchNoResults({required Object query}) => 'No matches for "${query}"';
+
+	/// en: 'Channels'
+	String get channelsSection => 'Channels';
+
+	/// en: 'Programs'
+	String get programsSection => 'Programs';
 
 	/// en: 'Now'
 	String get now => 'Now';
@@ -6940,6 +6958,7 @@ extension on Translations {
 			'common.mute' => 'Mute',
 			'common.ok' => 'OK',
 			'common.off' => 'Off',
+			'common.options' => 'Options',
 			'common.seasonNumber' => ({required Object number}) => 'Season ${number}',
 			'common.episodeNumberTitle' => ({required Object number, required Object title}) => 'Episode ${number} - ${title}',
 			'common.chapterNumber' => ({required Object number}) => 'Chapter ${number}',
@@ -7401,9 +7420,9 @@ extension on Translations {
 			'fileInfo.mediaType' => 'Media Type',
 			'fileInfo.sourceKind' => 'Source Kind',
 			'fileInfo.optimizedVersion' => 'Optimized Version',
-			'fileInfo.optimizationTarget' => 'Optimization Target',
 			_ => null,
 		} ?? switch (path) {
+			'fileInfo.optimizationTarget' => 'Optimization Target',
 			'fileInfo.deletedAt' => 'Deleted',
 			'fileInfo.remoteSource' => 'Remote Source',
 			'fileInfo.infiniteStream' => 'Infinite Stream',
@@ -7915,9 +7934,9 @@ extension on Translations {
 			'libraries.filterCategories.unwatched' => 'Unwatched',
 			'libraries.filterCategories.unplayed' => 'Unplayed',
 			'libraries.filterCategories.favorites' => 'Favorites',
-			'libraries.sortLabels.title' => 'Title',
 			_ => null,
 		} ?? switch (path) {
+			'libraries.sortLabels.title' => 'Title',
 			'libraries.sortLabels.dateAdded' => 'Date Added',
 			'libraries.sortLabels.releaseDate' => 'Release Date',
 			'libraries.sortLabels.rating' => 'Rating',
@@ -8148,6 +8167,11 @@ extension on Translations {
 			'liveTv.unknownChannel' => 'Unknown channel',
 			'liveTv.live' => 'LIVE',
 			'liveTv.reloadGuide' => 'Reload Guide',
+			'liveTv.searchGuide' => 'Search Guide',
+			'liveTv.searchHint' => 'Search channels & programs',
+			'liveTv.searchNoResults' => ({required Object query}) => 'No matches for "${query}"',
+			'liveTv.channelsSection' => 'Channels',
+			'liveTv.programsSection' => 'Programs',
 			'liveTv.now' => 'Now',
 			'liveTv.today' => 'Today',
 			'liveTv.tomorrow' => 'Tomorrow',
@@ -8424,14 +8448,14 @@ extension on Translations {
 			'downloads.activeSyncRules' => 'Sync rules',
 			'downloads.noSyncRules' => 'No sync rules',
 			'downloads.manageSyncRule' => 'Manage sync',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.editEpisodeCount' => 'Episode count',
 			'downloads.editSyncFilter' => 'Sync filter',
 			'downloads.syncAllItems' => 'Syncing all items',
 			'downloads.syncUnwatchedItems' => 'Syncing unwatched items',
 			'downloads.syncRuleServerContext' => ({required Object server, required Object status}) => 'Server: ${server} • ${status}',
 			'downloads.syncRuleAvailable' => 'Available',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.syncRuleOffline' => 'Offline',
 			'downloads.syncRuleSignInRequired' => 'Sign in required',
 			'downloads.syncRuleNotAvailableForProfile' => 'Not available for current profile',
