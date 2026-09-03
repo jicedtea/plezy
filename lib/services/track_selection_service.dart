@@ -689,19 +689,10 @@ class TrackSelectionService {
 
   TrackSelectionService({this.player, this.profileSettings, required this.metadata, this.plexMediaInfo});
 
-  /// Build list of preferred languages from a user profile
-  List<String> _buildPreferredLanguages(MediaServerUserProfile profile, {required bool isAudio}) {
+  /// The profile's preferred language for one track kind, or null when unset.
+  static String? _preferredLanguage(MediaServerUserProfile profile, {required bool isAudio}) {
     final primary = isAudio ? profile.defaultAudioLanguage : profile.defaultSubtitleLanguage;
-    final list = isAudio ? profile.defaultAudioLanguages : profile.defaultSubtitleLanguages;
-
-    final result = <String>[];
-    if (primary != null && primary.isNotEmpty) {
-      result.add(primary);
-    }
-    if (list != null) {
-      result.addAll(list);
-    }
-    return result;
+    return primary == null || primary.isEmpty ? null : primary;
   }
 
   /// Find the first track whose language matches the preferred language.
@@ -767,16 +758,9 @@ class TrackSelectionService {
 
   AudioTrack? findAudioTrackByProfile(List<AudioTrack> availableTracks, MediaServerUserProfile profile) {
     if (availableTracks.isEmpty || !profile.autoSelectAudio) return null;
-
-    final preferredLanguages = _buildPreferredLanguages(profile, isAudio: true);
-    if (preferredLanguages.isEmpty) return null;
-
-    for (final preferredLanguage in preferredLanguages) {
-      final match = _findTrackByPreferredLanguage<AudioTrack>(availableTracks, preferredLanguage, (t) => t.language);
-      if (match != null) return match;
-    }
-
-    return null;
+    final preferredLanguage = _preferredLanguage(profile, isAudio: true);
+    if (preferredLanguage == null) return null;
+    return _findTrackByPreferredLanguage<AudioTrack>(availableTracks, preferredLanguage, (t) => t.language);
   }
 
   SubtitleTrack? _findSubtitleTrackByProfile(
@@ -786,20 +770,9 @@ class TrackSelectionService {
   }) {
     final candidates = forcedOnly ? availableTracks.where((track) => track.effectiveForced).toList() : availableTracks;
     if (candidates.isEmpty) return null;
-
-    final preferredLanguages = _buildPreferredLanguages(profile, isAudio: false);
-    if (preferredLanguages.isEmpty) return null;
-
-    for (final preferredLanguage in preferredLanguages) {
-      final match = _findTrackByPreferredLanguage<SubtitleTrack>(
-        candidates,
-        preferredLanguage,
-        (track) => track.language,
-      );
-      if (match != null) return match;
-    }
-
-    return null;
+    final preferredLanguage = _preferredLanguage(profile, isAudio: false);
+    if (preferredLanguage == null) return null;
+    return _findTrackByPreferredLanguage<SubtitleTrack>(candidates, preferredLanguage, (track) => track.language);
   }
 
   SubtitleTrack? _findDefaultSubtitleTrack(List<SubtitleTrack> availableTracks) {
@@ -822,15 +795,19 @@ class TrackSelectionService {
 
   bool _audioMatchesProfile(AudioTrack? selectedAudioTrack, MediaServerUserProfile profile) {
     if (selectedAudioTrack == null) return false;
-    final preferredLanguages = _buildPreferredLanguages(profile, isAudio: true);
-    if (preferredLanguages.isEmpty) return false;
-    return preferredLanguages.any((language) => languageMatches(selectedAudioTrack.language, language));
+    final preferredLanguage = _preferredLanguage(profile, isAudio: true);
+    return preferredLanguage != null && languageMatches(selectedAudioTrack.language, preferredLanguage);
   }
 
   TrackSelectionResult<SubtitleTrack>? _selectSubtitleTrackByProfile(
     List<SubtitleTrack> availableTracks,
     AudioTrack? selectedAudioTrack,
   ) {
+    // PMS already applies the account's `autoSelectSubtitle` when it stamps
+    // `selected` on the item's streams (Plex Web reads nothing else), so
+    // re-applying the mode here would second-guess a decision the server has
+    // made — and Plex's 0 means "manually selected", not "off".
+    if (metadata.backend == MediaBackend.plex) return null;
     final profile = profileSettings;
     final mode = profile?.subtitleMode;
     if (profile == null || mode == null || mode == SubtitlePlaybackMode.defaultMode) return null;
@@ -1193,8 +1170,9 @@ class TrackSelectionService {
       if (waitForPendingSource && availableTracks.isEmpty && info.subtitleTracks.isNotEmpty) return null;
     }
 
-    // Priority 3: Apply server profile subtitle mode when the backend exposes
-    // one (MediaBrowser). Plex keeps using the selected-stream path above.
+    // Priority 3: Apply the server profile's subtitle mode where the server
+    // does not pre-select for us (MediaBrowser). Plex never reaches this with
+    // a mode: PMS already folded it into `selected` above.
     final profileSelectedTrack = _selectSubtitleTrackByProfile(availableTracks, selectedAudioTrack);
     if (profileSelectedTrack != null) return profileSelectedTrack;
 
