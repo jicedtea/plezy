@@ -26,7 +26,7 @@ typedef SeerrPlexTokenSupplier = Future<String?> Function();
 
 /// Authenticated Seerr API client, scoped to one [SeerrSession].
 ///
-/// When the instance no longer knows the session (see [_isSessionRejection])
+/// When the instance no longer knows the session (see [_probeSession])
 /// it re-logins silently via [SeerrAuthService.reauth] (password methods use
 /// the stored secret; plex uses [plexTokenSupplier]), swaps the cookie, and
 /// retries once. Concurrent re-auths coalesce per instance+user so a burst of
@@ -81,8 +81,12 @@ class SeerrClient {
   /// partial `/auth/local` body as permission-less (#2213), only reaches the
   /// Request action once the snapshot is refreshed — and a silent re-auth,
   /// the only other refresh, never runs while the cookie is still accepted.
-  Future<void> refreshUser() async {
-    final user = await getMe();
+  Future<void> refreshUser() async => _adoptUser(await getMe());
+
+  /// Adopt a fresh `/auth/me` body: a changed permission mask or display
+  /// name reaches the owner through [onSessionUpdated] in place — the client
+  /// is never replaced for a capability change.
+  void _adoptUser(SeerrUser user) {
     final displayName = user.displayName ?? _session.displayName;
     if (user.permissions == _session.permissions && displayName == _session.displayName) return;
     _adopt(_session.copyWith(permissions: user.permissions, displayName: displayName));
@@ -220,46 +224,72 @@ class SeerrClient {
     Map<String, Object?>? body,
   }) async {
     var res = await _http.send(method, path, query: query, body: body);
-    if (await _isSessionRejection(res, path)) {
-      try {
-        await _reauthCoalesced();
-      } on SeerrAuthException {
-        onSessionInvalidated();
-        rethrow;
-      }
-      res = await _http.send(method, path, query: query, body: body);
-      SeerrHttpClient.throwIfProxied(res);
-      if (res.statusCode == 401) {
-        onSessionInvalidated();
-        throw SeerrAuthException(
-          'Session rejected after successful re-auth',
-          statusCode: 401,
-          display: t.seerr.sessionRejectedAfterReauth,
-        );
+    if (SeerrHttpClient.classify(res, path: path) == SeerrRejection.session) {
+      switch (await _probeSession(path)) {
+        case _SessionVerdict.live:
+          throw _permissionDenied(res, path);
+        case _SessionVerdict.inconclusive:
+          break;
+        case _SessionVerdict.gone:
+          try {
+            await _reauthCoalesced();
+          } on SeerrAuthException {
+            onSessionInvalidated();
+            rethrow;
+          }
+          res = await _http.send(method, path, query: query, body: body);
+          if (SeerrHttpClient.classify(res, path: path) == SeerrRejection.session) {
+            // A fresh cookie that /auth/me itself refuses is unambiguous; on
+            // any other route the cookie was just issued, so a 403 is the
+            // permission miss it always was — the login body already adopted
+            // the current mask.
+            if (path != '/auth/me') throw _permissionDenied(res, path);
+            onSessionInvalidated();
+            throw SeerrAuthException(
+              'Session rejected after successful re-auth',
+              statusCode: res.statusCode,
+              display: t.seerr.sessionRejectedAfterReauth,
+            );
+          }
       }
     }
-    SeerrHttpClient.throwForStatus(res);
+    SeerrHttpClient.throwForStatus(res, path: path);
     return res.data;
   }
 
-  /// Whether [res] means the instance no longer knows the session.
+  SeerrPermissionException _permissionDenied(SeerrResponse res, String path) => SeerrPermissionException(
+    'Permission denied for $path',
+    display: t.seerr.permissionDenied,
+    statusCode: res.statusCode,
+  );
+
+  /// Whether a middleware rejection on [path] means the instance no longer
+  /// knows the session.
   ///
-  /// Seerr answers a missing or expired session with 403, never 401 — the
-  /// same status and body its permission checks produce — so a 403 only
-  /// counts as expiry once `GET /auth/me` (authenticated, no permission bits)
-  /// rejects the cookie too. Re-authing on every 403 would instead unlink a
-  /// Quick Connect session, which has no re-auth credentials, over a plain
-  /// permission denial. A 401 never comes from Seerr itself — a proxy in
-  /// front of it can send one, and that is not a session rejection at all:
-  /// the cookie may be fine behind the wall, so it must not trigger a re-auth
-  /// that would fail the same way and unlink the session.
-  Future<bool> _isSessionRejection(SeerrResponse res, String path) async {
-    if (SeerrHttpClient.isProxyInterception(res)) return false;
-    if (res.statusCode == 401) return true;
-    if (res.statusCode != 403) return false;
-    if (path == '/auth/me') return true;
+  /// Only Seerr's own middleware rejection ([SeerrRejection.session]) can
+  /// mean that, and it carries the same status and body as a permission
+  /// denial, so it counts as expiry only once `GET /auth/me` (authenticated,
+  /// no permission bits) refuses the cookie the same way. Re-authing on
+  /// every 403 would instead unlink a Quick Connect session, which has no
+  /// re-auth credentials, over a plain permission denial. Anything an
+  /// intermediary answered — on the request or on the probe — is no
+  /// rejection at all: the cookie may be fine behind the wall, and a re-auth
+  /// would fail the same way and unlink the session.
+  ///
+  /// A probe that answers with the user proves the session live *and*
+  /// carries the current permission mask — the very authority the denied
+  /// request was gated on — so it is adopted before the caller reports the
+  /// denial, and the owner's surfaces re-derive their gates from it.
+  Future<_SessionVerdict> _probeSession(String path) async {
+    if (path == '/auth/me') return _SessionVerdict.gone;
     final me = await _http.send('GET', '/auth/me');
-    return me.statusCode == 401 || me.statusCode == 403;
+    SeerrHttpClient.throwIfIntermediary(me, path: '/auth/me');
+    if (SeerrHttpClient.classify(me, path: '/auth/me') == SeerrRejection.session) return _SessionVerdict.gone;
+    if (me.statusCode < 200 || me.statusCode >= 300 || me.data is! Map<String, dynamic>) {
+      return _SessionVerdict.inconclusive;
+    }
+    _adoptUser(SeerrUser.fromJson(me.data as Map<String, dynamic>));
+    return _SessionVerdict.live;
   }
 
   Future<void> _reauthCoalesced() async {
@@ -301,4 +331,17 @@ class SeerrClient {
     updateSession(merged);
     onSessionUpdated?.call(merged);
   }
+}
+
+/// What the `/auth/me` probe said about a middleware-rejected cookie.
+enum _SessionVerdict {
+  /// The probe refused the cookie the same way: re-auth.
+  gone,
+
+  /// The probe answered with the user: the rejection was a permission miss.
+  live,
+
+  /// The probe answered with neither (a 5xx, a non-JSON body): report the
+  /// original response as the plain API failure it looks like.
+  inconclusive,
 }

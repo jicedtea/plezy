@@ -91,6 +91,7 @@ class WatchTogetherController {
   String? _attachedServerId;
   String? _attachedMediaTitle;
   Future<void>? _attachedStartupHold;
+  double? _attachedRate;
   final List<StreamSubscription<dynamic>> _subscriptions = [];
   final SerialFutureQueue _messageQueue = SerialFutureQueue();
   bool _disposed = false;
@@ -150,14 +151,22 @@ class WatchTogetherController {
 
     final attached = _attachedPlayer;
     if (session.isHost) {
-      // Promotion: adopt the room where the old host left it.
+      // Promotion: adopt the room where the old host left it, whether or not
+      // a player is bound right now (a reload gap, the lobby, an episode
+      // switch). The position is read on the old host's clock before that
+      // clock is discarded — the reconciler's own player may be
+      // mid-correction, and a stale local snapshot would become the room's
+      // authoritative anchor. A player bound later for the same media rebinds
+      // into the adopted epoch instead of opening a new one.
       final lastState = _reconciler?.latestState;
       final firstFrameSeen = _reconciler?.firstFrameSeen ?? false;
+      final transitionAnchorMs = lastState?.targetPositionMs(_clockSync?.hostNowMs() ?? _nowMs());
       _clockSync?.stop();
       _clockSync = null;
       _reconciler?.dispose();
       _reconciler = null;
       _createCoordinator();
+      if (lastState != null) _coordinator!.adoptRoom(lastState, anchorMs: transitionAnchorMs);
       if (attached != null && _attachedRatingKey != null && _attachedServerId != null) {
         _coordinator!.attach(
           attached,
@@ -166,12 +175,7 @@ class WatchTogetherController {
           mediaTitle: _attachedMediaTitle,
           hasFirstFrame: firstFrameSeen,
           startupHold: _attachedStartupHold,
-          // A paused room must not start playing just because its host
-          // changed; anything else (playing, a stall, mid-load) carries the
-          // intent to (re)start.
-          intendPlaying: lastState == null || lastState.phase != PlaybackPhase.paused,
-          // The room's rate, not this player's: it may be mid-nudge.
-          rate: lastState?.rate,
+          rate: _attachedRate,
         );
       }
     } else {
@@ -203,7 +207,9 @@ class WatchTogetherController {
   /// [hasFirstFrame] is the screen's first-frame snapshot; [startupHold]
   /// delays readiness until platform startup gates (frame-rate switch)
   /// release; [remoteSeek] routes sync seeks through the screen's seek path
-  /// (Plex transcode restarts).
+  /// (Plex transcode restarts); [rate] is the speed this player intends for
+  /// the item (its resolved saved preference). A host seeds a fresh epoch's
+  /// room rate with it; a guest follows the room instead.
   void attachPlayer(
     Player player, {
     required String ratingKey,
@@ -212,6 +218,7 @@ class WatchTogetherController {
     bool hasFirstFrame = false,
     Future<void>? startupHold,
     Future<void> Function(Duration target)? remoteSeek,
+    double? rate,
   }) {
     detachPlayer();
 
@@ -229,6 +236,7 @@ class WatchTogetherController {
     _attachedServerId = serverId;
     _attachedMediaTitle = mediaTitle;
     _attachedStartupHold = startupHold;
+    _attachedRate = rate;
 
     if (_session.isHost) {
       _coordinator!.attach(
@@ -238,6 +246,7 @@ class WatchTogetherController {
         mediaTitle: mediaTitle,
         hasFirstFrame: hasFirstFrame,
         startupHold: startupHold,
+        rate: rate,
       );
     } else {
       _reconciler!.attach(
@@ -261,6 +270,7 @@ class WatchTogetherController {
     _attachedServerId = null;
     _attachedMediaTitle = null;
     _attachedStartupHold = null;
+    _attachedRate = null;
     _coordinator?.detachPlayer(exiting: exiting);
     _reconciler?.detachPlayer();
     unawaited(
@@ -492,6 +502,7 @@ class WatchTogetherController {
         // messages that preceded it on the wire. Only the host may end the
         // media epoch.
         if (!_session.isHost && senderId == _session.hostPeerId) {
+          _reconciler?.endEpoch();
           onHostExitedPlayer?.call();
         }
         break;

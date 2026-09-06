@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:provider/provider.dart';
 
 import '../focus/dpad_navigator.dart';
 import '../focus/focusable_button.dart';
@@ -14,6 +15,7 @@ import '../models/seerr/seerr_public_settings.dart';
 import '../models/seerr/seerr_request.dart';
 import '../models/seerr/seerr_session.dart';
 import '../models/seerr/seerr_service.dart';
+import '../providers/seerr_account_provider.dart';
 import '../services/catalog/seerr_catalog_source.dart';
 import '../services/seerr/seerr_constants.dart';
 import '../services/seerr/seerr_exceptions.dart';
@@ -26,21 +28,33 @@ import 'focusable_list_tile.dart';
 import 'overlay_sheet.dart';
 import 'stat_chip.dart';
 
+/// Why the sheet closed itself; a caller surfaces it on its own scaffold
+/// since the sheet is unmounting.
+enum SeerrRequestSheetClose {
+  /// The signed-in user lost the permission to request this kind (or the
+  /// account disconnected) while the sheet was open.
+  permissionRevoked,
+}
+
 /// Open the Seerr request sheet for a title. Pops with a success snackbar
-/// once the request is submitted.
+/// once the request is submitted, or an error snackbar when the sheet had to
+/// close because the user's request permission went away.
 Future<void> showSeerrRequestSheet(
   BuildContext context, {
   required SeerrCatalogSource source,
   required MediaKind kind,
   required int tmdbId,
   required String title,
-}) {
-  return OverlaySheetController.showAdaptive<void>(
+}) async {
+  final close = await OverlaySheetController.showAdaptive<SeerrRequestSheetClose>(
     context,
     isScrollControlled: true,
     showDragHandle: true,
     builder: (_) => SeerrRequestSheet(source: source, kind: kind, tmdbId: tmdbId, title: title),
   );
+  if (close == SeerrRequestSheetClose.permissionRevoked && context.mounted) {
+    showErrorSnackBar(context, t.seerr.permissionRevoked);
+  }
 }
 
 /// The full Seerr request flow, mirroring the web UI: per-season selection
@@ -91,6 +105,12 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
   SeerrServiceInstance? _server;
   SeerrServiceDetail? _serverDetail;
   bool _serverDetailLoading = false;
+
+  /// Bumped on every destination adoption (including null and the 4K
+  /// round-trip). A detail load that lands for an older generation is
+  /// dropped outright: an id-only check would let A→B→A or 4K on→off apply
+  /// the first A response over the second's in-flight load.
+  int _serverSelectionGeneration = 0;
   int? _profileId;
   String? _rootFolder;
   int? _languageProfileId;
@@ -102,6 +122,16 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
 
   bool _submitting = false;
   String? _errorText;
+
+  /// Whether the account provider (when one scopes the sheet) still holds a
+  /// session; a disconnect leaves [widget.source] wrapping a disposed client.
+  bool _connected = true;
+
+  /// The permission mask the sheet's state was last reconciled against, so
+  /// a grant or revocation while open is applied as a transition (servers
+  /// loaded, 4K/destination reset) rather than re-derived from scratch.
+  int? _reconciledPermissions;
+  bool _closing = false;
 
   bool get _isMovie => widget.kind == MediaKind.movie;
 
@@ -132,6 +162,54 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // The client's session is updated in place (bind-time refresh, silent
+    // re-auth, a denied request's /auth/me probe); the provider's notify is
+    // what tells the sheet to look again. Nullable: hosts without the
+    // profile session scope (tests) still reconcile after a denied submit.
+    final account = context.watch<SeerrAccountProvider?>();
+    _connected = account?.isConnected ?? true;
+    _reconcileAuthority();
+  }
+
+  /// Apply a permission change that landed while the sheet is open. Skipped
+  /// mid-submit — [_submit] reconciles once the server has answered, so a
+  /// denial's freshly adopted mask closes or trims the sheet consistently —
+  /// and mid-load, where [_load] reconciles against the mask it started
+  /// under.
+  void _reconcileAuthority() {
+    if (_submitting || _loading) return;
+    if (!_connected || !widget.source.canRequest(widget.kind)) {
+      _closeForRevokedPermission();
+      return;
+    }
+    final permissions = _permissions;
+    final previous = _reconciledPermissions;
+    _reconciledPermissions = permissions;
+    if (previous == null || previous == permissions) return;
+    final hadAdvanced = seerrHasPermission(previous, [SeerrPermission.requestAdvanced]);
+    if (_advancedAllowed && !hadAdvanced && !_loadFailed) {
+      unawaited(_loadServers());
+    } else if (!_advancedAllowed && hadAdvanced) {
+      setState(() => _allServers = const []);
+      _adoptServer(null);
+    }
+    if (_is4k && !_can4k) _toggle4k(false);
+  }
+
+  void _closeForRevokedPermission() {
+    if (_closing) return;
+    _closing = true;
+    // Reached from didChangeDependencies (build phase) or a submit
+    // continuation; either way the host's close animates from a settled
+    // frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) OverlaySheetController.closeAdaptive(context, SeerrRequestSheetClose.permissionRevoked);
+    });
+  }
+
+  @override
   void dispose() {
     for (final node in _seasonFocusNodes) {
       node.dispose();
@@ -159,6 +237,9 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
       _loadFailed = false;
     });
     final client = widget.source.client;
+    // The advanced gate is read once here; a grant landing mid-load is
+    // applied by the reconcile below as a transition from this mask.
+    _reconciledPermissions = _permissions;
     try {
       final (settings, servers) = await (
         client.getPublicSettings(),
@@ -200,6 +281,23 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
         _loadFailed = true;
       });
     }
+    _reconcileAuthority();
+  }
+
+  /// Servers-only reload for an advanced grant that landed after [_load]
+  /// skipped them; degrades like a failed detail load (defaults apply).
+  Future<void> _loadServers() async {
+    final client = widget.source.client;
+    final List<SeerrServiceInstance> servers;
+    try {
+      servers = _isMovie ? await client.getRadarrServices() : await client.getSonarrServices();
+    } catch (e) {
+      appLogger.w('Seerr: service list load failed', error: e);
+      return;
+    }
+    if (!mounted || !_advancedAllowed) return;
+    setState(() => _allServers = servers);
+    _selectDefaultServer();
   }
 
   void _selectDefaultServer() {
@@ -223,38 +321,46 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
   List<int>? _defaultTags(SeerrServiceInstance? server) => _isAnime ? server?.activeAnimeTags : server?.activeTags;
 
   void _adoptServer(SeerrServiceInstance? server) {
+    final generation = ++_serverSelectionGeneration;
+    final loadsDetail = server != null && _advancedAllowed;
     setState(() {
       _server = server;
       _serverDetail = null;
+      _serverDetailLoading = loadsDetail;
       _profileId = _defaultProfileId(server);
       _rootFolder = _defaultRootFolder(server);
       _languageProfileId = _defaultLanguageProfileId(server);
       // The list endpoint reports no usable tags; wait for the detail.
       _tags = null;
     });
-    if (server != null && _advancedAllowed) unawaited(_loadServerDetail(server));
+    if (loadsDetail) unawaited(_loadServerDetail(server, generation));
   }
 
-  Future<void> _loadServerDetail(SeerrServiceInstance server) async {
-    setState(() => _serverDetailLoading = true);
+  Future<void> _loadServerDetail(SeerrServiceInstance server, int generation) async {
     final client = widget.source.client;
+    final SeerrServiceDetail detail;
     try {
-      final detail = _isMovie ? await client.getRadarrService(server.id) : await client.getSonarrService(server.id);
-      if (!mounted || _server?.id != server.id) return;
-      setState(() {
-        _serverDetail = detail;
-        _serverDetailLoading = false;
-        _profileId ??= _defaultProfileId(detail.server);
-        _rootFolder ??= _defaultRootFolder(detail.server);
-        _languageProfileId ??= _defaultLanguageProfileId(detail.server);
-        if (detail.tags != null) _tags = [...?_defaultTags(detail.server)];
-      });
+      detail = _isMovie ? await client.getRadarrService(server.id) : await client.getSonarrService(server.id);
     } catch (e) {
       // Advanced pickers degrade to server defaults; the request still works.
       appLogger.w('Seerr: service detail load failed', error: e);
-      if (!mounted || _server?.id != server.id) return;
+      if (!mounted || generation != _serverSelectionGeneration) return;
       setState(() => _serverDetailLoading = false);
+      return;
     }
+    if (!mounted || generation != _serverSelectionGeneration) return;
+    // Runs once per accepted generation (adoption reset every default), so
+    // `??=` only fills what the list endpoint left null and an explicit
+    // `activeTags: []` hydrates to `[]`; user edits made afterwards are the
+    // last write.
+    setState(() {
+      _serverDetail = detail;
+      _serverDetailLoading = false;
+      _profileId ??= _defaultProfileId(detail.server);
+      _rootFolder ??= _defaultRootFolder(detail.server);
+      _languageProfileId ??= _defaultLanguageProfileId(detail.server);
+      if (detail.tags != null) _tags = [...?_defaultTags(detail.server)];
+    });
   }
 
   void _toggle4k(bool value) {
@@ -354,6 +460,14 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
 
   Future<void> _submit() async {
     if (!_canSubmit) return;
+    // The gates were derived when the sheet was built; the mask may have
+    // moved since (a refresh landing between build and press). Seerr would
+    // refuse anyway — fail locally, localized, without the round-trip.
+    if (!_connected || !widget.source.canRequest(widget.kind) || (_is4k && !_can4k)) {
+      setState(() => _errorText = t.seerr.permissionRevoked);
+      _reconcileAuthority();
+      return;
+    }
     setState(() {
       _submitting = true;
       _errorText = null;
@@ -370,6 +484,7 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
       languageProfileId: advanced ? _languageProfileId : null,
       tags: advanced ? _tags : null,
     );
+    String? errorText;
     try {
       await widget.source.client.createRequest(payload);
       if (!mounted) return;
@@ -377,26 +492,26 @@ class _SeerrRequestSheetState extends State<SeerrRequestSheet> {
       // so a bare Navigator.pop would pop the screen underneath instead.
       OverlaySheetController.closeAdaptive(context);
       showSuccessSnackBar(context, t.seerr.requestSubmitted);
+      return;
     } on SeerrApiException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _submitting = false;
-        _errorText = e.message;
-      });
+      errorText = e.message;
+    } on SeerrPermissionException catch (e) {
+      // The client adopted the probe's mask before throwing; the reconcile
+      // below closes the sheet (request permission gone) or trims it (4K or
+      // advanced gone) from that authority.
+      errorText = e.display;
     } on SeerrProxyException catch (e) {
-      if (!mounted) return;
-      setState(() {
-        _submitting = false;
-        _errorText = e.display;
-      });
+      errorText = e.display;
     } catch (e) {
       appLogger.w('Seerr: request submit failed', error: e);
-      if (!mounted) return;
-      setState(() {
-        _submitting = false;
-        _errorText = t.seerr.requestFailed(error: '$e');
-      });
+      errorText = t.seerr.requestFailed(error: '$e');
     }
+    if (!mounted) return;
+    setState(() {
+      _submitting = false;
+      _errorText = errorText;
+    });
+    _reconcileAuthority();
   }
 
   bool get _hasVisibleAdvancedControls {

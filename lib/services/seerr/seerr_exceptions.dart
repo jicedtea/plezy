@@ -50,11 +50,12 @@ class SeerrReauthUnavailableException implements Exception {
 }
 
 /// Something in front of Seerr answered instead of Seerr: a forward-auth
-/// redirect to an SSO login page, an HTTP Basic challenge, or an auth wall's
-/// non-JSON 401/403. Seerr's own API never redirects and always answers with
-/// JSON, so these shapes are diagnostic. Deliberately not a
-/// [SeerrAuthException]: the stored session may be perfectly valid behind the
-/// wall, so [SeerrClient] must not unlink it.
+/// redirect to an SSO login page, an HTTP Basic challenge, an auth wall or
+/// API gateway's 401/403 — JSON-bodied or not. Seerr's own API never
+/// redirects and rejects in exactly two JSON shapes ([SeerrRejection]), so
+/// anything else is diagnostic. Deliberately not a [SeerrAuthException]: the
+/// stored session may be perfectly valid behind the wall, so [SeerrClient]
+/// must not unlink it.
 ///
 /// [message] is English for stable logs and Sentry grouping. [display] is the
 /// localized user-facing text when this failure is rendered in the UI.
@@ -77,4 +78,23 @@ class SeerrApiException implements Exception {
 
   @override
   String toString() => 'SeerrApiException($statusCode): $message';
+}
+
+/// Seerr's `isAuthenticated(permission)` middleware refused a live session
+/// the action's permission bit — the body is identical to a session
+/// rejection, and only the `GET /auth/me` probe [SeerrClient] runs tells
+/// them apart. Distinct from [SeerrApiException] so request surfaces can
+/// localize it instead of echoing the server's English body, and from
+/// [SeerrAuthException] because the session is fine and must stay linked.
+///
+/// [message] is English for stable logs and Sentry grouping. [display] is the
+/// localized user-facing text when this failure is rendered in the UI.
+class SeerrPermissionException implements Exception {
+  final String message;
+  final String display;
+  final int statusCode;
+  const SeerrPermissionException(this.message, {required this.display, required this.statusCode});
+
+  @override
+  String toString() => 'SeerrPermissionException($statusCode): $message';
 }
