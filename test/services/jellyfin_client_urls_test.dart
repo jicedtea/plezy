@@ -280,6 +280,83 @@ void main() {
       expect(uri.queryParameters['MediaSourceId'], 'src-9');
     });
 
+    test('buildDirectStreamUrl emits stream.{container} when containerExtension is set', () {
+      final url = client.buildDirectStreamUrl('item-99', container: 'iso', containerExtension: true);
+      final uri = Uri.parse(url);
+
+      expect(uri.path, '/Videos/item-99/stream.iso');
+      expect(uri.queryParameters['Container'], 'iso');
+      expect(uri.queryParameters['Static'], 'true');
+    });
+
+    test('buildDirectStreamUrl keeps the bare stream path when containerExtension is unset', () {
+      final url = client.buildDirectStreamUrl('item-99', container: 'mkv');
+      expect(Uri.parse(url).path, '/Videos/item-99/stream');
+    });
+
+    test('buildDirectStreamUrl drops a malformed container from the path but keeps the query param', () {
+      // `Container` is server-provided; a value with separators must never
+      // become path segments.
+      final url = client.buildDirectStreamUrl('item-99', container: '../x', containerExtension: true);
+      final uri = Uri.parse(url);
+
+      expect(uri.path, '/Videos/item-99/stream');
+      expect(uri.queryParameters['Container'], '../x');
+    });
+
+    test('buildAudioDirectStreamUrl emits stream.{container} when containerExtension is set', () {
+      final url = client.buildAudioDirectStreamUrl('track-7', container: 'flac', containerExtension: true);
+      expect(Uri.parse(url).path, '/Audio/track-7/stream.flac');
+    });
+
+    test('resolveExternalPlaybackUrl gives external players the extension-hinted stream URL', () async {
+      // External players can't sniff a bare `stream` path — the container
+      // extension is the only hint they get, and disc images (ISO) are
+      // unplayable without it (#2375).
+      final scoped = _clientWithPlaybackInfo(
+        (_) async => jsonResponse({'MediaSources': []}),
+        itemSources: [
+          {'Id': 'src-1', 'Container': 'iso', 'VideoType': 'Iso', 'MediaStreams': []},
+        ],
+      );
+      addTearDown(scoped.close);
+
+      final url = await scoped.resolveExternalPlaybackUrl(
+        testMediaItem(id: 'item-1', backend: MediaBackend.jellyfin, kind: MediaKind.movie, serverId: 'srv-1'),
+      );
+
+      final uri = Uri.parse(url!);
+      expect(uri.path, '/Videos/item-1/stream.iso');
+      expect(uri.queryParameters['Static'], 'true');
+      expect(uri.queryParameters['MediaSourceId'], 'src-1');
+    });
+
+    test('resolveExternalPlaybackUrl uses the audio endpoint with extension for tracks', () async {
+      final scoped = JellyfinClient.forTesting(
+        connection: _conn(),
+        httpClient: MockClient((request) async {
+          if (request.url.path == '/Users/user-1/Items/track-1') {
+            return jsonResponse({
+              'Id': 'track-1',
+              'Type': 'Audio',
+              'Name': 'Track',
+              'MediaSources': [
+                {'Id': 'src-1', 'Container': 'flac', 'MediaStreams': []},
+              ],
+            });
+          }
+          return http.Response('not found', 404);
+        }),
+      );
+      addTearDown(scoped.close);
+
+      final url = await scoped.resolveExternalPlaybackUrl(
+        testMediaItem(id: 'track-1', backend: MediaBackend.jellyfin, kind: MediaKind.track, serverId: 'srv-1'),
+      );
+
+      expect(Uri.parse(url!).path, '/Audio/track-1/stream.flac');
+    });
+
     test('buildDirectStreamUrl canonicalizes a mixed-case scheme from stored config', () async {
       // This URL bypasses Dart's Uri normalization on its way to the player,
       // and FFmpeg's protocol lookup is case-sensitive — a stored
@@ -4722,18 +4799,10 @@ void main() {
   });
 
   group('JellyfinClient.fetchCollections', () {
-    test('uses boxsets view instead of selected media library parent', () async {
+    test('queries the server-wide BoxSet root without a views lookup', () async {
       final requests = <Uri>[];
       final mock = MockClient((req) async {
         requests.add(req.url);
-        if (req.url.path == '/Users/user-1/Views') {
-          return jsonResponse({
-            'Items': [
-              {'Id': 'lib-movies', 'Name': 'Movies', 'CollectionType': 'movies'},
-              {'Id': 'lib-boxsets', 'Name': 'Collections', 'CollectionType': 'boxsets'},
-            ],
-          });
-        }
         if (req.url.path == '/Items') {
           return jsonResponse({
             'TotalRecordCount': 1,
@@ -4751,10 +4820,11 @@ void main() {
 
       expect(collections.map((c) => c.id).toList(), ['collection-1']);
       expect(collections.single.kind, MediaKind.collection);
-      expect(requests.map((u) => u.path).toList(), ['/Users/user-1/Views', '/Items']);
-      final itemsRequest = requests.singleWhere((u) => u.path == '/Items');
-      expect(itemsRequest.queryParameters['ParentId'], 'lib-boxsets');
-      expect(itemsRequest.queryParameters['ParentId'], isNot('lib-movies'));
+      // Both dialects discard ParentId on a BoxSet-only query, so the request
+      // goes straight to /Items — no /Views round trip, no ParentId (#2373).
+      expect(requests.map((u) => u.path).toList(), ['/Items']);
+      final itemsRequest = requests.single;
+      expect(itemsRequest.queryParameters.containsKey('ParentId'), isFalse);
       expect(itemsRequest.queryParameters['IncludeItemTypes'], 'BoxSet');
       expect(itemsRequest.queryParameters['Recursive'], 'true');
       expect(itemsRequest.queryParameters['StartIndex'], '0');
@@ -4773,13 +4843,6 @@ void main() {
     test('fetchCollectionsPage uses requested collection page bounds', () async {
       Uri? itemsRequest;
       final mock = MockClient((req) async {
-        if (req.url.path == '/Users/user-1/Views') {
-          return jsonResponse({
-            'Items': [
-              {'Id': 'lib-boxsets', 'Name': 'Collections', 'CollectionType': 'boxsets'},
-            ],
-          });
-        }
         if (req.url.path == '/Items') {
           itemsRequest = req.url;
           return jsonResponse({
@@ -4800,7 +4863,7 @@ void main() {
       expect(page.offset, 20);
       expect(page.items.single.id, 'collection-20');
       expect(itemsRequest, isNotNull);
-      expect(itemsRequest!.queryParameters['ParentId'], 'lib-boxsets');
+      expect(itemsRequest!.queryParameters.containsKey('ParentId'), isFalse);
       expect(itemsRequest!.queryParameters['StartIndex'], '20');
       expect(itemsRequest!.queryParameters['Limit'], '10');
       expect(itemsRequest!.queryParameters.containsKey('EnableTotalRecordCount'), isFalse);
@@ -4808,13 +4871,6 @@ void main() {
 
     test('fetchCollectionsPage uses sentinel total when total count is missing', () async {
       final mock = MockClient((req) async {
-        if (req.url.path == '/Users/user-1/Views') {
-          return jsonResponse({
-            'Items': [
-              {'Id': 'lib-boxsets', 'Name': 'Collections', 'CollectionType': 'boxsets'},
-            ],
-          });
-        }
         if (req.url.path == '/Items') {
           return jsonResponse({
             'Items': [
@@ -4834,16 +4890,9 @@ void main() {
       expect(page.totalCount, 3);
     });
 
-    test('walks boxsets view in pages', () async {
+    test('walks collections in pages', () async {
       final itemRequests = <Uri>[];
       final mock = MockClient((req) async {
-        if (req.url.path == '/Users/user-1/Views') {
-          return jsonResponse({
-            'Items': [
-              {'Id': 'lib-boxsets', 'Name': 'Collections', 'CollectionType': 'boxsets'},
-            ],
-          });
-        }
         if (req.url.path == '/Items') {
           itemRequests.add(req.url);
           final start = req.url.queryParameters['StartIndex'];
@@ -4866,19 +4915,23 @@ void main() {
       expect(itemRequests.every((u) => u.queryParameters['Limit'] == '36'), isTrue);
     });
 
-    test('returns empty when boxsets view is missing', () async {
-      var itemsRequested = false;
+    test('returns collections when the server exposes no boxsets view', () async {
+      // #2373: Emby can serve BoxSets while /Users/{id}/Views lacks a
+      // boxsets entry (deleted/never-created collections virtual folder).
+      // The fetch must not depend on that view.
+      var viewsRequested = false;
       final mock = MockClient((req) async {
         if (req.url.path == '/Users/user-1/Views') {
-          return jsonResponse({
-            'Items': [
-              {'Id': 'lib-movies', 'Name': 'Movies', 'CollectionType': 'movies'},
-            ],
-          });
+          viewsRequested = true;
+          return jsonResponse({'Items': []});
         }
         if (req.url.path == '/Items') {
-          itemsRequested = true;
-          return jsonResponse({'Items': []});
+          return jsonResponse({
+            'TotalRecordCount': 1,
+            'Items': [
+              {'Id': 'collection-1', 'Name': 'Collection 1', 'Type': 'BoxSet'},
+            ],
+          });
         }
         return http.Response('not found', 404);
       });
@@ -4887,8 +4940,8 @@ void main() {
 
       final collections = await client.fetchCollections('lib-movies');
 
-      expect(collections, isEmpty);
-      expect(itemsRequested, isFalse);
+      expect(collections.map((c) => c.id).toList(), ['collection-1']);
+      expect(viewsRequested, isFalse);
     });
 
     test('fetchCollectionPage uses Jellyfin item paging', () async {
