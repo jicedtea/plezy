@@ -73,7 +73,6 @@ import '../utils/dialogs.dart';
 import '../utils/snackbar_helper.dart';
 import '../utils/video_player_navigation.dart';
 import '../widgets/app_bar_back_button.dart';
-import '../widgets/desktop_app_bar.dart';
 import '../utils/desktop_window_padding.dart';
 import '../widgets/horizontal_scroll_with_arrows.dart';
 import '../widgets/media_context_menu.dart';
@@ -1726,7 +1725,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         shouldShowEpisodesDirectly = seasonsWithServerId.length <= 1;
       }
 
-      // Create focus nodes for season tabs
       _updateSeasonTabFocusNodes(seasonsWithServerId.length);
 
       // Auto-select the on-deck season
@@ -1791,7 +1789,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       seasonMap.putIfAbsent(seasonNum, () => []).add(episode);
     }
 
-    // Create focus nodes for season tabs and cache episodes per season
     _updateSeasonTabFocusNodes(seasons.length);
     for (final entry in seasonMap.entries) {
       final seasonRatingKey = entry.value.first.parentId ?? '';
@@ -1832,7 +1829,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
       ..sort((a, b) => (a.index ?? 0).compareTo(b.index ?? 0));
   }
 
-  /// Load episodes from downloaded content for a season
   void _loadEpisodesFromDownloads() {
     if (!_canUseDetail) return;
     final downloadProvider = context.read<DownloadProvider>();
@@ -1849,7 +1845,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     });
   }
 
-  /// Create or update focus nodes for season tab chips
   void _updateSeasonTabFocusNodes(int count) {
     if (_seasonTabFocusNodes.length != count) {
       for (final node in _seasonTabFocusNodes) {
@@ -1886,30 +1881,22 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     final cached = _seasonEpisodePager.stateFor(seasonId);
     if (_seasonEpisodePager.hasState(seasonId) && !cached.isInitialLoading && !cached.initialLoadFailed) {
       _seasonEpisodePager.completeFirstPage(seasonId, cached.items, cached.totalCount);
-      setStateIfMounted(() {
-        if (_isSelectedSeason(seasonIndex, seasonId)) {
-          _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
-        }
-      });
+      setStateIfMounted(() => _syncSelectedSeasonEpisodes(seasonIndex, seasonId));
       unawaited(_prefetchAdjacentSeasonEpisodePages(seasonIndex));
       return;
     }
 
-    if (!_seasonEpisodePager.beginFirstPageLoad(seasonId)) {
-      setStateIfMounted(() {
-        if (_isSelectedSeason(seasonIndex, seasonId)) {
-          _seasonEpisodePager.markFirstPageLoading(seasonId);
-        }
-      });
-      return;
-    }
-
-    final generation = ++_episodesLoadGeneration;
+    // Whether this call owns the fetch or another caller already does, the
+    // selected season shows its loading state.
+    final ownsLoad = _seasonEpisodePager.beginFirstPageLoad(seasonId);
     setStateIfMounted(() {
       if (_isSelectedSeason(seasonIndex, seasonId)) {
         _seasonEpisodePager.markFirstPageLoading(seasonId);
       }
     });
+    if (!ownsLoad) return;
+
+    final generation = ++_episodesLoadGeneration;
 
     try {
       if (widget.isOffline) {
@@ -1937,13 +1924,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           );
           return;
         }
-        final page = await fetchSeasonEpisodePage(
-          mediaClient,
-          show: _metadata,
-          season: season,
-          start: 0,
-          size: _episodesPageSize,
-        );
+        final page = await _fetchSeasonPage(mediaClient, season, start: 0);
         if (!mounted || generation != _episodesLoadGeneration) return;
         _completeSeasonEpisodesLoad(
           seasonIndex: seasonIndex,
@@ -1987,13 +1968,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     try {
       final mediaClient = _getMediaClientForMetadata(context);
       if (mediaClient == null) return;
-      final page = await fetchSeasonEpisodePage(
-        mediaClient,
-        show: _metadata,
-        season: season,
-        start: 0,
-        size: _episodesPageSize,
-      );
+      final page = await _fetchSeasonPage(mediaClient, season, start: 0);
       if (!_canUseDetail ||
           _showEpisodesDirectly ||
           seasonIndex >= _seasons.length ||
@@ -2004,9 +1979,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         final current = _seasonEpisodePager.stateFor(seasonId);
         if (_seasonEpisodePager.hasState(seasonId) && !(current.isInitialLoading && !current.hasItems)) return;
         _seasonEpisodePager.completeFirstPage(seasonId, page.items, page.totalCount);
-        if (_isSelectedSeason(seasonIndex, seasonId)) {
-          _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
-        }
+        _syncSelectedSeasonEpisodes(seasonIndex, seasonId);
       });
       if (_isSelectedSeason(seasonIndex, seasonId)) unawaited(_prefetchAdjacentSeasonEpisodePages(seasonIndex));
     } catch (e, st) {
@@ -2051,13 +2024,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         });
         return;
       }
-      final page = await fetchSeasonEpisodePage(
-        mediaClient,
-        show: _metadata,
-        season: season,
-        start: loaded,
-        size: _episodesPageSize,
-      );
+      final page = await _fetchSeasonPage(mediaClient, season, start: loaded);
       if (!mounted || generation != _episodesLoadGeneration) return;
       setStateIfMounted(() {
         _seasonEpisodePager.completeMoreLoad(
@@ -2066,7 +2033,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           episodes: page.items,
           total: page.totalCount,
         );
-        if (_isSelectedSeason(seasonIndex, seasonId)) _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
+        _syncSelectedSeasonEpisodes(seasonIndex, seasonId);
       });
     } catch (e, st) {
       appLogger.w('Season episodes page load failed', error: e, stackTrace: st);
@@ -2080,7 +2047,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     }
   }
 
-  /// Whether the selected season has more episodes to page in.
   bool get _selectedSeasonHasMore {
     if (_selectedSeasonIndex < 0 || _selectedSeasonIndex >= _seasons.length) return false;
     return _selectedSeasonEpisodeState.hasMore;
@@ -2093,6 +2059,19 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
         _seasons[seasonIndex].id == seasonId;
   }
 
+  /// One page of [season]'s episodes, sized for the detail lists.
+  Future<LibraryPage<MediaItem>> _fetchSeasonPage(MediaServerClient client, MediaItem season, {required int start}) {
+    return fetchSeasonEpisodePage(client, show: _metadata, season: season, start: start, size: _episodesPageSize);
+  }
+
+  /// Mirror the pager's items for [seasonId] into the visible episode list when
+  /// it is still the selected season. Call inside setState.
+  void _syncSelectedSeasonEpisodes(int seasonIndex, String seasonId) {
+    if (_isSelectedSeason(seasonIndex, seasonId)) {
+      _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
+    }
+  }
+
   void _completeSeasonEpisodesLoad({
     required int seasonIndex,
     required String seasonId,
@@ -2103,107 +2082,93 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     if (generation != _episodesLoadGeneration) return;
     setStateIfMounted(() {
       _seasonEpisodePager.completeFirstPage(seasonId, episodes, total);
-      if (_isSelectedSeason(seasonIndex, seasonId)) {
-        _episodes = List.of(_seasonEpisodePager.stateFor(seasonId).items);
-      }
+      _syncSelectedSeasonEpisodes(seasonIndex, seasonId);
     });
     if (_isSelectedSeason(seasonIndex, seasonId)) unawaited(_prefetchAdjacentSeasonEpisodePages(seasonIndex));
   }
 
-  /// Load extras (trailers, featurettes, behind-the-scenes, etc.).
-  Future<void> _loadExtras() async {
+  /// Shared skeleton of the supplemental detail sections (extras, related
+  /// hubs): only movies and shows carry them, offline has no server, and every
+  /// exit — skipped, failed or applied — flips the section's loaded flag via
+  /// [markLoaded] so the TV reveal can proceed.
+  Future<void> _loadSupplementalSection<T>({
+    required MediaServerClient? Function() resolveClient,
+    required Future<T> Function(MediaServerClient client) fetch,
+    required void Function(T result) apply,
+    required void Function() markLoaded,
+  }) async {
     if (!_canUseDetail) return;
-    void markLoaded() {
+    void markLoadedIfLive() {
       if (!_canUseDetail) return;
-      setStateIfMounted(() {
-        _hasLoadedExtras = true;
-      });
+      setStateIfMounted(markLoaded);
     }
 
-    // Only load extras for movies and shows
     if (!_metadata.isMovie && !_metadata.isShow) {
-      markLoaded();
+      markLoadedIfLive();
       return;
     }
 
-    // Skip in offline mode (no server available)
     if (widget.isOffline) {
-      markLoaded();
+      markLoadedIfLive();
       return;
     }
 
     try {
-      final client = getServerBoundMediaClient(context);
+      final client = resolveClient();
       if (client == null) {
-        markLoaded();
+        markLoadedIfLive();
         return;
       }
 
-      final extras = await client.fetchExtras(_metadata.id);
+      final result = await fetch(client);
       if (!_canUseDetail) return;
 
-      // Preserve serverId for each extra (needed for multi-server setups).
-      final extrasWithServerId = extras
-          .map(
-            (extra) => extra.copyWith(
-              serverId: _metadata.serverId ?? extra.serverId,
-              serverName: _metadata.serverName ?? extra.serverName,
-            ),
-          )
-          .toList();
-
       setStateIfMounted(() {
-        _extras = extrasWithServerId;
-        _hasLoadedExtras = true;
+        apply(result);
+        markLoaded();
       });
     } catch (e) {
-      // Silently fail - extras section won't appear if fetch fails
-      markLoaded();
+      // Silently fail - the section won't appear if the fetch fails
+      markLoadedIfLive();
     }
+  }
+
+  /// Load extras (trailers, featurettes, behind-the-scenes, etc.).
+  Future<void> _loadExtras() {
+    return _loadSupplementalSection<List<MediaItem>>(
+      resolveClient: () => getServerBoundMediaClient(context),
+      fetch: (client) => client.fetchExtras(_metadata.id),
+      apply: (extras) {
+        // Preserve serverId for each extra (needed for multi-server setups).
+        _extras = extras
+            .map(
+              (extra) => extra.copyWith(
+                serverId: _metadata.serverId ?? extra.serverId,
+                serverName: _metadata.serverName ?? extra.serverName,
+              ),
+            )
+            .toList();
+      },
+      markLoaded: () => _hasLoadedExtras = true,
+    );
   }
 
   /// Load related hubs (collections, similar, "more from" director/actor).
   /// Backend-neutral — both Plex and Jellyfin implement
   /// [MediaServerClient.fetchRelatedHubs].
-  Future<void> _loadRelatedHubs() async {
-    if (!_canUseDetail) return;
-    void markLoaded() {
-      if (!_canUseDetail) return;
-      setStateIfMounted(() {
-        _hasLoadedRelatedHubs = true;
-      });
-    }
-
-    if (!_metadata.isMovie && !_metadata.isShow) {
-      markLoaded();
-      return;
-    }
-
-    if (widget.isOffline) {
-      markLoaded();
-      return;
-    }
-
-    final serverId = _metadata.serverId;
-    final client = serverId == null ? null : context.tryGetMediaClientForServer(ServerId(serverId));
-    if (client == null) {
-      markLoaded();
-      return;
-    }
-
-    try {
-      final relatedHubs = await client.fetchRelatedHubs(_metadata.id);
-      if (!_canUseDetail) return;
-
-      setStateIfMounted(() {
+  Future<void> _loadRelatedHubs() {
+    return _loadSupplementalSection<List<MediaHub>>(
+      resolveClient: () {
+        final serverId = _metadata.serverId;
+        return serverId == null ? null : context.tryGetMediaClientForServer(ServerId(serverId));
+      },
+      fetch: (client) => client.fetchRelatedHubs(_metadata.id),
+      apply: (relatedHubs) {
         _relatedHubs = relatedHubs;
         _relatedHubKeys = List.generate(relatedHubs.length, (_) => GlobalKey<HubSectionState>());
-        _hasLoadedRelatedHubs = true;
-      });
-    } catch (e) {
-      // Silently fail - related sections won't appear if fetch fails
-      markLoaded();
-    }
+      },
+      markLoaded: () => _hasLoadedRelatedHubs = true,
+    );
   }
 
   /// Focus the first visible section above cast: season tabs → overview → play button.
@@ -2383,7 +2348,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
     // DOWN order: season tabs → episodes → cast → extras → related hubs → info rows.
     if (metadata.isShow && !_showEpisodesDirectly && _seasons.isNotEmpty && _seasonTabFocusNodes.isNotEmpty) {
-      // Focus the selected season tab chip
       _seasonTabFocusNodes[_selectedSeasonIndex].requestFocus();
       _scrollSectionIntoView(_seasonsSectionKey);
       return;
@@ -2422,20 +2386,17 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   /// the rendered cards can never disagree.
   double _getResponsiveCardWidth() => CastMemberStrip.responsiveCardWidth(context);
 
-  /// Show context menu for a season tab
   void _showSeasonTabContextMenu(int index, {Offset? position}) {
     final key = _seasonContextMenuKeys.putIfAbsent(index, () => GlobalKey<MediaContextMenuState>());
     key.currentState?.showContextMenu(context, position: position);
   }
 
-  /// Focus the currently selected season tab
   void _focusSelectedSeasonTab() {
     if (_seasonTabFocusNodes.length > _selectedSeasonIndex) {
       _seasonTabFocusNodes[_selectedSeasonIndex].requestFocus();
     }
   }
 
-  /// Scroll a season tab into view within the horizontal scroll
   void _scrollSeasonTabIntoView(int index) {
     if (index < 0 || index >= _seasonTabFocusNodes.length) return;
     scrollContextToCenter(_seasonTabFocusNodes[index].context);
@@ -2703,7 +2664,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
     }
   }
 
-  /// Handle vertical navigation between related hub sections
   bool _handleRelatedHubNavigation(int hubIndex, bool isUp) {
     return navigateVerticalHubRows(
       hubCount: _relatedHubKeys.length,
@@ -2921,30 +2881,26 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
   Future<void> _fetchAllEpisodes() async {
     if (!_canUseDetail) return;
     final generation = ++_episodesLoadGeneration;
-    if (_seasons.isEmpty) {
+    void markEmpty() {
       setStateIfMounted(() {
         _allEpisodes = const PagedMediaListState<MediaItem>();
         _episodes = const <MediaItem>[];
         _hasLoadedEpisodes = true;
       });
+    }
+
+    if (_seasons.isEmpty) {
+      markEmpty();
       return;
     }
     final serverId = _metadata.serverId;
     if (serverId == null) {
-      setStateIfMounted(() {
-        _allEpisodes = const PagedMediaListState<MediaItem>();
-        _episodes = const <MediaItem>[];
-        _hasLoadedEpisodes = true;
-      });
+      markEmpty();
       return;
     }
     final client = context.tryGetMediaClientForServer(ServerId(serverId));
     if (client == null) {
-      setStateIfMounted(() {
-        _allEpisodes = const PagedMediaListState<MediaItem>();
-        _episodes = const <MediaItem>[];
-        _hasLoadedEpisodes = true;
-      });
+      markEmpty();
       return;
     }
     setStateIfMounted(() {
@@ -3214,7 +3170,6 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
 
       final firstSeason = defaultPlaybackSeason(_seasons)!;
 
-      // Get the first episode of the first season.
       MediaItem? firstEpisode;
       if (widget.isOffline) {
         // In offline mode, get episodes from downloads (filtered to this season).
@@ -3323,11 +3278,12 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
           onKeyEvent: _handleMediaDetailBackKey,
           child: Scaffold(
             appBar: AppBar(
-              leading: DesktopAppBarSections.buildLeadingSection(leading: backButton, context: context),
-              leadingWidth: DesktopAppBarSections.calculateLeadingWidthForSection(
-                leading: backButton,
+              leading: DesktopAppBarHelper.buildAdjustedLeading(
+                backButton,
+                includeGestureDetector: true,
                 context: context,
               ),
+              leadingWidth: DesktopAppBarHelper.calculateLeadingWidth(backButton, context: context),
             ),
             body: const Center(child: CircularProgressIndicator()),
           ),
@@ -4849,7 +4805,7 @@ class _MediaDetailScreenState extends State<MediaDetailScreen>
                         item: extra,
                         width: cardWidth,
                         height: posterHeight,
-                        forceGridMode: true,
+                        viewModeOverride: ViewMode.grid,
                       ),
                     ),
                   );
