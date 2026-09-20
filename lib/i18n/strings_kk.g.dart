@@ -875,6 +875,7 @@ class _Translations$videoControls$kk extends Translations$videoControls$en {
 	@override String get pipFailed => 'PiP режимін іске қосу қатесі';
 	@override String get screenshotSaved => 'Экран суреті сақталды';
 	@override String zoomPercent({required Object percent}) => 'Масштаб %${percent}';
+	@override String volumePercent({required Object percent}) => 'Дыбыс ${percent}%';
 	@override late final _Translations$videoControls$pipErrors$kk pipErrors = _Translations$videoControls$pipErrors$kk._(_root);
 	@override String get chapters => 'Бөлімдер';
 	@override String get noChaptersAvailable => 'Бөлімдер қолжетімсіз';
@@ -1100,7 +1101,7 @@ class _Translations$profiles$kk extends Translations$profiles$en {
 	@override String borrowAddTo({required Object displayName}) => '${displayName} профиліне қосу';
 	@override String get borrowExplain => 'Басқа профильдің қосылымын пайдаланыңыз.';
 	@override String get borrowEmpty => 'Әлі де пайдаланатын ештеңе жоқ.';
-	@override String get borrowEmptySubtitle => 'Алдымен басқа профильге Plex немесе Jellyfin қосыңыз.';
+	@override String get borrowEmptySubtitle => 'Алдымен басқа профильге Plex, Jellyfin немесе Emby қосыңыз.';
 	@override String get borrowLoadFailed => 'Қолжетімді қосылымдарды жүктеу мүмкін болмады.';
 	@override String borrowFromProfile({required Object displayName}) => '${displayName} профилінен';
 	@override String get borrowConnectionBorrowed => 'Қосылым пайдаланылды.';
@@ -1128,8 +1129,8 @@ class _Translations$connections$kk extends Translations$connections$en {
 	// Translations
 	@override String get sectionTitle => 'Қосылымдар';
 	@override String get addConnection => 'Қосылым қосу';
-	@override String get addConnectionSubtitleNoProfile => 'Plex арқылы кіріңіз немесе Jellyfin серверіне қосылыңыз';
-	@override String addConnectionSubtitleScoped({required Object displayName}) => '${displayName} профиліне қосу';
+	@override String get addConnectionSubtitleNoProfile => 'Plex арқылы кіріңіз немесе Jellyfin не Emby серверіне қосылыңыз';
+	@override String addConnectionSubtitleScoped({required Object displayName}) => '${displayName} профиліне қосу: Plex, Jellyfin, Emby немесе басқа қосылым';
 	@override String sessionExpiredOne({required Object name}) => '${name} үшін сеанс мерзімі өтті';
 	@override String sessionExpiredMany({required Object count}) => '${count} сервер үшін сеанс мерзімі өтті';
 	@override String get signInAgain => 'Қайтадан кіру';
@@ -1236,6 +1237,13 @@ class _Translations$errors$kk extends Translations$errors$en {
 	@override String failedToSwitchProfile({required Object displayName}) => '${displayName} профиліне ауысу мүмкін болмады';
 	@override String failedToDeleteProfile({required Object displayName}) => '${displayName} профилін өшіру мүмкін болмады';
 	@override String get failedToRate => 'Рейтингті жаңарту мүмкін болмады';
+	@override String get reasonTimedOut => 'қосылу уақыты өтті';
+	@override String get reasonUnreachable => 'серверге қосылу мүмкін болмады';
+	@override String get reasonRefused => 'сервер сұрауды қабылдамады';
+	@override String get reasonNotFound => 'бұл нысан серверде қазір жоқ';
+	@override String get reasonServerError => 'сервер қате хабарлады';
+	@override String get reasonCancelled => 'сұрау бас тартылды';
+	@override String get reasonUnexpected => 'күтпеген қате орын алды';
 }
 
 // Path: libraries
@@ -1302,7 +1310,7 @@ class _Translations$about$kk extends Translations$about$en {
 	@override String get title => 'Қолданба туралы';
 	@override String get openSourceLicenses => 'Ашық бастапқы код лицензиялары';
 	@override String versionLabel({required Object version}) => 'Нұсқа ${version}';
-	@override String get appDescription => 'Flutter негізіндегі ыңғайлы Plex және Jellyfin клиенті';
+	@override String get appDescription => 'Flutter негізіндегі ыңғайлы Plex, Jellyfin және Emby клиенті';
 	@override String get viewLicensesDescription => 'Үшінші тарап кітапханаларының лицензияларын көру';
 }
 
@@ -1541,7 +1549,9 @@ class _Translations$liveTv$kk extends Translations$liveTv$en {
 	@override String get editRuleAction => 'Өңдеу';
 	@override String get recordingRuleUpdated => 'Жазу ережесі жаңартылды';
 	@override String get guideReloadRequested => 'Бағдарламаны жаңарту сұралды';
+	@override String get guideReloadFailed => 'Телебағдарламаны жаңарту мүмкін болмады';
 	@override String get rulesProcessRequested => 'Ережелерді қайта бағалау сұралды';
+	@override String get rulesProcessFailed => 'Жазу ережелерін қайта тексеру мүмкін болмады';
 	@override String get recordShow => 'Шоуды жазу';
 	@override late final _Translations$liveTv$recordSettings$kk recordSettings = _Translations$liveTv$recordSettings$kk._(_root);
 	@override String startingInMinutes({required Object minutes}) => '${minutes} мин кейін басталады';
@@ -1549,6 +1559,8 @@ class _Translations$liveTv$kk extends Translations$liveTv$en {
 	@override String invalidPlaybackData({required Object product}) => '${product} жарамсыз тікелей TV ойнату деректерін қайтарды';
 	@override String get failedToStartChannel => 'Тікелей эфир арнасын іске қосу мүмкін болмады';
 	@override String get failedToBuildStreamUrl => 'Ағын URL-ін құру мүмкін болмады';
+	@override String playbackStartFailed({required Object reason}) => 'Арнаны іске қосу мүмкін болмады: ${reason}';
+	@override String channelSwitchFailed({required Object reason}) => 'Арнаны ауыстыру мүмкін болмады: ${reason}';
 }
 
 // Path: collections
@@ -1821,6 +1833,9 @@ class _Translations$downloads$kk extends Translations$downloads$en {
 	@override String get syncRuleUnknownServer => 'Белгісіз сервер';
 	@override String get syncRuleListCreated => 'Синхрондау ережесі жасалды';
 	@override late final _Translations$downloads$backgroundWarning$kk backgroundWarning = _Translations$downloads$backgroundWarning$kk._(_root);
+	@override String get options => 'Жүктеулер параметрлері';
+	@override late final _Translations$downloads$groupings$kk groupings = _Translations$downloads$groupings$kk._(_root);
+	@override String get unknownLibrary => 'Белгісіз кітапхана';
 	@override String get unknownShow => 'Белгісіз телешоу';
 	@override String get unknownSeason => 'Белгісіз маусым';
 	@override String get unknownAlbum => 'Белгісіз альбом';
@@ -2513,6 +2528,9 @@ class _Translations$libraries$sortLabels$kk extends Translations$libraries$sortL
 	@override String get dateShared => 'Бөлісілген күні';
 	@override String get latestEpisodeAirDate => 'Соңғы бөлімнің шыққан күні';
 	@override String get lastEpisodeDateAdded => 'Соңғы қосылған бөлім күні';
+	@override String get dateDownloaded => 'Жүктелген күні';
+	@override String get size => 'Көлемі';
+	@override String get library => 'Кітапхана';
 }
 
 // Path: explore.rows
@@ -2806,6 +2824,16 @@ class _Translations$downloads$backgroundWarning$kk extends Translations$download
 	@override String get statusUnknown => 'Әлі тексерілмеген';
 	@override String get settingsUnavailable => 'Бұл құрылғыда жүйе баптаулары ашылмады';
 	@override String get linkUnavailable => 'Бұл құрылғыда dontkillmyapp.com ашылмады';
+}
+
+// Path: downloads.groupings
+class _Translations$downloads$groupings$kk extends Translations$downloads$groupings$en {
+	_Translations$downloads$groupings$kk._(TranslationsKk root) : this._root = root, super.internal(root);
+
+	final TranslationsKk _root; // ignore: unused_field
+
+	// Translations
+	@override String get library => 'Кітапхана';
 }
 
 // Path: companionRemote.session
@@ -3675,6 +3703,7 @@ extension on TranslationsKk {
 			'videoControls.pipFailed' => 'PiP режимін іске қосу қатесі',
 			'videoControls.screenshotSaved' => 'Экран суреті сақталды',
 			'videoControls.zoomPercent' => ({required Object percent}) => 'Масштаб %${percent}',
+			'videoControls.volumePercent' => ({required Object percent}) => 'Дыбыс ${percent}%',
 			'videoControls.pipErrors.androidVersion' => 'Android 8.0 немесе жаңалауы қажет',
 			'videoControls.pipErrors.iosVersion' => 'iOS 15.0 немесе жаңалауы қажет',
 			'videoControls.pipErrors.permissionDisabled' => 'PiP режимі өшірілген. Жүйелік баптаулардан қосыңыз.',
@@ -3859,7 +3888,7 @@ extension on TranslationsKk {
 			'profiles.borrowAddTo' => ({required Object displayName}) => '${displayName} профиліне қосу',
 			'profiles.borrowExplain' => 'Басқа профильдің қосылымын пайдаланыңыз.',
 			'profiles.borrowEmpty' => 'Әлі де пайдаланатын ештеңе жоқ.',
-			'profiles.borrowEmptySubtitle' => 'Алдымен басқа профильге Plex немесе Jellyfin қосыңыз.',
+			'profiles.borrowEmptySubtitle' => 'Алдымен басқа профильге Plex, Jellyfin немесе Emby қосыңыз.',
 			'profiles.borrowLoadFailed' => 'Қолжетімді қосылымдарды жүктеу мүмкін болмады.',
 			'profiles.borrowFromProfile' => ({required Object displayName}) => '${displayName} профилінен',
 			'profiles.borrowConnectionBorrowed' => 'Қосылым пайдаланылды.',
@@ -3878,8 +3907,8 @@ extension on TranslationsKk {
 			'profiles.tokenIdentityMismatch' => 'Plex профилінің токені күтілмеген серверді анықтады',
 			'connections.sectionTitle' => 'Қосылымдар',
 			'connections.addConnection' => 'Қосылым қосу',
-			'connections.addConnectionSubtitleNoProfile' => 'Plex арқылы кіріңіз немесе Jellyfin серверіне қосылыңыз',
-			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => '${displayName} профиліне қосу',
+			'connections.addConnectionSubtitleNoProfile' => 'Plex арқылы кіріңіз немесе Jellyfin не Emby серверіне қосылыңыз',
+			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => '${displayName} профиліне қосу: Plex, Jellyfin, Emby немесе басқа қосылым',
 			'connections.sessionExpiredOne' => ({required Object name}) => '${name} үшін сеанс мерзімі өтті',
 			'connections.sessionExpiredMany' => ({required Object count}) => '${count} сервер үшін сеанс мерзімі өтті',
 			'connections.signInAgain' => 'Қайтадан кіру',
@@ -3979,6 +4008,13 @@ extension on TranslationsKk {
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => '${displayName} профиліне ауысу мүмкін болмады',
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => '${displayName} профилін өшіру мүмкін болмады',
 			'errors.failedToRate' => 'Рейтингті жаңарту мүмкін болмады',
+			'errors.reasonTimedOut' => 'қосылу уақыты өтті',
+			'errors.reasonUnreachable' => 'серверге қосылу мүмкін болмады',
+			'errors.reasonRefused' => 'сервер сұрауды қабылдамады',
+			'errors.reasonNotFound' => 'бұл нысан серверде қазір жоқ',
+			'errors.reasonServerError' => 'сервер қате хабарлады',
+			'errors.reasonCancelled' => 'сұрау бас тартылды',
+			'errors.reasonUnexpected' => 'күтпеген қате орын алды',
 			'libraries.title' => 'Кітапханалар',
 			'libraries.fallbackTitle' => 'Кітапхана',
 			'libraries.scanLibraryFiles' => 'Файлдарды сканерлеу',
@@ -4005,6 +4041,8 @@ extension on TranslationsKk {
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => '"${title}" кітапханасына талдау жасағыңыз келе ме?',
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => '"${title}" метадеректерін жаңартасыз ба?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => '"${title}" себетін тазалайсыз ба?',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.manageLibraries' => 'Кітапханаларды басқару',
 			'libraries.sort' => 'Сұрыптау',
 			'libraries.sortBy' => 'Сұрыптау реті',
@@ -4013,8 +4051,6 @@ extension on TranslationsKk {
 			'libraries.showLibrary' => 'Кітапхананы көрсету',
 			'libraries.hideLibrary' => 'Кітапхананы жасыру',
 			'libraries.libraryOptions' => 'Кітапхана параметрлері',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.content' => 'кітапхана мазмұны',
 			'libraries.selectLibrary' => 'Кітапхананы таңдау',
 			'libraries.filtersWithCount' => ({required Object count}) => 'Фильтрлер (${count})',
@@ -4063,10 +4099,13 @@ extension on TranslationsKk {
 			'libraries.sortLabels.dateShared' => 'Бөлісілген күні',
 			'libraries.sortLabels.latestEpisodeAirDate' => 'Соңғы бөлімнің шыққан күні',
 			'libraries.sortLabels.lastEpisodeDateAdded' => 'Соңғы қосылған бөлім күні',
+			'libraries.sortLabels.dateDownloaded' => 'Жүктелген күні',
+			'libraries.sortLabels.size' => 'Көлемі',
+			'libraries.sortLabels.library' => 'Кітапхана',
 			'about.title' => 'Қолданба туралы',
 			'about.openSourceLicenses' => 'Ашық бастапқы код лицензиялары',
 			'about.versionLabel' => ({required Object version}) => 'Нұсқа ${version}',
-			'about.appDescription' => 'Flutter негізіндегі ыңғайлы Plex және Jellyfin клиенті',
+			'about.appDescription' => 'Flutter негізіндегі ыңғайлы Plex, Jellyfin және Emby клиенті',
 			'about.viewLicensesDescription' => 'Үшінші тарап кітапханаларының лицензияларын көру',
 			'serverSelection.noServersFoundForAccount' => ({required Object username, required Object email}) => '${username} (${email}) үшін серверлер табылмады',
 			'serverSelection.failedToLoadServers' => ({required Object error}) => 'Серверлерді жүктеу қатесі: ${error}',
@@ -4333,7 +4372,9 @@ extension on TranslationsKk {
 			'liveTv.editRuleAction' => 'Өңдеу',
 			'liveTv.recordingRuleUpdated' => 'Жазу ережесі жаңартылды',
 			'liveTv.guideReloadRequested' => 'Бағдарламаны жаңарту сұралды',
+			'liveTv.guideReloadFailed' => 'Телебағдарламаны жаңарту мүмкін болмады',
 			'liveTv.rulesProcessRequested' => 'Ережелерді қайта бағалау сұралды',
+			'liveTv.rulesProcessFailed' => 'Жазу ережелерін қайта тексеру мүмкін болмады',
 			'liveTv.recordShow' => 'Шоуды жазу',
 			'liveTv.recordSettings.startEarly' => 'Ертерек бастау (секунд)',
 			'liveTv.recordSettings.endLate' => 'Кешірек аяқтау (секунд)',
@@ -4348,6 +4389,8 @@ extension on TranslationsKk {
 			'liveTv.invalidPlaybackData' => ({required Object product}) => '${product} жарамсыз тікелей TV ойнату деректерін қайтарды',
 			'liveTv.failedToStartChannel' => 'Тікелей эфир арнасын іске қосу мүмкін болмады',
 			'liveTv.failedToBuildStreamUrl' => 'Ағын URL-ін құру мүмкін болмады',
+			'liveTv.playbackStartFailed' => ({required Object reason}) => 'Арнаны іске қосу мүмкін болмады: ${reason}',
+			'liveTv.channelSwitchFailed' => ({required Object reason}) => 'Арнаны ауыстыру мүмкін болмады: ${reason}',
 			'collections.title' => 'Топтамалар',
 			'collections.collection' => 'Топтама',
 			'collections.empty' => 'Топтама бос',
@@ -4512,6 +4555,8 @@ extension on TranslationsKk {
 			'downloads.noDownloadsDescription' => 'Жүктелген файлдар офлайн көру үшін мұнда көрінеді',
 			'downloads.downloadNow' => 'Жүктеу',
 			'downloads.deleteDownload' => 'Жүктеуді өшіру',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.retryDownload' => 'Жүктеуді қайталау',
 			'downloads.downloadQueued' => 'Жүктеу кезекке қойылды',
 			'downloads.downloadResumed' => 'Жүктеу жалғастырылды',
@@ -4527,8 +4572,6 @@ extension on TranslationsKk {
 			'downloads.resumeDownload' => 'Жүктеуді жалғастыру',
 			'downloads.cancelledDownload' => 'Тоқтатылған жүктеу',
 			'downloads.syncingFile' => ({required Object file, required Object status}) => '${file} (${status} синхрондалуда)',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadedFileClickToComplete' => ({required Object file}) => 'Жүктелді ${file} - Аяқтау үшін түртіңіз',
 			'downloads.partialDownloadClickToComplete' => 'Жартылай жүктелді - Аяқтау үшін түртіңіз',
 			'downloads.deleting' => 'Өшірілуде...',
@@ -4605,6 +4648,9 @@ extension on TranslationsKk {
 			'downloads.backgroundWarning.statusUnknown' => 'Әлі тексерілмеген',
 			'downloads.backgroundWarning.settingsUnavailable' => 'Бұл құрылғыда жүйе баптаулары ашылмады',
 			'downloads.backgroundWarning.linkUnavailable' => 'Бұл құрылғыда dontkillmyapp.com ашылмады',
+			'downloads.options' => 'Жүктеулер параметрлері',
+			'downloads.groupings.library' => 'Кітапхана',
+			'downloads.unknownLibrary' => 'Белгісіз кітапхана',
 			'downloads.unknownShow' => 'Белгісіз телешоу',
 			'downloads.unknownSeason' => 'Белгісіз маусым',
 			'downloads.unknownAlbum' => 'Белгісіз альбом',

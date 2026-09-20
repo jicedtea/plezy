@@ -729,7 +729,7 @@
     "pipFailed": "PiP rejimini ishga tushirishda xatolik",
     "screenshotSaved": "Ekran tasviri saqlandi",
     "zoomPercent": "Masshtab %${percent}",
-    "volumePercent": "",
+    "volumePercent": "Ovoz ${percent}%",
     "pipErrors": {
       "androidVersion": "Android 8.0 yoki undan yangisi talab qilinadi",
       "iosVersion": "iOS 15.0 yoki undan yangisi talab qilinadi",
@@ -930,7 +930,7 @@
     "borrowAddTo": "${displayName} profiliga qoʻshish",
     "borrowExplain": "Boshqa profilning ulanishidan foydalaning.",
     "borrowEmpty": "Hali foydalanadigan hech narsa yoʻq.",
-    "borrowEmptySubtitle": "Avval boshqa profilga Plex yoki Jellyfin ulang.",
+    "borrowEmptySubtitle": "Avval boshqa profilga Plex, Jellyfin yoki Emby ulang.",
     "borrowLoadFailed": "Mavjud ulanishlarni yuklab boʻlmadi.",
     "borrowFromProfile": "${displayName} profilidan",
     "borrowConnectionBorrowed": "Ulanishdan foydalanildi.",
@@ -951,8 +951,8 @@
   "connections": {
     "sectionTitle": "Ulanishlar",
     "addConnection": "Ulanish qoʻshish",
-    "addConnectionSubtitleNoProfile": "Plex orqali kiring yoki Jellyfin serveriga ulaning",
-    "addConnectionSubtitleScoped": "${displayName} profiliga qoʻshish",
+    "addConnectionSubtitleNoProfile": "Plex orqali kiring yoki Jellyfin yoki Emby serveriga ulaning",
+    "addConnectionSubtitleScoped": "${displayName} profiliga qoʻshish: Plex, Jellyfin, Emby yoki boshqa ulanish",
     "sessionExpiredOne": "${name} uchun seans vaqti tugadi",
     "sessionExpiredMany": "${count} server uchun seans vaqti tugadi",
     "signInAgain": "Qaytadan kirish",
@@ -1072,7 +1072,14 @@
     "failedToVerifyToken": "Tokenni tekshirib boʻlmadi: ${error}",
     "failedToSwitchProfile": "${displayName} profiliga oʻtib boʻlmadi",
     "failedToDeleteProfile": "${displayName} profilini oʻchirib boʻlmadi",
-    "failedToRate": "Reytingni yangilab boʻlmadi"
+    "failedToRate": "Reytingni yangilab boʻlmadi",
+    "reasonTimedOut": "ulanish vaqti tugadi",
+    "reasonUnreachable": "serverga ulanib boʻlmadi",
+    "reasonRefused": "server soʻrovni rad etdi",
+    "reasonNotFound": "element endi serverda yoʻq",
+    "reasonServerError": "server xatolik haqida xabar berdi",
+    "reasonCancelled": "soʻrov bekor qilindi",
+    "reasonUnexpected": "kutilmagan xatolik yuz berdi"
   },
   "libraries": {
     "title": "Kutubxonalar",
@@ -1141,7 +1148,8 @@
       "tag": "Teg",
       "unwatched": "Koʻrilmagan",
       "unplayed": "Eshitilmagan",
-      "favorites": "Tanlanganlar"
+      "favorites": "Tanlanganlar",
+      "filePath": ""
     },
     "sortLabels": {
       "title": "Nomi",
@@ -1164,16 +1172,44 @@
       "dateShared": "Ulashilgan sanasi",
       "latestEpisodeAirDate": "Soʻnggi qism chiqqan sana",
       "lastEpisodeDateAdded": "Soʻnggi qoʻshilgan qism sanasi",
-      "dateDownloaded": "",
-      "size": "",
-      "library": ""
+      "dateDownloaded": "Yuklab olingan sanasi",
+      "size": "Hajmi",
+      "library": "Kutubxona"
+    },
+    "advancedFilters": {
+      "include": "",
+      "exclude": "",
+      "any": "",
+      "yes": "",
+      "no": "",
+      "not": "",
+      "valueCount": "",
+      "valueCountExcluded": "",
+      "searchValues": "",
+      "noValues": "",
+      "matchContains": "",
+      "matchNotContains": "",
+      "matchIs": "",
+      "matchIsNot": "",
+      "matchBeginsWith": "",
+      "matchEndsWith": "",
+      "textHint": "",
+      "from": "",
+      "to": "",
+      "range": "",
+      "atLeast": "",
+      "atMost": "",
+      "dateLastDays": "",
+      "dateLastYear": "",
+      "dateOlderThanDays": "",
+      "dateOlderThanYear": ""
     }
   },
   "about": {
     "title": "Dastur haqida",
     "openSourceLicenses": "Ochiq kodli litsenziyalar",
     "versionLabel": "Versiya ${version}",
-    "appDescription": "Flutter asosidagi qulay Plex va Jellyfin mijozi",
+    "appDescription": "Flutter asosidagi qulay Plex, Jellyfin va Emby mijozi",
     "viewLicensesDescription": "Uchinchi tomon kutubxonalarining litsenziyalarini koʻrish"
   },
   "serverSelection": {
@@ -1491,7 +1527,9 @@
     "editRuleAction": "Tahrirlash",
     "recordingRuleUpdated": "Yozib olish qoidasi yangilandi",
     "guideReloadRequested": "Jadvalni yangilash soʻraldi",
+    "guideReloadFailed": "Dasturlar jadvalini yangilab boʻlmadi",
     "rulesProcessRequested": "Qoidalarni qayta baholash soʻraldi",
+    "rulesProcessFailed": "Yozib olish qoidalarini qayta baholab boʻlmadi",
     "recordShow": "Shouni yozib olish",
     "recordSettings": {
       "startEarly": "Erta boshlash (soniya)",
@@ -1507,7 +1545,9 @@
     "dayAtTime": "${day}, soat ${time} da",
     "invalidPlaybackData": "${product} Jonli TV ijrosi uchun notoʻgʻri maʼlumot qaytardi",
     "failedToStartChannel": "Jonli kanalni boshlab boʻlmadi",
-    "failedToBuildStreamUrl": "Oqim URL-ini tuzib boʻlmadi"
+    "failedToBuildStreamUrl": "Oqim URL-ini tuzib boʻlmadi",
+    "playbackStartFailed": "Kanalni ishga tushirib boʻlmadi: ${reason}",
+    "channelSwitchFailed": "Kanalni almashtirib boʻlmadi: ${reason}"
   },
   "collections": {
     "title": "Toʻplamlar",
@@ -1782,11 +1822,11 @@
       "settingsUnavailable": "Bu qurilmada tizim sozlamalarini ochib boʻlmadi",
       "linkUnavailable": "Bu qurilmada dontkillmyapp.com-ni ochib boʻlmadi"
     },
-    "options": "",
+    "options": "Yuklamalar parametrlari",
     "groupings": {
-      "library": ""
+      "library": "Kutubxona"
     },
-    "unknownLibrary": "",
+    "unknownLibrary": "Nomaʼlum kutubxona",
     "unknownShow": "Nomaʼlum serial",
     "unknownSeason": "Nomaʼlum mavsum",
     "unknownAlbum": "Nomaʼlum albom",

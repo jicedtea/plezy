@@ -875,6 +875,7 @@ class _Translations$videoControls$uz extends Translations$videoControls$en {
 	@override String get pipFailed => 'PiP rejimini ishga tushirishda xatolik';
 	@override String get screenshotSaved => 'Ekran tasviri saqlandi';
 	@override String zoomPercent({required Object percent}) => 'Masshtab %${percent}';
+	@override String volumePercent({required Object percent}) => 'Ovoz ${percent}%';
 	@override late final _Translations$videoControls$pipErrors$uz pipErrors = _Translations$videoControls$pipErrors$uz._(_root);
 	@override String get chapters => 'Boʻlimlar';
 	@override String get noChaptersAvailable => 'Boʻlimlar mavjud emas';
@@ -1100,7 +1101,7 @@ class _Translations$profiles$uz extends Translations$profiles$en {
 	@override String borrowAddTo({required Object displayName}) => '${displayName} profiliga qoʻshish';
 	@override String get borrowExplain => 'Boshqa profilning ulanishidan foydalaning.';
 	@override String get borrowEmpty => 'Hali foydalanadigan hech narsa yoʻq.';
-	@override String get borrowEmptySubtitle => 'Avval boshqa profilga Plex yoki Jellyfin ulang.';
+	@override String get borrowEmptySubtitle => 'Avval boshqa profilga Plex, Jellyfin yoki Emby ulang.';
 	@override String get borrowLoadFailed => 'Mavjud ulanishlarni yuklab boʻlmadi.';
 	@override String borrowFromProfile({required Object displayName}) => '${displayName} profilidan';
 	@override String get borrowConnectionBorrowed => 'Ulanishdan foydalanildi.';
@@ -1128,8 +1129,8 @@ class _Translations$connections$uz extends Translations$connections$en {
 	// Translations
 	@override String get sectionTitle => 'Ulanishlar';
 	@override String get addConnection => 'Ulanish qoʻshish';
-	@override String get addConnectionSubtitleNoProfile => 'Plex orqali kiring yoki Jellyfin serveriga ulaning';
-	@override String addConnectionSubtitleScoped({required Object displayName}) => '${displayName} profiliga qoʻshish';
+	@override String get addConnectionSubtitleNoProfile => 'Plex orqali kiring yoki Jellyfin yoki Emby serveriga ulaning';
+	@override String addConnectionSubtitleScoped({required Object displayName}) => '${displayName} profiliga qoʻshish: Plex, Jellyfin, Emby yoki boshqa ulanish';
 	@override String sessionExpiredOne({required Object name}) => '${name} uchun seans vaqti tugadi';
 	@override String sessionExpiredMany({required Object count}) => '${count} server uchun seans vaqti tugadi';
 	@override String get signInAgain => 'Qaytadan kirish';
@@ -1236,6 +1237,13 @@ class _Translations$errors$uz extends Translations$errors$en {
 	@override String failedToSwitchProfile({required Object displayName}) => '${displayName} profiliga oʻtib boʻlmadi';
 	@override String failedToDeleteProfile({required Object displayName}) => '${displayName} profilini oʻchirib boʻlmadi';
 	@override String get failedToRate => 'Reytingni yangilab boʻlmadi';
+	@override String get reasonTimedOut => 'ulanish vaqti tugadi';
+	@override String get reasonUnreachable => 'serverga ulanib boʻlmadi';
+	@override String get reasonRefused => 'server soʻrovni rad etdi';
+	@override String get reasonNotFound => 'element endi serverda yoʻq';
+	@override String get reasonServerError => 'server xatolik haqida xabar berdi';
+	@override String get reasonCancelled => 'soʻrov bekor qilindi';
+	@override String get reasonUnexpected => 'kutilmagan xatolik yuz berdi';
 }
 
 // Path: libraries
@@ -1302,7 +1310,7 @@ class _Translations$about$uz extends Translations$about$en {
 	@override String get title => 'Dastur haqida';
 	@override String get openSourceLicenses => 'Ochiq kodli litsenziyalar';
 	@override String versionLabel({required Object version}) => 'Versiya ${version}';
-	@override String get appDescription => 'Flutter asosidagi qulay Plex va Jellyfin mijozi';
+	@override String get appDescription => 'Flutter asosidagi qulay Plex, Jellyfin va Emby mijozi';
 	@override String get viewLicensesDescription => 'Uchinchi tomon kutubxonalarining litsenziyalarini koʻrish';
 }
 
@@ -1541,7 +1549,9 @@ class _Translations$liveTv$uz extends Translations$liveTv$en {
 	@override String get editRuleAction => 'Tahrirlash';
 	@override String get recordingRuleUpdated => 'Yozib olish qoidasi yangilandi';
 	@override String get guideReloadRequested => 'Jadvalni yangilash soʻraldi';
+	@override String get guideReloadFailed => 'Dasturlar jadvalini yangilab boʻlmadi';
 	@override String get rulesProcessRequested => 'Qoidalarni qayta baholash soʻraldi';
+	@override String get rulesProcessFailed => 'Yozib olish qoidalarini qayta baholab boʻlmadi';
 	@override String get recordShow => 'Shouni yozib olish';
 	@override late final _Translations$liveTv$recordSettings$uz recordSettings = _Translations$liveTv$recordSettings$uz._(_root);
 	@override String startingInMinutes({required Object minutes}) => '${minutes} daqiqadan keyin boshlanadi';
@@ -1549,6 +1559,8 @@ class _Translations$liveTv$uz extends Translations$liveTv$en {
 	@override String invalidPlaybackData({required Object product}) => '${product} Jonli TV ijrosi uchun notoʻgʻri maʼlumot qaytardi';
 	@override String get failedToStartChannel => 'Jonli kanalni boshlab boʻlmadi';
 	@override String get failedToBuildStreamUrl => 'Oqim URL-ini tuzib boʻlmadi';
+	@override String playbackStartFailed({required Object reason}) => 'Kanalni ishga tushirib boʻlmadi: ${reason}';
+	@override String channelSwitchFailed({required Object reason}) => 'Kanalni almashtirib boʻlmadi: ${reason}';
 }
 
 // Path: collections
@@ -1821,6 +1833,9 @@ class _Translations$downloads$uz extends Translations$downloads$en {
 	@override String get syncRuleUnknownServer => 'Nomaʼlum server';
 	@override String get syncRuleListCreated => 'Sinxronlash qoidasi yaratildi';
 	@override late final _Translations$downloads$backgroundWarning$uz backgroundWarning = _Translations$downloads$backgroundWarning$uz._(_root);
+	@override String get options => 'Yuklamalar parametrlari';
+	@override late final _Translations$downloads$groupings$uz groupings = _Translations$downloads$groupings$uz._(_root);
+	@override String get unknownLibrary => 'Nomaʼlum kutubxona';
 	@override String get unknownShow => 'Nomaʼlum serial';
 	@override String get unknownSeason => 'Nomaʼlum mavsum';
 	@override String get unknownAlbum => 'Nomaʼlum albom';
@@ -2513,6 +2528,9 @@ class _Translations$libraries$sortLabels$uz extends Translations$libraries$sortL
 	@override String get dateShared => 'Ulashilgan sanasi';
 	@override String get latestEpisodeAirDate => 'Soʻnggi qism chiqqan sana';
 	@override String get lastEpisodeDateAdded => 'Soʻnggi qoʻshilgan qism sanasi';
+	@override String get dateDownloaded => 'Yuklab olingan sanasi';
+	@override String get size => 'Hajmi';
+	@override String get library => 'Kutubxona';
 }
 
 // Path: explore.rows
@@ -2806,6 +2824,16 @@ class _Translations$downloads$backgroundWarning$uz extends Translations$download
 	@override String get statusUnknown => 'Hali tekshirilmagan';
 	@override String get settingsUnavailable => 'Bu qurilmada tizim sozlamalarini ochib boʻlmadi';
 	@override String get linkUnavailable => 'Bu qurilmada dontkillmyapp.com-ni ochib boʻlmadi';
+}
+
+// Path: downloads.groupings
+class _Translations$downloads$groupings$uz extends Translations$downloads$groupings$en {
+	_Translations$downloads$groupings$uz._(TranslationsUz root) : this._root = root, super.internal(root);
+
+	final TranslationsUz _root; // ignore: unused_field
+
+	// Translations
+	@override String get library => 'Kutubxona';
 }
 
 // Path: companionRemote.session
@@ -3675,6 +3703,7 @@ extension on TranslationsUz {
 			'videoControls.pipFailed' => 'PiP rejimini ishga tushirishda xatolik',
 			'videoControls.screenshotSaved' => 'Ekran tasviri saqlandi',
 			'videoControls.zoomPercent' => ({required Object percent}) => 'Masshtab %${percent}',
+			'videoControls.volumePercent' => ({required Object percent}) => 'Ovoz ${percent}%',
 			'videoControls.pipErrors.androidVersion' => 'Android 8.0 yoki undan yangisi talab qilinadi',
 			'videoControls.pipErrors.iosVersion' => 'iOS 15.0 yoki undan yangisi talab qilinadi',
 			'videoControls.pipErrors.permissionDisabled' => 'PiP rejimi oʻchirilgan. Tizim sozlamalaridan yoqing.',
@@ -3859,7 +3888,7 @@ extension on TranslationsUz {
 			'profiles.borrowAddTo' => ({required Object displayName}) => '${displayName} profiliga qoʻshish',
 			'profiles.borrowExplain' => 'Boshqa profilning ulanishidan foydalaning.',
 			'profiles.borrowEmpty' => 'Hali foydalanadigan hech narsa yoʻq.',
-			'profiles.borrowEmptySubtitle' => 'Avval boshqa profilga Plex yoki Jellyfin ulang.',
+			'profiles.borrowEmptySubtitle' => 'Avval boshqa profilga Plex, Jellyfin yoki Emby ulang.',
 			'profiles.borrowLoadFailed' => 'Mavjud ulanishlarni yuklab boʻlmadi.',
 			'profiles.borrowFromProfile' => ({required Object displayName}) => '${displayName} profilidan',
 			'profiles.borrowConnectionBorrowed' => 'Ulanishdan foydalanildi.',
@@ -3878,8 +3907,8 @@ extension on TranslationsUz {
 			'profiles.tokenIdentityMismatch' => 'Plex profil tokeni kutilmagan serverga tegishli boʻlib chiqdi',
 			'connections.sectionTitle' => 'Ulanishlar',
 			'connections.addConnection' => 'Ulanish qoʻshish',
-			'connections.addConnectionSubtitleNoProfile' => 'Plex orqali kiring yoki Jellyfin serveriga ulaning',
-			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => '${displayName} profiliga qoʻshish',
+			'connections.addConnectionSubtitleNoProfile' => 'Plex orqali kiring yoki Jellyfin yoki Emby serveriga ulaning',
+			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => '${displayName} profiliga qoʻshish: Plex, Jellyfin, Emby yoki boshqa ulanish',
 			'connections.sessionExpiredOne' => ({required Object name}) => '${name} uchun seans vaqti tugadi',
 			'connections.sessionExpiredMany' => ({required Object count}) => '${count} server uchun seans vaqti tugadi',
 			'connections.signInAgain' => 'Qaytadan kirish',
@@ -3979,6 +4008,13 @@ extension on TranslationsUz {
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => '${displayName} profiliga oʻtib boʻlmadi',
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => '${displayName} profilini oʻchirib boʻlmadi',
 			'errors.failedToRate' => 'Reytingni yangilab boʻlmadi',
+			'errors.reasonTimedOut' => 'ulanish vaqti tugadi',
+			'errors.reasonUnreachable' => 'serverga ulanib boʻlmadi',
+			'errors.reasonRefused' => 'server soʻrovni rad etdi',
+			'errors.reasonNotFound' => 'element endi serverda yoʻq',
+			'errors.reasonServerError' => 'server xatolik haqida xabar berdi',
+			'errors.reasonCancelled' => 'soʻrov bekor qilindi',
+			'errors.reasonUnexpected' => 'kutilmagan xatolik yuz berdi',
 			'libraries.title' => 'Kutubxonalar',
 			'libraries.fallbackTitle' => 'Kutubxona',
 			'libraries.scanLibraryFiles' => 'Fayllarni skanerlash',
@@ -4005,6 +4041,8 @@ extension on TranslationsUz {
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => '"${title}" kutubxonasini tahlil qilmoqchimisiz?',
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => '"${title}" metamaʼlumotlarini yangilaysizmi?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => '"${title}" savatini tozalaysizmi?',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.manageLibraries' => 'Kutubxonalarni boshqarish',
 			'libraries.sort' => 'Saralash',
 			'libraries.sortBy' => 'Saralash mezonlari',
@@ -4013,8 +4051,6 @@ extension on TranslationsUz {
 			'libraries.showLibrary' => 'Kutubxonani koʻrsatish',
 			'libraries.hideLibrary' => 'Kutubxonani yashirish',
 			'libraries.libraryOptions' => 'Kutubxona parametrlari',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.content' => 'kutubxona tarkibi',
 			'libraries.selectLibrary' => 'Kutubxonani tanlash',
 			'libraries.filtersWithCount' => ({required Object count}) => 'Filtrlar (${count})',
@@ -4063,10 +4099,13 @@ extension on TranslationsUz {
 			'libraries.sortLabels.dateShared' => 'Ulashilgan sanasi',
 			'libraries.sortLabels.latestEpisodeAirDate' => 'Soʻnggi qism chiqqan sana',
 			'libraries.sortLabels.lastEpisodeDateAdded' => 'Soʻnggi qoʻshilgan qism sanasi',
+			'libraries.sortLabels.dateDownloaded' => 'Yuklab olingan sanasi',
+			'libraries.sortLabels.size' => 'Hajmi',
+			'libraries.sortLabels.library' => 'Kutubxona',
 			'about.title' => 'Dastur haqida',
 			'about.openSourceLicenses' => 'Ochiq kodli litsenziyalar',
 			'about.versionLabel' => ({required Object version}) => 'Versiya ${version}',
-			'about.appDescription' => 'Flutter asosidagi qulay Plex va Jellyfin mijozi',
+			'about.appDescription' => 'Flutter asosidagi qulay Plex, Jellyfin va Emby mijozi',
 			'about.viewLicensesDescription' => 'Uchinchi tomon kutubxonalarining litsenziyalarini koʻrish',
 			'serverSelection.noServersFoundForAccount' => ({required Object username, required Object email}) => '${username} (${email}) uchun serverlar topilmadi',
 			'serverSelection.failedToLoadServers' => ({required Object error}) => 'Serverlarni yuklashda xatolik: ${error}',
@@ -4333,7 +4372,9 @@ extension on TranslationsUz {
 			'liveTv.editRuleAction' => 'Tahrirlash',
 			'liveTv.recordingRuleUpdated' => 'Yozib olish qoidasi yangilandi',
 			'liveTv.guideReloadRequested' => 'Jadvalni yangilash soʻraldi',
+			'liveTv.guideReloadFailed' => 'Dasturlar jadvalini yangilab boʻlmadi',
 			'liveTv.rulesProcessRequested' => 'Qoidalarni qayta baholash soʻraldi',
+			'liveTv.rulesProcessFailed' => 'Yozib olish qoidalarini qayta baholab boʻlmadi',
 			'liveTv.recordShow' => 'Shouni yozib olish',
 			'liveTv.recordSettings.startEarly' => 'Erta boshlash (soniya)',
 			'liveTv.recordSettings.endLate' => 'Kech tugatish (soniya)',
@@ -4348,6 +4389,8 @@ extension on TranslationsUz {
 			'liveTv.invalidPlaybackData' => ({required Object product}) => '${product} Jonli TV ijrosi uchun notoʻgʻri maʼlumot qaytardi',
 			'liveTv.failedToStartChannel' => 'Jonli kanalni boshlab boʻlmadi',
 			'liveTv.failedToBuildStreamUrl' => 'Oqim URL-ini tuzib boʻlmadi',
+			'liveTv.playbackStartFailed' => ({required Object reason}) => 'Kanalni ishga tushirib boʻlmadi: ${reason}',
+			'liveTv.channelSwitchFailed' => ({required Object reason}) => 'Kanalni almashtirib boʻlmadi: ${reason}',
 			'collections.title' => 'Toʻplamlar',
 			'collections.collection' => 'Toʻplam',
 			'collections.empty' => 'Toʻplam boʻsh',
@@ -4512,6 +4555,8 @@ extension on TranslationsUz {
 			'downloads.noDownloadsDescription' => 'Yuklangan fayllar oflayn koʻrish uchun bu yerda koʻrinadi',
 			'downloads.downloadNow' => 'Yuklab olish',
 			'downloads.deleteDownload' => 'Yuklamani oʻchirish',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.retryDownload' => 'Yuklashni qaytadan urinish',
 			'downloads.downloadQueued' => 'Yuklash navbatga qoʻyildi',
 			'downloads.downloadResumed' => 'Yuklash davom ettirildi',
@@ -4527,8 +4572,6 @@ extension on TranslationsUz {
 			'downloads.resumeDownload' => 'Yuklashni davom ettirish',
 			'downloads.cancelledDownload' => 'Toʻxtatilgan yuklama',
 			'downloads.syncingFile' => ({required Object file, required Object status}) => '${file} (${status} sinxronlanmoqda)',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadedFileClickToComplete' => ({required Object file}) => 'Yuklab olindi ${file} - Yakunlash uchun bosing',
 			'downloads.partialDownloadClickToComplete' => 'Qisman yuklandi - Yakunlash uchun bosing',
 			'downloads.deleting' => 'Oʻchirilmoqda...',
@@ -4605,6 +4648,9 @@ extension on TranslationsUz {
 			'downloads.backgroundWarning.statusUnknown' => 'Hali tekshirilmagan',
 			'downloads.backgroundWarning.settingsUnavailable' => 'Bu qurilmada tizim sozlamalarini ochib boʻlmadi',
 			'downloads.backgroundWarning.linkUnavailable' => 'Bu qurilmada dontkillmyapp.com-ni ochib boʻlmadi',
+			'downloads.options' => 'Yuklamalar parametrlari',
+			'downloads.groupings.library' => 'Kutubxona',
+			'downloads.unknownLibrary' => 'Nomaʼlum kutubxona',
 			'downloads.unknownShow' => 'Nomaʼlum serial',
 			'downloads.unknownSeason' => 'Nomaʼlum mavsum',
 			'downloads.unknownAlbum' => 'Nomaʼlum albom',

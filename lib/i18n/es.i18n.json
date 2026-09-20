@@ -729,7 +729,7 @@
     "pipFailed": "No se pudo iniciar el modo de imagen en imagen",
     "screenshotSaved": "Captura de pantalla guardada",
     "zoomPercent": "Zoom ${percent}%",
-    "volumePercent": "",
+    "volumePercent": "Volumen ${percent}%",
     "pipErrors": {
       "androidVersion": "Requiere Android 8.0 o más reciente",
       "iosVersion": "Requiere iOS 15.0 o más reciente",
@@ -930,7 +930,7 @@
     "borrowAddTo": "Añadir a ${displayName}",
     "borrowExplain": "Toma prestada la conexión de otro perfil. Los perfiles protegidos con PIN requieren un PIN.",
     "borrowEmpty": "Todavía no hay ninguna conexión que tomar prestada.",
-    "borrowEmptySubtitle": "Conecta primero Plex o Jellyfin a otro perfil.",
+    "borrowEmptySubtitle": "Conecta primero Plex, Jellyfin o Emby a otro perfil.",
     "borrowLoadFailed": "No se pudieron cargar las conexiones disponibles. Inténtalo de nuevo.",
     "borrowFromProfile": "De ${displayName}",
     "borrowConnectionBorrowed": "Conexión tomada prestada.",
@@ -951,8 +951,8 @@
   "connections": {
     "sectionTitle": "Conexiones",
     "addConnection": "Añadir conexión",
-    "addConnectionSubtitleNoProfile": "Inicia sesión con Plex o conecta un servidor de Jellyfin",
-    "addConnectionSubtitleScoped": "Añadir a ${displayName}: Plex, Jellyfin u otra conexión de perfil",
+    "addConnectionSubtitleNoProfile": "Inicia sesión con Plex o conecta un servidor de Jellyfin o Emby",
+    "addConnectionSubtitleScoped": "Añadir a ${displayName}: Plex, Jellyfin, Emby u otra conexión de perfil",
     "sessionExpiredOne": "Sesión caducada para ${name}",
     "sessionExpiredMany": "Sesión caducada para ${count} servidores",
     "signInAgain": "Iniciar sesión de nuevo",
@@ -1072,7 +1072,14 @@
     "failedToVerifyToken": "Error al verificar el token: ${error}",
     "failedToSwitchProfile": "Error al cambiar al perfil ${displayName}",
     "failedToDeleteProfile": "Error al eliminar ${displayName}",
-    "failedToRate": "No se pudo actualizar la valoración"
+    "failedToRate": "No se pudo actualizar la valoración",
+    "reasonTimedOut": "se agotó el tiempo de conexión",
+    "reasonUnreachable": "no se pudo contactar con el servidor",
+    "reasonRefused": "el servidor rechazó la solicitud",
+    "reasonNotFound": "el elemento ya no está en el servidor",
+    "reasonServerError": "el servidor informó de un error",
+    "reasonCancelled": "se canceló la solicitud",
+    "reasonUnexpected": "se produjo un error inesperado"
   },
   "libraries": {
     "title": "Bibliotecas",
@@ -1141,7 +1148,8 @@
       "tag": "Etiqueta",
       "unwatched": "No vistos",
       "unplayed": "No reproducidos",
-      "favorites": "Favoritos"
+      "favorites": "Favoritos",
+      "filePath": ""
     },
     "sortLabels": {
       "title": "Título",
@@ -1164,16 +1172,44 @@
       "dateShared": "Fecha en que se compartió",
       "latestEpisodeAirDate": "Fecha de emisión del episodio más reciente",
       "lastEpisodeDateAdded": "Fecha en que se añadió el último episodio",
-      "dateDownloaded": "",
-      "size": "",
-      "library": ""
+      "dateDownloaded": "Fecha de descarga",
+      "size": "Tamaño",
+      "library": "Biblioteca"
+    },
+    "advancedFilters": {
+      "include": "",
+      "exclude": "",
+      "any": "",
+      "yes": "",
+      "no": "",
+      "not": "",
+      "valueCount": "",
+      "valueCountExcluded": "",
+      "searchValues": "",
+      "noValues": "",
+      "matchContains": "",
+      "matchNotContains": "",
+      "matchIs": "",
+      "matchIsNot": "",
+      "matchBeginsWith": "",
+      "matchEndsWith": "",
+      "textHint": "",
+      "from": "",
+      "to": "",
+      "range": "",
+      "atLeast": "",
+      "atMost": "",
+      "dateLastDays": "",
+      "dateLastYear": "",
+      "dateOlderThanDays": "",
+      "dateOlderThanYear": ""
     }
   },
   "about": {
     "title": "Acerca de",
     "openSourceLicenses": "Licencias de código abierto",
     "versionLabel": "Versión ${version}",
-    "appDescription": "Un cliente de Plex y Jellyfin para Flutter",
+    "appDescription": "Un cliente de Plex, Jellyfin y Emby para Flutter",
     "viewLicensesDescription": "Ver las licencias de bibliotecas de terceros"
   },
   "serverSelection": {
@@ -1491,7 +1527,9 @@
     "editRuleAction": "Editar",
     "recordingRuleUpdated": "Regla de grabación actualizada",
     "guideReloadRequested": "Solicitada actualización de la guía",
+    "guideReloadFailed": "No se pudo actualizar la guía",
     "rulesProcessRequested": "Solicitada reevaluación de reglas",
+    "rulesProcessFailed": "No se pudieron reevaluar las reglas de grabación",
     "recordShow": "Grabar programa",
     "recordSettings": {
       "startEarly": "Empezar antes (segundos)",
@@ -1507,7 +1545,9 @@
     "dayAtTime": "${day} a las ${time}",
     "invalidPlaybackData": "${product} devolvió datos de reproducción de TV en vivo no válidos",
     "failedToStartChannel": "No se pudo iniciar el canal en vivo",
-    "failedToBuildStreamUrl": "No se pudo generar la URL de transmisión"
+    "failedToBuildStreamUrl": "No se pudo generar la URL de transmisión",
+    "playbackStartFailed": "No se pudo iniciar el canal: ${reason}",
+    "channelSwitchFailed": "No se pudo cambiar de canal: ${reason}"
   },
   "collections": {
     "title": "Colecciones",
@@ -1782,11 +1822,11 @@
       "settingsUnavailable": "No se pudo abrir la configuración del sistema en este dispositivo",
       "linkUnavailable": "No se pudo abrir dontkillmyapp.com en este dispositivo"
     },
-    "options": "",
+    "options": "Opciones de descargas",
     "groupings": {
-      "library": ""
+      "library": "Biblioteca"
     },
-    "unknownLibrary": "",
+    "unknownLibrary": "Biblioteca desconocida",
     "unknownShow": "Serie desconocida",
     "unknownSeason": "Temporada desconocida",
     "unknownAlbum": "Álbum desconocido",

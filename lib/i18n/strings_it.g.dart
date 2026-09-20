@@ -875,6 +875,7 @@ class _Translations$videoControls$it extends Translations$videoControls$en {
 	@override String get pipFailed => 'Impossibile avviare la modalità Picture-in-Picture';
 	@override String get screenshotSaved => 'Schermata salvata';
 	@override String zoomPercent({required Object percent}) => 'Zoom ${percent}%';
+	@override String volumePercent({required Object percent}) => 'Volume ${percent}%';
 	@override late final _Translations$videoControls$pipErrors$it pipErrors = _Translations$videoControls$pipErrors$it._(_root);
 	@override String get chapters => 'Capitoli';
 	@override String get noChaptersAvailable => 'Nessun capitolo disponibile';
@@ -1100,7 +1101,7 @@ class _Translations$profiles$it extends Translations$profiles$en {
 	@override String borrowAddTo({required Object displayName}) => 'Aggiungi a ${displayName}';
 	@override String get borrowExplain => 'Prendi in prestito la connessione di un altro profilo. I profili protetti da PIN richiedono un PIN.';
 	@override String get borrowEmpty => 'Nulla da prendere in prestito al momento.';
-	@override String get borrowEmptySubtitle => 'Collega prima Plex o Jellyfin a un altro profilo.';
+	@override String get borrowEmptySubtitle => 'Collega prima Plex, Jellyfin o Emby a un altro profilo.';
 	@override String get borrowLoadFailed => 'Impossibile caricare le connessioni disponibili. Riprova.';
 	@override String borrowFromProfile({required Object displayName}) => 'Da ${displayName}';
 	@override String get borrowConnectionBorrowed => 'Connessione presa in prestito.';
@@ -1128,8 +1129,8 @@ class _Translations$connections$it extends Translations$connections$en {
 	// Translations
 	@override String get sectionTitle => 'Connessioni';
 	@override String get addConnection => 'Aggiungi connessione';
-	@override String get addConnectionSubtitleNoProfile => 'Accedi con Plex o collega un server Jellyfin';
-	@override String addConnectionSubtitleScoped({required Object displayName}) => 'Aggiungi a ${displayName}: Plex, Jellyfin o la connessione di un altro profilo';
+	@override String get addConnectionSubtitleNoProfile => 'Accedi con Plex o collega un server Jellyfin o Emby';
+	@override String addConnectionSubtitleScoped({required Object displayName}) => 'Aggiungi a ${displayName}: Plex, Jellyfin, Emby o la connessione di un altro profilo';
 	@override String sessionExpiredOne({required Object name}) => 'Sessione scaduta per ${name}';
 	@override String sessionExpiredMany({required Object count}) => 'Sessione scaduta per ${count} server';
 	@override String get signInAgain => 'Accedi di nuovo';
@@ -1236,6 +1237,13 @@ class _Translations$errors$it extends Translations$errors$en {
 	@override String failedToSwitchProfile({required Object displayName}) => 'Impossibile passare a ${displayName}';
 	@override String failedToDeleteProfile({required Object displayName}) => 'Impossibile eliminare ${displayName}';
 	@override String get failedToRate => 'Impossibile aggiornare la valutazione';
+	@override String get reasonTimedOut => 'il tempo di connessione è scaduto';
+	@override String get reasonUnreachable => 'non è stato possibile raggiungere il server';
+	@override String get reasonRefused => 'il server ha rifiutato la richiesta';
+	@override String get reasonNotFound => 'l\'elemento non è più presente sul server';
+	@override String get reasonServerError => 'il server ha segnalato un errore';
+	@override String get reasonCancelled => 'la richiesta è stata annullata';
+	@override String get reasonUnexpected => 'si è verificato un errore imprevisto';
 }
 
 // Path: libraries
@@ -1302,7 +1310,7 @@ class _Translations$about$it extends Translations$about$en {
 	@override String get title => 'Informazioni';
 	@override String get openSourceLicenses => 'Licenze open source';
 	@override String versionLabel({required Object version}) => 'Versione ${version}';
-	@override String get appDescription => 'Un elegante client Plex e Jellyfin per Flutter';
+	@override String get appDescription => 'Un elegante client Plex, Jellyfin ed Emby per Flutter';
 	@override String get viewLicensesDescription => 'Visualizza le licenze delle librerie di terze parti';
 }
 
@@ -1541,7 +1549,9 @@ class _Translations$liveTv$it extends Translations$liveTv$en {
 	@override String get editRuleAction => 'Modifica';
 	@override String get recordingRuleUpdated => 'Regola di registrazione aggiornata';
 	@override String get guideReloadRequested => 'Aggiornamento della guida richiesto';
+	@override String get guideReloadFailed => 'Impossibile aggiornare la guida';
 	@override String get rulesProcessRequested => 'Rielaborazione delle regole richiesta';
+	@override String get rulesProcessFailed => 'Impossibile rielaborare le regole di registrazione';
 	@override String get recordShow => 'Registra programma';
 	@override late final _Translations$liveTv$recordSettings$it recordSettings = _Translations$liveTv$recordSettings$it._(_root);
 	@override String startingInMinutes({required Object minutes}) => 'Inizia tra ${minutes} min';
@@ -1549,6 +1559,8 @@ class _Translations$liveTv$it extends Translations$liveTv$en {
 	@override String invalidPlaybackData({required Object product}) => '${product} ha restituito dati di riproduzione della TV in diretta non validi';
 	@override String get failedToStartChannel => 'Impossibile avviare il canale in diretta';
 	@override String get failedToBuildStreamUrl => 'Impossibile creare l\'URL dello stream';
+	@override String playbackStartFailed({required Object reason}) => 'Impossibile avviare il canale: ${reason}';
+	@override String channelSwitchFailed({required Object reason}) => 'Impossibile cambiare canale: ${reason}';
 }
 
 // Path: collections
@@ -1821,6 +1833,9 @@ class _Translations$downloads$it extends Translations$downloads$en {
 	@override String get syncRuleUnknownServer => 'Server sconosciuto';
 	@override String get syncRuleListCreated => 'Regola di sincronizzazione creata';
 	@override late final _Translations$downloads$backgroundWarning$it backgroundWarning = _Translations$downloads$backgroundWarning$it._(_root);
+	@override String get options => 'Opzioni download';
+	@override late final _Translations$downloads$groupings$it groupings = _Translations$downloads$groupings$it._(_root);
+	@override String get unknownLibrary => 'Libreria sconosciuta';
 	@override String get unknownShow => 'Serie sconosciuta';
 	@override String get unknownSeason => 'Stagione sconosciuta';
 	@override String get unknownAlbum => 'Album sconosciuto';
@@ -2513,6 +2528,9 @@ class _Translations$libraries$sortLabels$it extends Translations$libraries$sortL
 	@override String get dateShared => 'Data di condivisione';
 	@override String get latestEpisodeAirDate => 'Data di trasmissione dell\'ultimo episodio';
 	@override String get lastEpisodeDateAdded => 'Data di aggiunta dell\'ultimo episodio';
+	@override String get dateDownloaded => 'Data di download';
+	@override String get size => 'Dimensione';
+	@override String get library => 'Libreria';
 }
 
 // Path: explore.rows
@@ -2806,6 +2824,16 @@ class _Translations$downloads$backgroundWarning$it extends Translations$download
 	@override String get statusUnknown => 'Non ancora verificato';
 	@override String get settingsUnavailable => 'Impossibile aprire le impostazioni di sistema su questo dispositivo';
 	@override String get linkUnavailable => 'Impossibile aprire dontkillmyapp.com su questo dispositivo';
+}
+
+// Path: downloads.groupings
+class _Translations$downloads$groupings$it extends Translations$downloads$groupings$en {
+	_Translations$downloads$groupings$it._(TranslationsIt root) : this._root = root, super.internal(root);
+
+	final TranslationsIt _root; // ignore: unused_field
+
+	// Translations
+	@override String get library => 'Libreria';
 }
 
 // Path: companionRemote.session
@@ -3675,6 +3703,7 @@ extension on TranslationsIt {
 			'videoControls.pipFailed' => 'Impossibile avviare la modalità Picture-in-Picture',
 			'videoControls.screenshotSaved' => 'Schermata salvata',
 			'videoControls.zoomPercent' => ({required Object percent}) => 'Zoom ${percent}%',
+			'videoControls.volumePercent' => ({required Object percent}) => 'Volume ${percent}%',
 			'videoControls.pipErrors.androidVersion' => 'Richiede Android 8.0 o versioni successive',
 			'videoControls.pipErrors.iosVersion' => 'Richiede iOS 15.0 o versioni successive',
 			'videoControls.pipErrors.permissionDisabled' => 'La modalità Picture-in-Picture è disattivata. Attivala nelle impostazioni di sistema.',
@@ -3859,7 +3888,7 @@ extension on TranslationsIt {
 			'profiles.borrowAddTo' => ({required Object displayName}) => 'Aggiungi a ${displayName}',
 			'profiles.borrowExplain' => 'Prendi in prestito la connessione di un altro profilo. I profili protetti da PIN richiedono un PIN.',
 			'profiles.borrowEmpty' => 'Nulla da prendere in prestito al momento.',
-			'profiles.borrowEmptySubtitle' => 'Collega prima Plex o Jellyfin a un altro profilo.',
+			'profiles.borrowEmptySubtitle' => 'Collega prima Plex, Jellyfin o Emby a un altro profilo.',
 			'profiles.borrowLoadFailed' => 'Impossibile caricare le connessioni disponibili. Riprova.',
 			'profiles.borrowFromProfile' => ({required Object displayName}) => 'Da ${displayName}',
 			'profiles.borrowConnectionBorrowed' => 'Connessione presa in prestito.',
@@ -3878,8 +3907,8 @@ extension on TranslationsIt {
 			'profiles.tokenIdentityMismatch' => 'Il token del profilo Plex è stato associato a un server imprevisto',
 			'connections.sectionTitle' => 'Connessioni',
 			'connections.addConnection' => 'Aggiungi connessione',
-			'connections.addConnectionSubtitleNoProfile' => 'Accedi con Plex o collega un server Jellyfin',
-			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => 'Aggiungi a ${displayName}: Plex, Jellyfin o la connessione di un altro profilo',
+			'connections.addConnectionSubtitleNoProfile' => 'Accedi con Plex o collega un server Jellyfin o Emby',
+			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => 'Aggiungi a ${displayName}: Plex, Jellyfin, Emby o la connessione di un altro profilo',
 			'connections.sessionExpiredOne' => ({required Object name}) => 'Sessione scaduta per ${name}',
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Sessione scaduta per ${count} server',
 			'connections.signInAgain' => 'Accedi di nuovo',
@@ -3979,6 +4008,13 @@ extension on TranslationsIt {
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => 'Impossibile passare a ${displayName}',
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => 'Impossibile eliminare ${displayName}',
 			'errors.failedToRate' => 'Impossibile aggiornare la valutazione',
+			'errors.reasonTimedOut' => 'il tempo di connessione è scaduto',
+			'errors.reasonUnreachable' => 'non è stato possibile raggiungere il server',
+			'errors.reasonRefused' => 'il server ha rifiutato la richiesta',
+			'errors.reasonNotFound' => 'l\'elemento non è più presente sul server',
+			'errors.reasonServerError' => 'il server ha segnalato un errore',
+			'errors.reasonCancelled' => 'la richiesta è stata annullata',
+			'errors.reasonUnexpected' => 'si è verificato un errore imprevisto',
 			'libraries.title' => 'Librerie',
 			'libraries.fallbackTitle' => 'Libreria',
 			'libraries.scanLibraryFiles' => 'Scansiona i file della libreria',
@@ -4005,6 +4041,8 @@ extension on TranslationsIt {
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => 'Vuoi analizzare "${title}"?',
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => 'Vuoi aggiornare i metadati di "${title}"?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => 'Vuoi svuotare il cestino di "${title}"?',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.manageLibraries' => 'Gestisci librerie',
 			'libraries.sort' => 'Ordina',
 			'libraries.sortBy' => 'Ordina per',
@@ -4013,8 +4051,6 @@ extension on TranslationsIt {
 			'libraries.showLibrary' => 'Mostra libreria',
 			'libraries.hideLibrary' => 'Nascondi libreria',
 			'libraries.libraryOptions' => 'Opzioni libreria',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.content' => 'contenuto della libreria',
 			'libraries.selectLibrary' => 'Seleziona libreria',
 			'libraries.filtersWithCount' => ({required Object count}) => 'Filtri (${count})',
@@ -4063,10 +4099,13 @@ extension on TranslationsIt {
 			'libraries.sortLabels.dateShared' => 'Data di condivisione',
 			'libraries.sortLabels.latestEpisodeAirDate' => 'Data di trasmissione dell\'ultimo episodio',
 			'libraries.sortLabels.lastEpisodeDateAdded' => 'Data di aggiunta dell\'ultimo episodio',
+			'libraries.sortLabels.dateDownloaded' => 'Data di download',
+			'libraries.sortLabels.size' => 'Dimensione',
+			'libraries.sortLabels.library' => 'Libreria',
 			'about.title' => 'Informazioni',
 			'about.openSourceLicenses' => 'Licenze open source',
 			'about.versionLabel' => ({required Object version}) => 'Versione ${version}',
-			'about.appDescription' => 'Un elegante client Plex e Jellyfin per Flutter',
+			'about.appDescription' => 'Un elegante client Plex, Jellyfin ed Emby per Flutter',
 			'about.viewLicensesDescription' => 'Visualizza le licenze delle librerie di terze parti',
 			'serverSelection.noServersFoundForAccount' => ({required Object username, required Object email}) => 'Nessun server trovato per ${username} (${email})',
 			'serverSelection.failedToLoadServers' => ({required Object error}) => 'Impossibile caricare i server: ${error}',
@@ -4333,7 +4372,9 @@ extension on TranslationsIt {
 			'liveTv.editRuleAction' => 'Modifica',
 			'liveTv.recordingRuleUpdated' => 'Regola di registrazione aggiornata',
 			'liveTv.guideReloadRequested' => 'Aggiornamento della guida richiesto',
+			'liveTv.guideReloadFailed' => 'Impossibile aggiornare la guida',
 			'liveTv.rulesProcessRequested' => 'Rielaborazione delle regole richiesta',
+			'liveTv.rulesProcessFailed' => 'Impossibile rielaborare le regole di registrazione',
 			'liveTv.recordShow' => 'Registra programma',
 			'liveTv.recordSettings.startEarly' => 'Inizia in anticipo (secondi)',
 			'liveTv.recordSettings.endLate' => 'Termina in ritardo (secondi)',
@@ -4348,6 +4389,8 @@ extension on TranslationsIt {
 			'liveTv.invalidPlaybackData' => ({required Object product}) => '${product} ha restituito dati di riproduzione della TV in diretta non validi',
 			'liveTv.failedToStartChannel' => 'Impossibile avviare il canale in diretta',
 			'liveTv.failedToBuildStreamUrl' => 'Impossibile creare l\'URL dello stream',
+			'liveTv.playbackStartFailed' => ({required Object reason}) => 'Impossibile avviare il canale: ${reason}',
+			'liveTv.channelSwitchFailed' => ({required Object reason}) => 'Impossibile cambiare canale: ${reason}',
 			'collections.title' => 'Raccolte',
 			'collections.collection' => 'Raccolta',
 			'collections.empty' => 'La raccolta è vuota',
@@ -4512,6 +4555,8 @@ extension on TranslationsIt {
 			'downloads.noDownloadsDescription' => 'I contenuti scaricati appariranno qui per la visualizzazione offline',
 			'downloads.downloadNow' => 'Scarica',
 			'downloads.deleteDownload' => 'Elimina il download',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.retryDownload' => 'Riprova il download',
 			'downloads.downloadQueued' => 'Download in coda',
 			'downloads.downloadResumed' => 'Download ripreso',
@@ -4527,8 +4572,6 @@ extension on TranslationsIt {
 			'downloads.resumeDownload' => 'Riprendi il download',
 			'downloads.cancelledDownload' => 'Download annullato',
 			'downloads.syncingFile' => ({required Object file, required Object status}) => '${file} (sincronizzazione ${status})',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadedFileClickToComplete' => ({required Object file}) => '${file} scaricato — fai clic per completare',
 			'downloads.partialDownloadClickToComplete' => 'Scaricato parzialmente — fai clic per completare',
 			'downloads.deleting' => 'Eliminazione...',
@@ -4605,6 +4648,9 @@ extension on TranslationsIt {
 			'downloads.backgroundWarning.statusUnknown' => 'Non ancora verificato',
 			'downloads.backgroundWarning.settingsUnavailable' => 'Impossibile aprire le impostazioni di sistema su questo dispositivo',
 			'downloads.backgroundWarning.linkUnavailable' => 'Impossibile aprire dontkillmyapp.com su questo dispositivo',
+			'downloads.options' => 'Opzioni download',
+			'downloads.groupings.library' => 'Libreria',
+			'downloads.unknownLibrary' => 'Libreria sconosciuta',
 			'downloads.unknownShow' => 'Serie sconosciuta',
 			'downloads.unknownSeason' => 'Stagione sconosciuta',
 			'downloads.unknownAlbum' => 'Album sconosciuto',

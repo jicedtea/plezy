@@ -18,16 +18,7 @@ import 'package:plezy/widgets/app_icon.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:rate_limiter/rate_limiter.dart';
 import 'package:flutter/services.dart'
-    show
-        SystemChrome,
-        DeviceOrientation,
-        LogicalKeyboardKey,
-        PhysicalKeyboardKey,
-        KeyEvent,
-        KeyDownEvent,
-        KeyUpEvent,
-        KeyRepeatEvent,
-        HardwareKeyboard;
+    show LogicalKeyboardKey, PhysicalKeyboardKey, KeyEvent, KeyDownEvent, KeyUpEvent, KeyRepeatEvent, HardwareKeyboard;
 import '../../services/fullscreen_state_manager.dart';
 import '../../services/macos_window_service.dart';
 import '../../services/pip_service.dart';
@@ -62,6 +53,7 @@ import '../../services/settings_service.dart';
 import '../../services/video_volume_controller.dart';
 import '../../utils/codec_utils.dart';
 import '../../utils/formatters.dart';
+import '../../utils/orientation_helper.dart';
 import '../../utils/platform_detector.dart';
 import '../../utils/player_utils.dart';
 import '../../theme/mono_tokens.dart';
@@ -79,6 +71,7 @@ import '../../focus/input_mode_tracker.dart';
 import 'models/track_controls_state.dart';
 import 'widgets/double_tap_feedback.dart';
 import 'helpers/mobile_edge_adjustment_tracker.dart';
+import 'helpers/render_geometry.dart';
 import 'helpers/two_finger_tap_tracker.dart';
 import 'widgets/linux_keep_alive.dart';
 import 'widgets/mobile_edge_adjustment_indicator.dart';
@@ -96,6 +89,7 @@ import '../../providers/playback_state_provider.dart';
 import '../../providers/shader_provider.dart';
 import '../../services/shader_service.dart';
 import '../../watch_together/providers/watch_together_provider.dart';
+import '../../utils/error_message_utils.dart';
 
 part 'parts/key_events.dart';
 part 'parts/markers.dart';
@@ -1309,7 +1303,8 @@ class _PlexVideoControlsState extends State<PlexVideoControls>
                                 child: Builder(
                                   builder: (context) {
                                     return GestureDetector(
-                                      onTapUp: (details) => _handleControlsOverlayTap(details, _sizeOf(context)),
+                                      onTapUp: (details) =>
+                                          _handleControlsOverlayTap(details, renderBoxSizeOf(context)),
                                       onLongPressStart: (_) => _handleLongPressStart(),
                                       onLongPressEnd: (_) => _handleLongPressEnd(),
                                       onLongPressCancel: _handleLongPressCancel,

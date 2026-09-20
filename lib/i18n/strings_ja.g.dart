@@ -872,6 +872,7 @@ class _Translations$videoControls$ja extends Translations$videoControls$en {
 	@override String get pipFailed => 'ピクチャーインピクチャーの開始に失敗しました';
 	@override String get screenshotSaved => 'スクリーンショットを保存しました';
 	@override String zoomPercent({required Object percent}) => 'ズーム ${percent}%';
+	@override String volumePercent({required Object percent}) => '音量 ${percent}%';
 	@override late final _Translations$videoControls$pipErrors$ja pipErrors = _Translations$videoControls$pipErrors$ja._(_root);
 	@override String get chapters => 'チャプター';
 	@override String get noChaptersAvailable => 'チャプターがありません';
@@ -1096,7 +1097,7 @@ class _Translations$profiles$ja extends Translations$profiles$en {
 	@override String borrowAddTo({required Object displayName}) => '${displayName}に追加';
 	@override String get borrowExplain => '別のプロフィールの接続を利用します。PINで保護されたプロフィールにはPINが必要です。';
 	@override String get borrowEmpty => '利用できる接続はまだありません。';
-	@override String get borrowEmptySubtitle => 'まず、別のプロフィールをPlexまたはJellyfinに接続してください。';
+	@override String get borrowEmptySubtitle => 'まず、別のプロフィールをPlex、JellyfinまたはEmbyに接続してください。';
 	@override String get borrowLoadFailed => '利用可能な接続を読み込めませんでした。もう一度お試しください。';
 	@override String borrowFromProfile({required Object displayName}) => '${displayName}から利用';
 	@override String get borrowConnectionBorrowed => '接続を追加しました。';
@@ -1124,8 +1125,8 @@ class _Translations$connections$ja extends Translations$connections$en {
 	// Translations
 	@override String get sectionTitle => '接続';
 	@override String get addConnection => '接続を追加';
-	@override String get addConnectionSubtitleNoProfile => 'Plexでサインインするか、Jellyfinサーバーに接続';
-	@override String addConnectionSubtitleScoped({required Object displayName}) => '${displayName}に追加：Plex、Jellyfin、または別のプロフィールの接続';
+	@override String get addConnectionSubtitleNoProfile => 'Plexでサインインするか、JellyfinまたはEmbyサーバーに接続';
+	@override String addConnectionSubtitleScoped({required Object displayName}) => '${displayName}に追加：Plex、Jellyfin、Emby、または別のプロフィールの接続';
 	@override String sessionExpiredOne({required Object name}) => '${name} のセッションの有効期限が切れました';
 	@override String sessionExpiredMany({required Object count}) => '${count} 台のサーバーのセッションの有効期限が切れました';
 	@override String get signInAgain => '再度サインイン';
@@ -1231,6 +1232,13 @@ class _Translations$errors$ja extends Translations$errors$en {
 	@override String failedToSwitchProfile({required Object displayName}) => '${displayName}への切替に失敗しました';
 	@override String failedToDeleteProfile({required Object displayName}) => '${displayName}の削除に失敗しました';
 	@override String get failedToRate => '評価を更新できませんでした';
+	@override String get reasonTimedOut => '接続がタイムアウトしました';
+	@override String get reasonUnreachable => 'メディアサーバーに接続できませんでした';
+	@override String get reasonRefused => 'メディアサーバーがリクエストを拒否しました';
+	@override String get reasonNotFound => 'この項目はメディアサーバー上に存在しません';
+	@override String get reasonServerError => 'メディアサーバーでエラーが発生しました';
+	@override String get reasonCancelled => 'リクエストがキャンセルされました';
+	@override String get reasonUnexpected => '予期しないエラーが発生しました';
 }
 
 // Path: libraries
@@ -1297,7 +1305,7 @@ class _Translations$about$ja extends Translations$about$en {
 	@override String get title => 'アプリについて';
 	@override String get openSourceLicenses => 'オープンソースライセンス';
 	@override String versionLabel({required Object version}) => 'バージョン ${version}';
-	@override String get appDescription => 'Flutter製の美しいPlex・Jellyfinクライアント';
+	@override String get appDescription => 'Flutter製の美しいPlex・Jellyfin・Embyクライアント';
 	@override String get viewLicensesDescription => 'サードパーティライブラリのライセンスを表示';
 }
 
@@ -1533,7 +1541,9 @@ class _Translations$liveTv$ja extends Translations$liveTv$en {
 	@override String get editRuleAction => '編集';
 	@override String get recordingRuleUpdated => '録画ルールを更新しました';
 	@override String get guideReloadRequested => '番組表の更新をリクエストしました';
+	@override String get guideReloadFailed => '番組表を再読み込みできませんでした';
 	@override String get rulesProcessRequested => '録画ルールの再評価をリクエストしました';
+	@override String get rulesProcessFailed => '録画ルールを再適用できませんでした';
 	@override String get recordShow => '番組を録画';
 	@override late final _Translations$liveTv$recordSettings$ja recordSettings = _Translations$liveTv$recordSettings$ja._(_root);
 	@override String startingInMinutes({required Object minutes}) => '${minutes}分後に開始';
@@ -1541,6 +1551,8 @@ class _Translations$liveTv$ja extends Translations$liveTv$en {
 	@override String invalidPlaybackData({required Object product}) => '${product}から無効なライブTV再生データが返されました';
 	@override String get failedToStartChannel => 'ライブチャンネルを開始できませんでした';
 	@override String get failedToBuildStreamUrl => 'ストリームURLを生成できませんでした';
+	@override String playbackStartFailed({required Object reason}) => 'チャンネルを再生できませんでした: ${reason}';
+	@override String channelSwitchFailed({required Object reason}) => 'チャンネルを切り替えられませんでした: ${reason}';
 }
 
 // Path: collections
@@ -1812,6 +1824,9 @@ class _Translations$downloads$ja extends Translations$downloads$en {
 	@override String get syncRuleUnknownServer => '不明なサーバー';
 	@override String get syncRuleListCreated => '同期ルールを作成しました';
 	@override late final _Translations$downloads$backgroundWarning$ja backgroundWarning = _Translations$downloads$backgroundWarning$ja._(_root);
+	@override String get options => 'ダウンロードのオプション';
+	@override late final _Translations$downloads$groupings$ja groupings = _Translations$downloads$groupings$ja._(_root);
+	@override String get unknownLibrary => '不明なライブラリ';
 	@override String get unknownShow => '不明な番組';
 	@override String get unknownSeason => '不明なシーズン';
 	@override String get unknownAlbum => '不明なアルバム';
@@ -2504,6 +2519,9 @@ class _Translations$libraries$sortLabels$ja extends Translations$libraries$sortL
 	@override String get dateShared => '共有日';
 	@override String get latestEpisodeAirDate => '最新エピソード放送日';
 	@override String get lastEpisodeDateAdded => '最新エピソード追加日';
+	@override String get dateDownloaded => 'ダウンロード日';
+	@override String get size => 'サイズ';
+	@override String get library => 'ライブラリ';
 }
 
 // Path: explore.rows
@@ -2795,6 +2813,16 @@ class _Translations$downloads$backgroundWarning$ja extends Translations$download
 	@override String get statusUnknown => '未確認';
 	@override String get settingsUnavailable => 'この端末ではシステム設定を開けませんでした';
 	@override String get linkUnavailable => 'この端末ではdontkillmyapp.comを開けませんでした';
+}
+
+// Path: downloads.groupings
+class _Translations$downloads$groupings$ja extends Translations$downloads$groupings$en {
+	_Translations$downloads$groupings$ja._(TranslationsJa root) : this._root = root, super.internal(root);
+
+	final TranslationsJa _root; // ignore: unused_field
+
+	// Translations
+	@override String get library => 'ライブラリ';
 }
 
 // Path: companionRemote.session
@@ -3664,6 +3692,7 @@ extension on TranslationsJa {
 			'videoControls.pipFailed' => 'ピクチャーインピクチャーの開始に失敗しました',
 			'videoControls.screenshotSaved' => 'スクリーンショットを保存しました',
 			'videoControls.zoomPercent' => ({required Object percent}) => 'ズーム ${percent}%',
+			'videoControls.volumePercent' => ({required Object percent}) => '音量 ${percent}%',
 			'videoControls.pipErrors.androidVersion' => 'Android 8.0以降が必要です',
 			'videoControls.pipErrors.iosVersion' => 'iOS 15.0以降が必要です',
 			'videoControls.pipErrors.permissionDisabled' => 'ピクチャーインピクチャーが無効です。システム設定で有効にしてください。',
@@ -3848,7 +3877,7 @@ extension on TranslationsJa {
 			'profiles.borrowAddTo' => ({required Object displayName}) => '${displayName}に追加',
 			'profiles.borrowExplain' => '別のプロフィールの接続を利用します。PINで保護されたプロフィールにはPINが必要です。',
 			'profiles.borrowEmpty' => '利用できる接続はまだありません。',
-			'profiles.borrowEmptySubtitle' => 'まず、別のプロフィールをPlexまたはJellyfinに接続してください。',
+			'profiles.borrowEmptySubtitle' => 'まず、別のプロフィールをPlex、JellyfinまたはEmbyに接続してください。',
 			'profiles.borrowLoadFailed' => '利用可能な接続を読み込めませんでした。もう一度お試しください。',
 			'profiles.borrowFromProfile' => ({required Object displayName}) => '${displayName}から利用',
 			'profiles.borrowConnectionBorrowed' => '接続を追加しました。',
@@ -3867,8 +3896,8 @@ extension on TranslationsJa {
 			'profiles.tokenIdentityMismatch' => 'Plexプロフィールのトークンから予期しないサーバーが特定されました',
 			'connections.sectionTitle' => '接続',
 			'connections.addConnection' => '接続を追加',
-			'connections.addConnectionSubtitleNoProfile' => 'Plexでサインインするか、Jellyfinサーバーに接続',
-			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => '${displayName}に追加：Plex、Jellyfin、または別のプロフィールの接続',
+			'connections.addConnectionSubtitleNoProfile' => 'Plexでサインインするか、JellyfinまたはEmbyサーバーに接続',
+			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => '${displayName}に追加：Plex、Jellyfin、Emby、または別のプロフィールの接続',
 			'connections.sessionExpiredOne' => ({required Object name}) => '${name} のセッションの有効期限が切れました',
 			'connections.sessionExpiredMany' => ({required Object count}) => '${count} 台のサーバーのセッションの有効期限が切れました',
 			'connections.signInAgain' => '再度サインイン',
@@ -3968,6 +3997,13 @@ extension on TranslationsJa {
 			'errors.failedToSwitchProfile' => ({required Object displayName}) => '${displayName}への切替に失敗しました',
 			'errors.failedToDeleteProfile' => ({required Object displayName}) => '${displayName}の削除に失敗しました',
 			'errors.failedToRate' => '評価を更新できませんでした',
+			'errors.reasonTimedOut' => '接続がタイムアウトしました',
+			'errors.reasonUnreachable' => 'メディアサーバーに接続できませんでした',
+			'errors.reasonRefused' => 'メディアサーバーがリクエストを拒否しました',
+			'errors.reasonNotFound' => 'この項目はメディアサーバー上に存在しません',
+			'errors.reasonServerError' => 'メディアサーバーでエラーが発生しました',
+			'errors.reasonCancelled' => 'リクエストがキャンセルされました',
+			'errors.reasonUnexpected' => '予期しないエラーが発生しました',
 			'libraries.title' => 'ライブラリ',
 			'libraries.fallbackTitle' => 'ライブラリ',
 			'libraries.scanLibraryFiles' => 'ライブラリファイルをスキャン',
@@ -3994,6 +4030,8 @@ extension on TranslationsJa {
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => '"${title}"を解析してもよろしいですか？',
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => '"${title}"のメタデータを更新してもよろしいですか？',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => '"${title}"のゴミ箱を空にしてもよろしいですか？',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.manageLibraries' => 'ライブラリを管理',
 			'libraries.sort' => '並べ替え',
 			'libraries.sortBy' => '並べ替え順',
@@ -4002,8 +4040,6 @@ extension on TranslationsJa {
 			'libraries.showLibrary' => 'ライブラリを表示',
 			'libraries.hideLibrary' => 'ライブラリを非表示',
 			'libraries.libraryOptions' => 'ライブラリオプション',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.content' => 'ライブラリコンテンツ',
 			'libraries.selectLibrary' => 'ライブラリを選択',
 			'libraries.filtersWithCount' => ({required Object count}) => 'フィルター (${count})',
@@ -4052,10 +4088,13 @@ extension on TranslationsJa {
 			'libraries.sortLabels.dateShared' => '共有日',
 			'libraries.sortLabels.latestEpisodeAirDate' => '最新エピソード放送日',
 			'libraries.sortLabels.lastEpisodeDateAdded' => '最新エピソード追加日',
+			'libraries.sortLabels.dateDownloaded' => 'ダウンロード日',
+			'libraries.sortLabels.size' => 'サイズ',
+			'libraries.sortLabels.library' => 'ライブラリ',
 			'about.title' => 'アプリについて',
 			'about.openSourceLicenses' => 'オープンソースライセンス',
 			'about.versionLabel' => ({required Object version}) => 'バージョン ${version}',
-			'about.appDescription' => 'Flutter製の美しいPlex・Jellyfinクライアント',
+			'about.appDescription' => 'Flutter製の美しいPlex・Jellyfin・Embyクライアント',
 			'about.viewLicensesDescription' => 'サードパーティライブラリのライセンスを表示',
 			'serverSelection.noServersFoundForAccount' => ({required Object username, required Object email}) => '${username} (${email})のサーバーが見つかりません',
 			'serverSelection.failedToLoadServers' => ({required Object error}) => 'サーバーの読み込みに失敗しました: ${error}',
@@ -4322,7 +4361,9 @@ extension on TranslationsJa {
 			'liveTv.editRuleAction' => '編集',
 			'liveTv.recordingRuleUpdated' => '録画ルールを更新しました',
 			'liveTv.guideReloadRequested' => '番組表の更新をリクエストしました',
+			'liveTv.guideReloadFailed' => '番組表を再読み込みできませんでした',
 			'liveTv.rulesProcessRequested' => '録画ルールの再評価をリクエストしました',
+			'liveTv.rulesProcessFailed' => '録画ルールを再適用できませんでした',
 			'liveTv.recordShow' => '番組を録画',
 			'liveTv.recordSettings.startEarly' => '早めに開始（秒）',
 			'liveTv.recordSettings.endLate' => '遅めに終了（秒）',
@@ -4337,6 +4378,8 @@ extension on TranslationsJa {
 			'liveTv.invalidPlaybackData' => ({required Object product}) => '${product}から無効なライブTV再生データが返されました',
 			'liveTv.failedToStartChannel' => 'ライブチャンネルを開始できませんでした',
 			'liveTv.failedToBuildStreamUrl' => 'ストリームURLを生成できませんでした',
+			'liveTv.playbackStartFailed' => ({required Object reason}) => 'チャンネルを再生できませんでした: ${reason}',
+			'liveTv.channelSwitchFailed' => ({required Object reason}) => 'チャンネルを切り替えられませんでした: ${reason}',
 			'collections.title' => 'コレクション',
 			'collections.collection' => 'コレクション',
 			'collections.empty' => 'コレクションは空です',
@@ -4501,6 +4544,8 @@ extension on TranslationsJa {
 			'downloads.noDownloadsDescription' => 'ダウンロードしたコンテンツはここに表示され、オフラインで視聴できます',
 			'downloads.downloadNow' => 'ダウンロード',
 			'downloads.deleteDownload' => 'ダウンロードを削除',
+			_ => null,
+		} ?? switch (path) {
 			'downloads.retryDownload' => 'ダウンロードを再試行',
 			'downloads.downloadQueued' => 'ダウンロードをキューに追加しました',
 			'downloads.downloadResumed' => 'ダウンロードを再開しました',
@@ -4516,8 +4561,6 @@ extension on TranslationsJa {
 			'downloads.resumeDownload' => 'ダウンロードを再開',
 			'downloads.cancelledDownload' => 'キャンセル済みのダウンロード',
 			'downloads.syncingFile' => ({required Object file, required Object status}) => '${file}（${status}を同期中）',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadedFileClickToComplete' => ({required Object file}) => '${file}をダウンロード済み — クリックして完了',
 			'downloads.partialDownloadClickToComplete' => '一部ダウンロード済み — クリックして完了',
 			'downloads.deleting' => '削除中…',
@@ -4594,6 +4637,9 @@ extension on TranslationsJa {
 			'downloads.backgroundWarning.statusUnknown' => '未確認',
 			'downloads.backgroundWarning.settingsUnavailable' => 'この端末ではシステム設定を開けませんでした',
 			'downloads.backgroundWarning.linkUnavailable' => 'この端末ではdontkillmyapp.comを開けませんでした',
+			'downloads.options' => 'ダウンロードのオプション',
+			'downloads.groupings.library' => 'ライブラリ',
+			'downloads.unknownLibrary' => '不明なライブラリ',
 			'downloads.unknownShow' => '不明な番組',
 			'downloads.unknownSeason' => '不明なシーズン',
 			'downloads.unknownAlbum' => '不明なアルバム',

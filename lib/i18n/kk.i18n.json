@@ -729,7 +729,7 @@
     "pipFailed": "PiP режимін іске қосу қатесі",
     "screenshotSaved": "Экран суреті сақталды",
     "zoomPercent": "Масштаб %${percent}",
-    "volumePercent": "",
+    "volumePercent": "Дыбыс ${percent}%",
     "pipErrors": {
       "androidVersion": "Android 8.0 немесе жаңалауы қажет",
       "iosVersion": "iOS 15.0 немесе жаңалауы қажет",
@@ -930,7 +930,7 @@
     "borrowAddTo": "${displayName} профиліне қосу",
     "borrowExplain": "Басқа профильдің қосылымын пайдаланыңыз.",
     "borrowEmpty": "Әлі де пайдаланатын ештеңе жоқ.",
-    "borrowEmptySubtitle": "Алдымен басқа профильге Plex немесе Jellyfin қосыңыз.",
+    "borrowEmptySubtitle": "Алдымен басқа профильге Plex, Jellyfin немесе Emby қосыңыз.",
     "borrowLoadFailed": "Қолжетімді қосылымдарды жүктеу мүмкін болмады.",
     "borrowFromProfile": "${displayName} профилінен",
     "borrowConnectionBorrowed": "Қосылым пайдаланылды.",
@@ -951,8 +951,8 @@
   "connections": {
     "sectionTitle": "Қосылымдар",
     "addConnection": "Қосылым қосу",
-    "addConnectionSubtitleNoProfile": "Plex арқылы кіріңіз немесе Jellyfin серверіне қосылыңыз",
-    "addConnectionSubtitleScoped": "${displayName} профиліне қосу",
+    "addConnectionSubtitleNoProfile": "Plex арқылы кіріңіз немесе Jellyfin не Emby серверіне қосылыңыз",
+    "addConnectionSubtitleScoped": "${displayName} профиліне қосу: Plex, Jellyfin, Emby немесе басқа қосылым",
     "sessionExpiredOne": "${name} үшін сеанс мерзімі өтті",
     "sessionExpiredMany": "${count} сервер үшін сеанс мерзімі өтті",
     "signInAgain": "Қайтадан кіру",
@@ -1072,7 +1072,14 @@
     "failedToVerifyToken": "Токенді тексеру мүмкін болмады: ${error}",
     "failedToSwitchProfile": "${displayName} профиліне ауысу мүмкін болмады",
     "failedToDeleteProfile": "${displayName} профилін өшіру мүмкін болмады",
-    "failedToRate": "Рейтингті жаңарту мүмкін болмады"
+    "failedToRate": "Рейтингті жаңарту мүмкін болмады",
+    "reasonTimedOut": "қосылу уақыты өтті",
+    "reasonUnreachable": "серверге қосылу мүмкін болмады",
+    "reasonRefused": "сервер сұрауды қабылдамады",
+    "reasonNotFound": "бұл нысан серверде қазір жоқ",
+    "reasonServerError": "сервер қате хабарлады",
+    "reasonCancelled": "сұрау бас тартылды",
+    "reasonUnexpected": "күтпеген қате орын алды"
   },
   "libraries": {
     "title": "Кітапханалар",
@@ -1141,7 +1148,8 @@
       "tag": "Тег",
       "unwatched": "Көрілмеген",
       "unplayed": "Ойнатылмаған",
-      "favorites": "Таңдаулылар"
+      "favorites": "Таңдаулылар",
+      "filePath": ""
     },
     "sortLabels": {
       "title": "Атауы",
@@ -1164,16 +1172,44 @@
       "dateShared": "Бөлісілген күні",
       "latestEpisodeAirDate": "Соңғы бөлімнің шыққан күні",
       "lastEpisodeDateAdded": "Соңғы қосылған бөлім күні",
-      "dateDownloaded": "",
-      "size": "",
-      "library": ""
+      "dateDownloaded": "Жүктелген күні",
+      "size": "Көлемі",
+      "library": "Кітапхана"
+    },
+    "advancedFilters": {
+      "include": "",
+      "exclude": "",
+      "any": "",
+      "yes": "",
+      "no": "",
+      "not": "",
+      "valueCount": "",
+      "valueCountExcluded": "",
+      "searchValues": "",
+      "noValues": "",
+      "matchContains": "",
+      "matchNotContains": "",
+      "matchIs": "",
+      "matchIsNot": "",
+      "matchBeginsWith": "",
+      "matchEndsWith": "",
+      "textHint": "",
+      "from": "",
+      "to": "",
+      "range": "",
+      "atLeast": "",
+      "atMost": "",
+      "dateLastDays": "",
+      "dateLastYear": "",
+      "dateOlderThanDays": "",
+      "dateOlderThanYear": ""
     }
   },
   "about": {
     "title": "Қолданба туралы",
     "openSourceLicenses": "Ашық бастапқы код лицензиялары",
     "versionLabel": "Нұсқа ${version}",
-    "appDescription": "Flutter негізіндегі ыңғайлы Plex және Jellyfin клиенті",
+    "appDescription": "Flutter негізіндегі ыңғайлы Plex, Jellyfin және Emby клиенті",
     "viewLicensesDescription": "Үшінші тарап кітапханаларының лицензияларын көру"
   },
   "serverSelection": {
@@ -1491,7 +1527,9 @@
     "editRuleAction": "Өңдеу",
     "recordingRuleUpdated": "Жазу ережесі жаңартылды",
     "guideReloadRequested": "Бағдарламаны жаңарту сұралды",
+    "guideReloadFailed": "Телебағдарламаны жаңарту мүмкін болмады",
     "rulesProcessRequested": "Ережелерді қайта бағалау сұралды",
+    "rulesProcessFailed": "Жазу ережелерін қайта тексеру мүмкін болмады",
     "recordShow": "Шоуды жазу",
     "recordSettings": {
       "startEarly": "Ертерек бастау (секунд)",
@@ -1507,7 +1545,9 @@
     "dayAtTime": "${day}, ${time}",
     "invalidPlaybackData": "${product} жарамсыз тікелей TV ойнату деректерін қайтарды",
     "failedToStartChannel": "Тікелей эфир арнасын іске қосу мүмкін болмады",
-    "failedToBuildStreamUrl": "Ағын URL-ін құру мүмкін болмады"
+    "failedToBuildStreamUrl": "Ағын URL-ін құру мүмкін болмады",
+    "playbackStartFailed": "Арнаны іске қосу мүмкін болмады: ${reason}",
+    "channelSwitchFailed": "Арнаны ауыстыру мүмкін болмады: ${reason}"
   },
   "collections": {
     "title": "Топтамалар",
@@ -1782,11 +1822,11 @@
       "settingsUnavailable": "Бұл құрылғыда жүйе баптаулары ашылмады",
       "linkUnavailable": "Бұл құрылғыда dontkillmyapp.com ашылмады"
     },
-    "options": "",
+    "options": "Жүктеулер параметрлері",
     "groupings": {
-      "library": ""
+      "library": "Кітапхана"
     },
-    "unknownLibrary": "",
+    "unknownLibrary": "Белгісіз кітапхана",
     "unknownShow": "Белгісіз телешоу",
     "unknownSeason": "Белгісіз маусым",
     "unknownAlbum": "Белгісіз альбом",
