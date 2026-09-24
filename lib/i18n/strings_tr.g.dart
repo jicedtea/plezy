@@ -311,6 +311,9 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'Varsayılan Kaliteyle Aynı';
 	@override String get directPlayCoveredQuality => 'Küçük Videoları Orijinal Kalitede Oynat';
 	@override String get directPlayCoveredQualityDescription => 'Kalite sınırı içindeki videoları kod dönüştürme yerine doğrudan oynat';
+	@override String get videoCodecs => 'Video codec\'leri';
+	@override String get videoCodecsDescription => 'İşaretlenmemiş codec\'lerin kodunu sunucu dönüştürür';
+	@override String get videoCodecsAlwaysAccepted => 'Her zaman kabul edilir';
 	@override String get musicQualityTitle => 'Müzik Kalitesi';
 	@override String get subtitleStyling => 'Altyazı Biçimlendirmesi';
 	@override String get subtitleStylingDescription => 'Altyazı görünümünü özelleştirin';
@@ -471,6 +474,14 @@ class _Translations$settings$tr extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Yerel DV7\'yi zorla ve DV dönüştürme yeniden denemesini engelle';
 	@override String get dvConversionDv81Description => 'Dolby Vision profile 8.1\'e satır içi RPU dönüştürmeyi zorla';
 	@override String get dvConversionHevcStripDescription => 'Dolby Vision RPU/EL katmanlarını soy ve düz HEVC olarak sun';
+	@override String get hdrSdrConversion => 'HDR\'den SDR\'ye Dönüştürme';
+	@override String get hdrSdrConversionDescription => 'Ekran HDR gösteremediğinde HDR videoyu neyin dönüştüreceğini seçin.';
+	@override String get hdrSdrConversionAuto => 'Otomatik';
+	@override String get hdrSdrConversionAutoDescription => 'Android 9 ve sonrasında cihaz, eski sürümlerde oynatıcı';
+	@override String get hdrSdrConversionDevice => 'Cihaz';
+	@override String get hdrSdrConversionDeviceDescription => 'Dönüştürmeyi cihazın video donanımı yapar. En hızlısı, ancak renkler cihaza bağlıdır';
+	@override String get hdrSdrConversionPlayer => 'Oynatıcı';
+	@override String get hdrSdrConversionPlayerDescription => 'Dönüştürmeyi oynatıcı yapar. Tutarlı renkler, ancak 4K düşük donanımlı TV kutularında takılabilir';
 	@override String get deinterlace => 'Deinterlacing';
 	@override String get deinterlaceDescription => 'Geçmeli videolardaki taraklanma bozukluklarını giderir (yalnızca mpv oynatıcı)';
 	@override String get requireProfileSelectionOnOpen => 'Uygulama açılışında profil sor';
@@ -3205,6 +3216,9 @@ extension on TranslationsTr {
 			'settings.cellularQualitySameAsDefault' => 'Varsayılan Kaliteyle Aynı',
 			'settings.directPlayCoveredQuality' => 'Küçük Videoları Orijinal Kalitede Oynat',
 			'settings.directPlayCoveredQualityDescription' => 'Kalite sınırı içindeki videoları kod dönüştürme yerine doğrudan oynat',
+			'settings.videoCodecs' => 'Video codec\'leri',
+			'settings.videoCodecsDescription' => 'İşaretlenmemiş codec\'lerin kodunu sunucu dönüştürür',
+			'settings.videoCodecsAlwaysAccepted' => 'Her zaman kabul edilir',
 			'settings.musicQualityTitle' => 'Müzik Kalitesi',
 			'settings.subtitleStyling' => 'Altyazı Biçimlendirmesi',
 			'settings.subtitleStylingDescription' => 'Altyazı görünümünü özelleştirin',
@@ -3365,6 +3379,14 @@ extension on TranslationsTr {
 			'settings.dvConversionNativeDescription' => 'Yerel DV7\'yi zorla ve DV dönüştürme yeniden denemesini engelle',
 			'settings.dvConversionDv81Description' => 'Dolby Vision profile 8.1\'e satır içi RPU dönüştürmeyi zorla',
 			'settings.dvConversionHevcStripDescription' => 'Dolby Vision RPU/EL katmanlarını soy ve düz HEVC olarak sun',
+			'settings.hdrSdrConversion' => 'HDR\'den SDR\'ye Dönüştürme',
+			'settings.hdrSdrConversionDescription' => 'Ekran HDR gösteremediğinde HDR videoyu neyin dönüştüreceğini seçin.',
+			'settings.hdrSdrConversionAuto' => 'Otomatik',
+			'settings.hdrSdrConversionAutoDescription' => 'Android 9 ve sonrasında cihaz, eski sürümlerde oynatıcı',
+			'settings.hdrSdrConversionDevice' => 'Cihaz',
+			'settings.hdrSdrConversionDeviceDescription' => 'Dönüştürmeyi cihazın video donanımı yapar. En hızlısı, ancak renkler cihaza bağlıdır',
+			'settings.hdrSdrConversionPlayer' => 'Oynatıcı',
+			'settings.hdrSdrConversionPlayerDescription' => 'Dönüştürmeyi oynatıcı yapar. Tutarlı renkler, ancak 4K düşük donanımlı TV kutularında takılabilir',
 			'settings.deinterlace' => 'Deinterlacing',
 			'settings.deinterlaceDescription' => 'Geçmeli videolardaki taraklanma bozukluklarını giderir (yalnızca mpv oynatıcı)',
 			'settings.requireProfileSelectionOnOpen' => 'Uygulama açılışında profil sor',
@@ -3518,6 +3540,8 @@ extension on TranslationsTr {
 			'fileInfo.streamId' => 'Akış Kimliği',
 			'fileInfo.language' => 'Dil',
 			'fileInfo.languageCode' => 'Dil Kodu',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Parça Başlığı',
 			'fileInfo.channels' => 'Kanallar',
 			'fileInfo.sampleRate' => 'Örnekleme Hızı',
@@ -3529,8 +3553,6 @@ extension on TranslationsTr {
 			'fileInfo.externalDelivery' => 'Ayrı Olarak Sunulabilir',
 			'fileInfo.sidecarPath' => 'Yan Dosya Yolu',
 			'fileInfo.sourceStream' => 'Kopyalandığı Yer',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Geçici',
 			'fileInfo.timeBase' => 'Zaman Tabanı',
 			'fileInfo.overallBitrate' => 'Genel Bit Hızı',
@@ -4032,6 +4054,8 @@ extension on TranslationsTr {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Çöp boşaltılamadı: ${error}',
 			'libraries.analyzing' => ({required Object title}) => '"${title}" analiz ediliyor...',
 			'libraries.analysisStarted' => ({required Object title}) => '"${title}" için analiz başladı',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Kitaplık analiz edilemedi: ${error}',
 			'libraries.noLibrariesFound' => 'Kitaplık bulunamadı',
 			'libraries.allLibrariesHidden' => 'Tüm kitaplıklar gizli',
@@ -4043,8 +4067,6 @@ extension on TranslationsTr {
 			'libraries.clearAll' => 'Tümünü Temizle',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => '"${title}" kitaplığını taramak istediğinizden emin misiniz?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => '"${title}" kitaplığını analiz etmek istediğinizden emin misiniz?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => '"${title}" kitaplığı için meta verileri yenilemek istediğinizden emin misiniz?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => '"${title}" için çöpü boşaltmak istediğinizden emin misiniz?',
 			'libraries.manageLibraries' => 'Kitaplıkları Yönet',
@@ -4546,6 +4568,8 @@ extension on TranslationsTr {
 			'watchTogether.defaultDisplayName' => 'Kullanıcı',
 			'watchTogether.errors.timedOut' => 'Aktarıcı sunucusu zamanında yanıt vermedi',
 			'watchTogether.errors.connectionLost' => 'Oturum hazır olmadan bağlantı kapandı',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'Aktarıcı sunucusu beklenmeyen bir yanıt gönderdi',
 			'watchTogether.errors.sessionEnded' => 'Kurucu oturumu sonlandırdı',
 			'watchTogether.errors.sessionUnavailable' => 'Bu oturum sürdürülemiyor. Devam etmek için bir odaya katılın veya oda oluşturun.',
@@ -4557,8 +4581,6 @@ extension on TranslationsTr {
 			'downloads.tracksQueued' => ({required Object count}) => 'İndirmek için ${count} parça kuyruğa alındı',
 			'downloads.noDownloads' => 'Henüz indirme yok',
 			'downloads.noDownloadsDescription' => 'İndirilen içerik çevrimdışı izlemek için burada görünecektir',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'İndir',
 			'downloads.deleteDownload' => 'İndirmeyi sil',
 			'downloads.retryDownload' => 'İndirmeyi tekrar dene',
@@ -5060,6 +5082,8 @@ extension on TranslationsTr {
 			'addServer.responseNotJson' => 'Sunucu yanıtı geçerli bir JSON değildi',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'Yanıtta kimlik veya sunucu adı eksik — bu bir ${product} sunucusu mu?',
 			'addServer.probeFailed' => ({required Object error}) => 'Sunucuya ulaşılamadı: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => 'En az bir ${product} sunucu URL\'si girin',
 			'addServer.noReachableServer' => ({required Object product}) => 'Ulaşılabilir ${product} sunucusu bulunamadı',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'Bu URL\'ler farklı ${product} sunucularını gösteriyor',

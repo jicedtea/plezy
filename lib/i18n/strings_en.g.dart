@@ -645,6 +645,15 @@ class Translations$settings$en {
 	/// en: 'Direct play videos already within the quality limit instead of transcoding them'
 	String get directPlayCoveredQualityDescription => 'Direct play videos already within the quality limit instead of transcoding them';
 
+	/// en: 'Video Codecs'
+	String get videoCodecs => 'Video Codecs';
+
+	/// en: 'Unchecked codecs are transcoded by the server'
+	String get videoCodecsDescription => 'Unchecked codecs are transcoded by the server';
+
+	/// en: 'Always accepted'
+	String get videoCodecsAlwaysAccepted => 'Always accepted';
+
 	/// en: 'Music Quality'
 	String get musicQualityTitle => 'Music Quality';
 
@@ -1124,6 +1133,30 @@ class Translations$settings$en {
 
 	/// en: 'Strip Dolby Vision RPU/EL layers and present plain HEVC'
 	String get dvConversionHevcStripDescription => 'Strip Dolby Vision RPU/EL layers and present plain HEVC';
+
+	/// en: 'HDR to SDR Conversion'
+	String get hdrSdrConversion => 'HDR to SDR Conversion';
+
+	/// en: 'Choose what converts HDR video when the display can't show HDR.'
+	String get hdrSdrConversionDescription => 'Choose what converts HDR video when the display can\'t show HDR.';
+
+	/// en: 'Auto'
+	String get hdrSdrConversionAuto => 'Auto';
+
+	/// en: 'Device on Android 9 and later, player on older versions'
+	String get hdrSdrConversionAutoDescription => 'Device on Android 9 and later, player on older versions';
+
+	/// en: 'Device'
+	String get hdrSdrConversionDevice => 'Device';
+
+	/// en: 'Your device's video hardware converts it. Fastest, but colors depend on the device'
+	String get hdrSdrConversionDeviceDescription => 'Your device\'s video hardware converts it. Fastest, but colors depend on the device';
+
+	/// en: 'Player'
+	String get hdrSdrConversionPlayer => 'Player';
+
+	/// en: 'The player converts it. Consistent colors, but 4K may stutter on low-end TV boxes'
+	String get hdrSdrConversionPlayerDescription => 'The player converts it. Consistent colors, but 4K may stutter on low-end TV boxes';
 
 	/// en: 'Deinterlacing'
 	String get deinterlace => 'Deinterlacing';
@@ -7408,6 +7441,9 @@ extension on Translations {
 			'settings.cellularQualitySameAsDefault' => 'Same as Default Quality',
 			'settings.directPlayCoveredQuality' => 'Play Smaller Videos at Original Quality',
 			'settings.directPlayCoveredQualityDescription' => 'Direct play videos already within the quality limit instead of transcoding them',
+			'settings.videoCodecs' => 'Video Codecs',
+			'settings.videoCodecsDescription' => 'Unchecked codecs are transcoded by the server',
+			'settings.videoCodecsAlwaysAccepted' => 'Always accepted',
 			'settings.musicQualityTitle' => 'Music Quality',
 			'settings.subtitleStyling' => 'Subtitle Styling',
 			'settings.subtitleStylingDescription' => 'Customize subtitle appearance',
@@ -7568,6 +7604,14 @@ extension on Translations {
 			'settings.dvConversionNativeDescription' => 'Force native DV7 and suppress DV conversion retry',
 			'settings.dvConversionDv81Description' => 'Force inline RPU conversion to Dolby Vision profile 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Strip Dolby Vision RPU/EL layers and present plain HEVC',
+			'settings.hdrSdrConversion' => 'HDR to SDR Conversion',
+			'settings.hdrSdrConversionDescription' => 'Choose what converts HDR video when the display can\'t show HDR.',
+			'settings.hdrSdrConversionAuto' => 'Auto',
+			'settings.hdrSdrConversionAutoDescription' => 'Device on Android 9 and later, player on older versions',
+			'settings.hdrSdrConversionDevice' => 'Device',
+			'settings.hdrSdrConversionDeviceDescription' => 'Your device\'s video hardware converts it. Fastest, but colors depend on the device',
+			'settings.hdrSdrConversionPlayer' => 'Player',
+			'settings.hdrSdrConversionPlayerDescription' => 'The player converts it. Consistent colors, but 4K may stutter on low-end TV boxes',
 			'settings.deinterlace' => 'Deinterlacing',
 			'settings.deinterlaceDescription' => 'Remove combing artifacts from interlaced video (mpv player only)',
 			'settings.requireProfileSelectionOnOpen' => 'Ask for profile on app open',
@@ -7721,6 +7765,8 @@ extension on Translations {
 			'fileInfo.streamId' => 'Stream ID',
 			'fileInfo.language' => 'Language',
 			'fileInfo.languageCode' => 'Language Code',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Track Title',
 			'fileInfo.channels' => 'Channels',
 			'fileInfo.sampleRate' => 'Sample Rate',
@@ -7732,8 +7778,6 @@ extension on Translations {
 			'fileInfo.externalDelivery' => 'Can Be Served Separately',
 			'fileInfo.sidecarPath' => 'Sidecar Path',
 			'fileInfo.sourceStream' => 'Copied From',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Temporary',
 			'fileInfo.timeBase' => 'Time Base',
 			'fileInfo.overallBitrate' => 'Overall Bitrate',
@@ -8235,6 +8279,8 @@ extension on Translations {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Failed to empty trash: ${error}',
 			'libraries.analyzing' => ({required Object title}) => 'Analyzing "${title}"...',
 			'libraries.analysisStarted' => ({required Object title}) => 'Analysis started for "${title}"',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Failed to analyze library: ${error}',
 			'libraries.noLibrariesFound' => 'No libraries found',
 			'libraries.allLibrariesHidden' => 'All libraries are hidden',
@@ -8246,8 +8292,6 @@ extension on Translations {
 			'libraries.clearAll' => 'Clear All',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => 'Are you sure you want to scan "${title}"?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => 'Are you sure you want to analyze "${title}"?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => 'Are you sure you want to refresh metadata for "${title}"?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => 'Are you sure you want to empty trash for "${title}"?',
 			'libraries.manageLibraries' => 'Manage Libraries',
@@ -8749,6 +8793,8 @@ extension on Translations {
 			'watchTogether.codeMustBe5Chars' => 'Session code must be 5 characters',
 			'watchTogether.joinInstructions' => 'Enter the host\'s session code to join.',
 			'watchTogether.failedToCreate' => 'Failed to create session',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.failedToJoin' => 'Failed to join session',
 			'watchTogether.sessionCodeCopied' => 'Session code copied to clipboard',
 			'watchTogether.relayUnreachable' => 'Relay server unreachable. ISP blocking may prevent Watch Together.',
@@ -8760,8 +8806,6 @@ extension on Translations {
 			'watchTogether.participantJoined' => ({required Object name}) => '${name} joined',
 			'watchTogether.participantLeft' => ({required Object name}) => '${name} left',
 			'watchTogether.participantPaused' => ({required Object name}) => '${name} paused',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.participantResumed' => ({required Object name}) => '${name} resumed',
 			'watchTogether.participantSeeked' => ({required Object name}) => '${name} changed the playback position',
 			'watchTogether.participantChangedSpeed' => ({required Object name, required Object speed}) => '${name} set the speed to ${speed}',
@@ -9263,6 +9307,8 @@ extension on Translations {
 			'addServer.change' => 'Change',
 			'addServer.required' => 'Required',
 			'addServer.couldNotReachServer' => ({required Object error}) => 'Could not reach the server: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.signInFailed' => ({required Object error}) => 'Sign-in failed: ${error}',
 			'addServer.quickConnectFailed' => ({required Object error}) => 'Quick Connect failed: ${error}',
 			'addServer.addPlexTitle' => 'Sign in with Plex',
@@ -9274,8 +9320,6 @@ extension on Translations {
 			'addServer.signInWithPlexCard' => 'Sign in with Plex',
 			'addServer.signInWithPlexCardSubtitle' => 'Authorize this device. Shared servers are added.',
 			'addServer.signInWithPlexCardSubtitleScoped' => 'Authorize a Plex account. Home users become profiles.',
-			_ => null,
-		} ?? switch (path) {
 			'addServer.connectToMediaBrowserCard' => ({required Object product}) => 'Connect to ${product}',
 			'addServer.connectToMediaBrowserCardSubtitle' => 'Enter your server URL, username, and password.',
 			'addServer.connectToMediaBrowserCardSubtitleScoped' => ({required Object product, required Object name}) => 'Sign in to your ${product} server. Binds to ${name}.',

@@ -311,6 +311,9 @@ class _Translations$settings$az extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'Defolt keyfiyyətlə eyni';
 	@override String get directPlayCoveredQuality => 'Kiçik videoları orijinal keyfiyyətdə oynat';
 	@override String get directPlayCoveredQualityDescription => 'Keyfiyyət limitinə uyğun gələn videoları yenidən kodlaşdırmaq əvəzinə birbaşa oynat';
+	@override String get videoCodecs => 'Video kodekləri';
+	@override String get videoCodecsDescription => 'İşarələnməmiş kodekləri server yenidən kodlaşdırır';
+	@override String get videoCodecsAlwaysAccepted => 'Həmişə qəbul edilir';
 	@override String get musicQualityTitle => 'Musiqi keyfiyyəti';
 	@override String get subtitleStyling => 'Altyazı tənzimləmələri';
 	@override String get subtitleStylingDescription => 'Altyazı görünüşünü özünüləşdirin';
@@ -471,6 +474,14 @@ class _Translations$settings$az extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Daxili DV7-ni məcburi et';
 	@override String get dvConversionDv81Description => 'Dolby Vision profile 8.1-ə çevrilməni məcburi et';
 	@override String get dvConversionHevcStripDescription => 'Dolby Vision təbəqələrini sil və sadə HEVC kimi təqdim et';
+	@override String get hdrSdrConversion => 'HDR-dən SDR-ə çevirmə';
+	@override String get hdrSdrConversionDescription => 'Ekran HDR göstərə bilmədikdə HDR videonu nəyin çevirəcəyini seçin.';
+	@override String get hdrSdrConversionAuto => 'Avtomatik';
+	@override String get hdrSdrConversionAutoDescription => 'Android 9 və sonrakı versiyalarda cihaz, köhnə versiyalarda oynadıcı';
+	@override String get hdrSdrConversionDevice => 'Cihaz';
+	@override String get hdrSdrConversionDeviceDescription => 'Çevirməni cihazın video avadanlığı edir. Ən sürətlisi, lakin rənglər cihazdan asılıdır';
+	@override String get hdrSdrConversionPlayer => 'Oynadıcı';
+	@override String get hdrSdrConversionPlayerDescription => 'Çevirməni oynadıcı edir. Sabit rənglər, lakin zəif TV qutularında 4K ilişə bilər';
 	@override String get deinterlace => 'Deinterleysinq';
 	@override String get deinterlaceDescription => 'Sətirlərarası videodakı darama artefaktlarını aradan qaldır (yalnız mpv oynadıcısı)';
 	@override String get requireProfileSelectionOnOpen => 'Açılışda profil soruş';
@@ -3205,6 +3216,9 @@ extension on TranslationsAz {
 			'settings.cellularQualitySameAsDefault' => 'Defolt keyfiyyətlə eyni',
 			'settings.directPlayCoveredQuality' => 'Kiçik videoları orijinal keyfiyyətdə oynat',
 			'settings.directPlayCoveredQualityDescription' => 'Keyfiyyət limitinə uyğun gələn videoları yenidən kodlaşdırmaq əvəzinə birbaşa oynat',
+			'settings.videoCodecs' => 'Video kodekləri',
+			'settings.videoCodecsDescription' => 'İşarələnməmiş kodekləri server yenidən kodlaşdırır',
+			'settings.videoCodecsAlwaysAccepted' => 'Həmişə qəbul edilir',
 			'settings.musicQualityTitle' => 'Musiqi keyfiyyəti',
 			'settings.subtitleStyling' => 'Altyazı tənzimləmələri',
 			'settings.subtitleStylingDescription' => 'Altyazı görünüşünü özünüləşdirin',
@@ -3365,6 +3379,14 @@ extension on TranslationsAz {
 			'settings.dvConversionNativeDescription' => 'Daxili DV7-ni məcburi et',
 			'settings.dvConversionDv81Description' => 'Dolby Vision profile 8.1-ə çevrilməni məcburi et',
 			'settings.dvConversionHevcStripDescription' => 'Dolby Vision təbəqələrini sil və sadə HEVC kimi təqdim et',
+			'settings.hdrSdrConversion' => 'HDR-dən SDR-ə çevirmə',
+			'settings.hdrSdrConversionDescription' => 'Ekran HDR göstərə bilmədikdə HDR videonu nəyin çevirəcəyini seçin.',
+			'settings.hdrSdrConversionAuto' => 'Avtomatik',
+			'settings.hdrSdrConversionAutoDescription' => 'Android 9 və sonrakı versiyalarda cihaz, köhnə versiyalarda oynadıcı',
+			'settings.hdrSdrConversionDevice' => 'Cihaz',
+			'settings.hdrSdrConversionDeviceDescription' => 'Çevirməni cihazın video avadanlığı edir. Ən sürətlisi, lakin rənglər cihazdan asılıdır',
+			'settings.hdrSdrConversionPlayer' => 'Oynadıcı',
+			'settings.hdrSdrConversionPlayerDescription' => 'Çevirməni oynadıcı edir. Sabit rənglər, lakin zəif TV qutularında 4K ilişə bilər',
 			'settings.deinterlace' => 'Deinterleysinq',
 			'settings.deinterlaceDescription' => 'Sətirlərarası videodakı darama artefaktlarını aradan qaldır (yalnız mpv oynadıcısı)',
 			'settings.requireProfileSelectionOnOpen' => 'Açılışda profil soruş',
@@ -3518,6 +3540,8 @@ extension on TranslationsAz {
 			'fileInfo.streamId' => 'Axın ID-si',
 			'fileInfo.language' => 'Dil',
 			'fileInfo.languageCode' => 'Dil kodu',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Trek başlığı',
 			'fileInfo.channels' => 'Kanallar',
 			'fileInfo.sampleRate' => 'Diskretləşdirmə tezliyi',
@@ -3529,8 +3553,6 @@ extension on TranslationsAz {
 			'fileInfo.externalDelivery' => 'Ayrıca ötürülə bilər',
 			'fileInfo.sidecarPath' => 'Sidecar yolu',
 			'fileInfo.sourceStream' => 'Kopyalanan mənbə',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Müvəqqəti',
 			'fileInfo.timeBase' => 'Vaxt bazası',
 			'fileInfo.overallBitrate' => 'Ümumi bit sürəti',
@@ -4032,6 +4054,8 @@ extension on TranslationsAz {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Zibil qutusu təmizlənə bilmədi: ${error}',
 			'libraries.analyzing' => ({required Object title}) => '"${title}" analiz edilir...',
 			'libraries.analysisStarted' => ({required Object title}) => '"${title}" üçün analiz başladı',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Kitabxana analiz edilə bilmədi: ${error}',
 			'libraries.noLibrariesFound' => 'Kitabxana tapılmadı',
 			'libraries.allLibrariesHidden' => 'Bütün kitabxanalar gizlədilib',
@@ -4043,8 +4067,6 @@ extension on TranslationsAz {
 			'libraries.clearAll' => 'Hamısını təmizlə',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => '"${title}" kitabxanasını skan etmək istədiyinizdən əminsiniz?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => '"${title}" kitabxanasını analiz etmək istədiyinizdən əminsiniz?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => '"${title}" üçün meta-məlumatları yeniləmək istədiyinizdən əminsiniz?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => '"${title}" üçün zibil qutusunu təmizləmək istədiyinizdən əminsiniz?',
 			'libraries.manageLibraries' => 'Kitabxanaları idarə et',
@@ -4546,6 +4568,8 @@ extension on TranslationsAz {
 			'watchTogether.defaultDisplayName' => 'İstifadəçi',
 			'watchTogether.errors.timedOut' => 'Rele serveri vaxtında cavab vermədi',
 			'watchTogether.errors.connectionLost' => 'Bağlantı seans hazır olmamış kəsildi',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'Rele serveri gözlənilməz cavab göndərdi',
 			'watchTogether.errors.sessionEnded' => 'Təşkilatçı seansı bitirdi',
 			'watchTogether.errors.sessionUnavailable' => 'Bu seansı davam etdirmək olmur. Davam etmək üçün otağa qoşulun və ya otaq yaradın.',
@@ -4557,8 +4581,6 @@ extension on TranslationsAz {
 			'downloads.tracksQueued' => ({required Object count}) => 'Yükləmə üçün ${count} mahnı növbəyə alındı',
 			'downloads.noDownloads' => 'Hələlik yükləmə yoxdur',
 			'downloads.noDownloadsDescription' => 'Yüklənmiş məzmun oflayn baxış üçün burada görünəcək',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'Yüklə',
 			'downloads.deleteDownload' => 'Yükləməni sil',
 			'downloads.retryDownload' => 'Yükləməni təzədən cəhd et',
@@ -5060,6 +5082,8 @@ extension on TranslationsAz {
 			'addServer.responseNotJson' => 'Server cavabı etibarlı JSON deyildi',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'Cavabda ID və ya server adı yoxdur — bu, ${product} serveridir?',
 			'addServer.probeFailed' => ({required Object error}) => 'Serverə çatmaq olmadı: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => 'Ən azı bir ${product} server URL-i daxil edin',
 			'addServer.noReachableServer' => ({required Object product}) => 'Əlçatan ${product} serveri tapılmadı',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'Bu URL-lər fərqli ${product} serverlərinə aiddir',

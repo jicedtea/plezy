@@ -311,6 +311,9 @@ class _Translations$settings$kk extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'Әдепкі сапамен бірдей';
 	@override String get directPlayCoveredQuality => 'Кіші видеоларды түпнұсқа сапада ойнату';
 	@override String get directPlayCoveredQualityDescription => 'Сапа шегіне сәйкес келетін видеоларды транскодтаудың орнына тікелей ойнату';
+	@override String get videoCodecs => 'Бейне кодектері';
+	@override String get videoCodecsDescription => 'Белгіленбеген кодектерді сервер транскодтайды';
+	@override String get videoCodecsAlwaysAccepted => 'Әрқашан қабылданады';
 	@override String get musicQualityTitle => 'Музыка сапасы';
 	@override String get subtitleStyling => 'Субтитр баптаулары';
 	@override String get subtitleStylingDescription => 'Субтитрлердің сыртқы келбетін теңшеу';
@@ -471,6 +474,14 @@ class _Translations$settings$kk extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Ішкі DV7 режимін мәжбүрлеу';
 	@override String get dvConversionDv81Description => 'Dolby Vision profile 8.1 форматына түрлендіру';
 	@override String get dvConversionHevcStripDescription => 'Dolby Vision қабаттарын алып тастап, HEVC ретінде көрсету';
+	@override String get hdrSdrConversion => 'HDR-ды SDR-ға түрлендіру';
+	@override String get hdrSdrConversionDescription => 'Дисплей HDR көрсете алмаған кезде HDR бейнесін не түрлендіретінін таңдаңыз.';
+	@override String get hdrSdrConversionAuto => 'Автоматты';
+	@override String get hdrSdrConversionAutoDescription => 'Android 9 және жаңарақ нұсқаларда құрылғы, ескі нұсқаларда ойнатқыш';
+	@override String get hdrSdrConversionDevice => 'Құрылғы';
+	@override String get hdrSdrConversionDeviceDescription => 'Түрлендіруді құрылғының бейне жабдығы орындайды. Ең жылдамы, бірақ түстер құрылғыға байланысты';
+	@override String get hdrSdrConversionPlayer => 'Ойнатқыш';
+	@override String get hdrSdrConversionPlayerDescription => 'Түрлендіруді ойнатқыш орындайды. Түстер тұрақты, бірақ әлсіз ТВ-приставкаларда 4K кідіруі мүмкін';
 	@override String get deinterlace => 'Деинтерлейсинг';
 	@override String get deinterlaceDescription => 'Жоларалық видеодағы тарақ тәрізді артефактілерді жою (тек mpv ойнатқышында)';
 	@override String get requireProfileSelectionOnOpen => 'Ашқанда профильді сұрау';
@@ -3205,6 +3216,9 @@ extension on TranslationsKk {
 			'settings.cellularQualitySameAsDefault' => 'Әдепкі сапамен бірдей',
 			'settings.directPlayCoveredQuality' => 'Кіші видеоларды түпнұсқа сапада ойнату',
 			'settings.directPlayCoveredQualityDescription' => 'Сапа шегіне сәйкес келетін видеоларды транскодтаудың орнына тікелей ойнату',
+			'settings.videoCodecs' => 'Бейне кодектері',
+			'settings.videoCodecsDescription' => 'Белгіленбеген кодектерді сервер транскодтайды',
+			'settings.videoCodecsAlwaysAccepted' => 'Әрқашан қабылданады',
 			'settings.musicQualityTitle' => 'Музыка сапасы',
 			'settings.subtitleStyling' => 'Субтитр баптаулары',
 			'settings.subtitleStylingDescription' => 'Субтитрлердің сыртқы келбетін теңшеу',
@@ -3365,6 +3379,14 @@ extension on TranslationsKk {
 			'settings.dvConversionNativeDescription' => 'Ішкі DV7 режимін мәжбүрлеу',
 			'settings.dvConversionDv81Description' => 'Dolby Vision profile 8.1 форматына түрлендіру',
 			'settings.dvConversionHevcStripDescription' => 'Dolby Vision қабаттарын алып тастап, HEVC ретінде көрсету',
+			'settings.hdrSdrConversion' => 'HDR-ды SDR-ға түрлендіру',
+			'settings.hdrSdrConversionDescription' => 'Дисплей HDR көрсете алмаған кезде HDR бейнесін не түрлендіретінін таңдаңыз.',
+			'settings.hdrSdrConversionAuto' => 'Автоматты',
+			'settings.hdrSdrConversionAutoDescription' => 'Android 9 және жаңарақ нұсқаларда құрылғы, ескі нұсқаларда ойнатқыш',
+			'settings.hdrSdrConversionDevice' => 'Құрылғы',
+			'settings.hdrSdrConversionDeviceDescription' => 'Түрлендіруді құрылғының бейне жабдығы орындайды. Ең жылдамы, бірақ түстер құрылғыға байланысты',
+			'settings.hdrSdrConversionPlayer' => 'Ойнатқыш',
+			'settings.hdrSdrConversionPlayerDescription' => 'Түрлендіруді ойнатқыш орындайды. Түстер тұрақты, бірақ әлсіз ТВ-приставкаларда 4K кідіруі мүмкін',
 			'settings.deinterlace' => 'Деинтерлейсинг',
 			'settings.deinterlaceDescription' => 'Жоларалық видеодағы тарақ тәрізді артефактілерді жою (тек mpv ойнатқышында)',
 			'settings.requireProfileSelectionOnOpen' => 'Ашқанда профильді сұрау',
@@ -3518,6 +3540,8 @@ extension on TranslationsKk {
 			'fileInfo.streamId' => 'Ағын ID',
 			'fileInfo.language' => 'Тіл',
 			'fileInfo.languageCode' => 'Тіл коды',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Трек атауы',
 			'fileInfo.channels' => 'Арналар',
 			'fileInfo.sampleRate' => 'Дискретизация жиілігі',
@@ -3529,8 +3553,6 @@ extension on TranslationsKk {
 			'fileInfo.externalDelivery' => 'Бөлек жеткізілуі мүмкін',
 			'fileInfo.sidecarPath' => 'Қосалқы файл жолы',
 			'fileInfo.sourceStream' => 'Көшірілген көзі',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Уақытша',
 			'fileInfo.timeBase' => 'Уақыт негізі',
 			'fileInfo.overallBitrate' => 'Жалпы биттік жылдамдық',
@@ -4032,6 +4054,8 @@ extension on TranslationsKk {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Себетті тазалау мүмкін болмады: ${error}',
 			'libraries.analyzing' => ({required Object title}) => '"${title}" талдануда...',
 			'libraries.analysisStarted' => ({required Object title}) => '"${title}" үшін талдау басталды',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Талдау жасау мүмкін болмады: ${error}',
 			'libraries.noLibrariesFound' => 'Кітапханалар табылмады',
 			'libraries.allLibrariesHidden' => 'Барлық кітапханалар жасырылған',
@@ -4043,8 +4067,6 @@ extension on TranslationsKk {
 			'libraries.clearAll' => 'Барлығын тазалау',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => '"${title}" кітапханасын сканерлегіңіз келе ме?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => '"${title}" кітапханасына талдау жасағыңыз келе ме?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => '"${title}" метадеректерін жаңартасыз ба?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => '"${title}" себетін тазалайсыз ба?',
 			'libraries.manageLibraries' => 'Кітапханаларды басқару',
@@ -4546,6 +4568,8 @@ extension on TranslationsKk {
 			'watchTogether.defaultDisplayName' => 'Пайдаланушы',
 			'watchTogether.errors.timedOut' => 'Реле сервері уақытында жауап бермеді',
 			'watchTogether.errors.connectionLost' => 'Сеанс дайын болмай тұрып байланыс үзілді',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'Реле сервері күтпеген жауап жіберді',
 			'watchTogether.errors.sessionEnded' => 'Ұйымдастырушы сеансты аяқтады',
 			'watchTogether.errors.sessionUnavailable' => 'Бұл сеансты жалғастыру мүмкін емес. Жалғастыру үшін бөлмеге қосылыңыз немесе бөлме жасаңыз.',
@@ -4557,8 +4581,6 @@ extension on TranslationsKk {
 			'downloads.tracksQueued' => ({required Object count}) => '${count} ән жүктеу кезегіне қосылды',
 			'downloads.noDownloads' => 'Әлі де жүктеулер жоқ',
 			'downloads.noDownloadsDescription' => 'Жүктелген файлдар офлайн көру үшін мұнда көрінеді',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'Жүктеу',
 			'downloads.deleteDownload' => 'Жүктеуді өшіру',
 			'downloads.retryDownload' => 'Жүктеуді қайталау',
@@ -5060,6 +5082,8 @@ extension on TranslationsKk {
 			'addServer.responseNotJson' => 'Сервер жауабы жарамды JSON болмады',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'Жауапта ID немесе сервер атауы жоқ — бұл ${product} сервері ме?',
 			'addServer.probeFailed' => ({required Object error}) => 'Серверге қосылу мүмкін болмады: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => 'Кемінде бір ${product} серверінің URL-ін енгізіңіз',
 			'addServer.noReachableServer' => ({required Object product}) => 'Қолжетімді ${product} сервері табылмады',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'Бұл URL-дер әртүрлі ${product} серверлеріне бағыттайды',

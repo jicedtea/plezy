@@ -311,6 +311,9 @@ class _Translations$settings$bg extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'Същото като качеството по подразбиране';
 	@override String get directPlayCoveredQuality => 'Пускай по-малките видеа в оригинално качество';
 	@override String get directPlayCoveredQualityDescription => 'Възпроизвеждай директно видеата, които вече са в рамките на лимита за качество, вместо да ги транскодираш';
+	@override String get videoCodecs => 'Видео кодеци';
+	@override String get videoCodecsDescription => 'Сървърът транскодира кодеците без отметка';
+	@override String get videoCodecsAlwaysAccepted => 'Винаги се приема';
 	@override String get musicQualityTitle => 'Качество на музиката';
 	@override String get subtitleStyling => 'Стил на субтитрите';
 	@override String get subtitleStylingDescription => 'Настройване на вида на субтитрите';
@@ -471,6 +474,14 @@ class _Translations$settings$bg extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Принуждава директно възпроизвеждане на DV7 и изключва повторния опит за преобразуване';
 	@override String get dvConversionDv81Description => 'Принуждава директно преобразуване на RPU към Dolby Vision Profile 8.1';
 	@override String get dvConversionHevcStripDescription => 'Премахва слоевете Dolby Vision RPU/EL и подава обикновен HEVC поток';
+	@override String get hdrSdrConversion => 'Преобразуване от HDR към SDR';
+	@override String get hdrSdrConversionDescription => 'Изберете какво да преобразува HDR видеото, когато дисплеят не поддържа HDR.';
+	@override String get hdrSdrConversionAuto => 'Автоматично';
+	@override String get hdrSdrConversionAutoDescription => 'Устройство при Android 9 и по-нови, плейър при по-стари версии';
+	@override String get hdrSdrConversionDevice => 'Устройство';
+	@override String get hdrSdrConversionDeviceDescription => 'Видеохардуерът на устройството извършва преобразуването. Най-бързо, но цветовете зависят от устройството';
+	@override String get hdrSdrConversionPlayer => 'Плейър';
+	@override String get hdrSdrConversionPlayerDescription => 'Плейърът извършва преобразуването. Еднакви цветове, но 4K може да накъсва на слаби ТВ приставки';
 	@override String get deinterlace => 'Деинтерлейсинг';
 	@override String get deinterlaceDescription => 'Премахва гребеновидните артефакти от интерлейсирано видео (само за mpv плейъра)';
 	@override String get requireProfileSelectionOnOpen => 'Питай за профил при отваряне на приложението';
@@ -3205,6 +3216,9 @@ extension on TranslationsBg {
 			'settings.cellularQualitySameAsDefault' => 'Същото като качеството по подразбиране',
 			'settings.directPlayCoveredQuality' => 'Пускай по-малките видеа в оригинално качество',
 			'settings.directPlayCoveredQualityDescription' => 'Възпроизвеждай директно видеата, които вече са в рамките на лимита за качество, вместо да ги транскодираш',
+			'settings.videoCodecs' => 'Видео кодеци',
+			'settings.videoCodecsDescription' => 'Сървърът транскодира кодеците без отметка',
+			'settings.videoCodecsAlwaysAccepted' => 'Винаги се приема',
 			'settings.musicQualityTitle' => 'Качество на музиката',
 			'settings.subtitleStyling' => 'Стил на субтитрите',
 			'settings.subtitleStylingDescription' => 'Настройване на вида на субтитрите',
@@ -3365,6 +3379,14 @@ extension on TranslationsBg {
 			'settings.dvConversionNativeDescription' => 'Принуждава директно възпроизвеждане на DV7 и изключва повторния опит за преобразуване',
 			'settings.dvConversionDv81Description' => 'Принуждава директно преобразуване на RPU към Dolby Vision Profile 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Премахва слоевете Dolby Vision RPU/EL и подава обикновен HEVC поток',
+			'settings.hdrSdrConversion' => 'Преобразуване от HDR към SDR',
+			'settings.hdrSdrConversionDescription' => 'Изберете какво да преобразува HDR видеото, когато дисплеят не поддържа HDR.',
+			'settings.hdrSdrConversionAuto' => 'Автоматично',
+			'settings.hdrSdrConversionAutoDescription' => 'Устройство при Android 9 и по-нови, плейър при по-стари версии',
+			'settings.hdrSdrConversionDevice' => 'Устройство',
+			'settings.hdrSdrConversionDeviceDescription' => 'Видеохардуерът на устройството извършва преобразуването. Най-бързо, но цветовете зависят от устройството',
+			'settings.hdrSdrConversionPlayer' => 'Плейър',
+			'settings.hdrSdrConversionPlayerDescription' => 'Плейърът извършва преобразуването. Еднакви цветове, но 4K може да накъсва на слаби ТВ приставки',
 			'settings.deinterlace' => 'Деинтерлейсинг',
 			'settings.deinterlaceDescription' => 'Премахва гребеновидните артефакти от интерлейсирано видео (само за mpv плейъра)',
 			'settings.requireProfileSelectionOnOpen' => 'Питай за профил при отваряне на приложението',
@@ -3518,6 +3540,8 @@ extension on TranslationsBg {
 			'fileInfo.streamId' => 'ID на потока',
 			'fileInfo.language' => 'Език',
 			'fileInfo.languageCode' => 'Код на езика',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Заглавие на пистата',
 			'fileInfo.channels' => 'Канали',
 			'fileInfo.sampleRate' => 'Честота на дискретизация',
@@ -3529,8 +3553,6 @@ extension on TranslationsBg {
 			'fileInfo.externalDelivery' => 'Може да се предоставя отделно',
 			'fileInfo.sidecarPath' => 'Път на сайдкар файла',
 			'fileInfo.sourceStream' => 'Копирано от',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Временен',
 			'fileInfo.timeBase' => 'Времева база',
 			'fileInfo.overallBitrate' => 'Общ битрейт',
@@ -4032,6 +4054,8 @@ extension on TranslationsBg {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Неуспешно изпразване на кошчето: ${error}',
 			'libraries.analyzing' => ({required Object title}) => 'Анализиране на "${title}"...',
 			'libraries.analysisStarted' => ({required Object title}) => 'Анализът е стартиран за "${title}"',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Неуспешен анализ на библиотеката: ${error}',
 			'libraries.noLibrariesFound' => 'Не са намерени библиотеки',
 			'libraries.allLibrariesHidden' => 'Всички библиотеки са скрити',
@@ -4043,8 +4067,6 @@ extension on TranslationsBg {
 			'libraries.clearAll' => 'Изчисти всички',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => 'Сигурни ли сте, че искате да сканирате "${title}"?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => 'Сигурни ли сте, че искате да анализирате "${title}"?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => 'Сигурни ли сте, че искате да опресните метаданните за "${title}"?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => 'Сигурни ли сте, че искате да изпразните кошчето за "${title}"?',
 			'libraries.manageLibraries' => 'Управление на библиотеки',
@@ -4546,6 +4568,8 @@ extension on TranslationsBg {
 			'watchTogether.defaultDisplayName' => 'Потребител',
 			'watchTogether.errors.timedOut' => 'Релейният сървър не отговори навреме',
 			'watchTogether.errors.connectionLost' => 'Връзката се затвори, преди сесията да е готова',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'Релейният сървър изпрати неочакван отговор',
 			'watchTogether.errors.sessionEnded' => 'Организаторът прекрати сесията',
 			'watchTogether.errors.sessionUnavailable' => 'Тази сесия не може да бъде възобновена. Присъединете се към стая или създайте нова, за да продължите.',
@@ -4557,8 +4581,6 @@ extension on TranslationsBg {
 			'downloads.tracksQueued' => ({required Object count}) => '${count} песни в опашката за изтегляне',
 			'downloads.noDownloads' => 'Все още няма изтегляния',
 			'downloads.noDownloadsDescription' => 'Изтегленото съдържание ще се показва тук за офлайн гледане',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'Изтегли',
 			'downloads.deleteDownload' => 'Изтрий изтегляне',
 			'downloads.retryDownload' => 'Опитай изтеглянето отново',
@@ -5060,6 +5082,8 @@ extension on TranslationsBg {
 			'addServer.responseNotJson' => 'Отговорът на сървъра не беше валиден JSON',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'В отговора липсва ID или име на сървъра — това сървър на ${product} ли е?',
 			'addServer.probeFailed' => ({required Object error}) => 'Сървърът не може да бъде достигнат: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => 'Въведете поне един URL на сървър на ${product}',
 			'addServer.noReachableServer' => ({required Object product}) => 'Не беше намерен достъпен сървър на ${product}',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'Тези URL адреси сочат към различни сървъри на ${product}',

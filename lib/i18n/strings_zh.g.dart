@@ -311,6 +311,9 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => '与默认画质相同';
 	@override String get directPlayCoveredQuality => '以原始画质播放较小视频';
 	@override String get directPlayCoveredQualityDescription => '已在画质限制内的视频直接播放，而非转码';
+	@override String get videoCodecs => '视频编解码器';
+	@override String get videoCodecsDescription => '未勾选的编解码器将由服务器转码';
+	@override String get videoCodecsAlwaysAccepted => '始终接受';
 	@override String get musicQualityTitle => '音乐音质';
 	@override String get subtitleStyling => '字幕样式';
 	@override String get subtitleStylingDescription => '调整字幕外观';
@@ -471,6 +474,14 @@ class Translations$settings$zh extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => '强制原生 DV7 并禁止重试 DV 转换';
 	@override String get dvConversionDv81Description => '强制内联 RPU 转换为 Dolby Vision Profile 8.1';
 	@override String get dvConversionHevcStripDescription => '移除 Dolby Vision RPU/EL 层并呈现普通 HEVC';
+	@override String get hdrSdrConversion => 'HDR 转 SDR';
+	@override String get hdrSdrConversionDescription => '选择在显示器无法显示 HDR 时由谁转换 HDR 视频。';
+	@override String get hdrSdrConversionAuto => '自动';
+	@override String get hdrSdrConversionAutoDescription => 'Android 9 及更高版本使用设备，更早版本使用播放器';
+	@override String get hdrSdrConversionDevice => '设备';
+	@override String get hdrSdrConversionDeviceDescription => '由设备的视频硬件转换。速度最快，但色彩取决于设备';
+	@override String get hdrSdrConversionPlayer => '播放器';
+	@override String get hdrSdrConversionPlayerDescription => '由播放器转换。色彩一致，但在低端电视盒上 4K 可能卡顿';
 	@override String get deinterlace => '去隔行';
 	@override String get deinterlaceDescription => '消除隔行扫描视频中的梳状伪影（仅 mpv 播放器）';
 	@override String get requireProfileSelectionOnOpen => '打开应用时选择用户资料';
@@ -3194,6 +3205,9 @@ extension on TranslationsZh {
 			'settings.cellularQualitySameAsDefault' => '与默认画质相同',
 			'settings.directPlayCoveredQuality' => '以原始画质播放较小视频',
 			'settings.directPlayCoveredQualityDescription' => '已在画质限制内的视频直接播放，而非转码',
+			'settings.videoCodecs' => '视频编解码器',
+			'settings.videoCodecsDescription' => '未勾选的编解码器将由服务器转码',
+			'settings.videoCodecsAlwaysAccepted' => '始终接受',
 			'settings.musicQualityTitle' => '音乐音质',
 			'settings.subtitleStyling' => '字幕样式',
 			'settings.subtitleStylingDescription' => '调整字幕外观',
@@ -3354,6 +3368,14 @@ extension on TranslationsZh {
 			'settings.dvConversionNativeDescription' => '强制原生 DV7 并禁止重试 DV 转换',
 			'settings.dvConversionDv81Description' => '强制内联 RPU 转换为 Dolby Vision Profile 8.1',
 			'settings.dvConversionHevcStripDescription' => '移除 Dolby Vision RPU/EL 层并呈现普通 HEVC',
+			'settings.hdrSdrConversion' => 'HDR 转 SDR',
+			'settings.hdrSdrConversionDescription' => '选择在显示器无法显示 HDR 时由谁转换 HDR 视频。',
+			'settings.hdrSdrConversionAuto' => '自动',
+			'settings.hdrSdrConversionAutoDescription' => 'Android 9 及更高版本使用设备，更早版本使用播放器',
+			'settings.hdrSdrConversionDevice' => '设备',
+			'settings.hdrSdrConversionDeviceDescription' => '由设备的视频硬件转换。速度最快，但色彩取决于设备',
+			'settings.hdrSdrConversionPlayer' => '播放器',
+			'settings.hdrSdrConversionPlayerDescription' => '由播放器转换。色彩一致，但在低端电视盒上 4K 可能卡顿',
 			'settings.deinterlace' => '去隔行',
 			'settings.deinterlaceDescription' => '消除隔行扫描视频中的梳状伪影（仅 mpv 播放器）',
 			'settings.requireProfileSelectionOnOpen' => '打开应用时选择用户资料',
@@ -3507,6 +3529,8 @@ extension on TranslationsZh {
 			'fileInfo.streamId' => '流 ID',
 			'fileInfo.language' => '语言',
 			'fileInfo.languageCode' => '语言代码',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => '轨道标题',
 			'fileInfo.channels' => '声道',
 			'fileInfo.sampleRate' => '采样率',
@@ -3518,8 +3542,6 @@ extension on TranslationsZh {
 			'fileInfo.externalDelivery' => '可单独提供',
 			'fileInfo.sidecarPath' => '外挂文件路径',
 			'fileInfo.sourceStream' => '复制来源',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => '临时',
 			'fileInfo.timeBase' => '时间基准',
 			'fileInfo.overallBitrate' => '总比特率',
@@ -4021,6 +4043,8 @@ extension on TranslationsZh {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => '无法清空回收站：${error}',
 			'libraries.analyzing' => ({required Object title}) => '正在分析“${title}”…',
 			'libraries.analysisStarted' => ({required Object title}) => '已开始分析“${title}”',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => '无法分析媒体库：${error}',
 			'libraries.noLibrariesFound' => '未找到媒体库',
 			'libraries.allLibrariesHidden' => '所有媒体库已隐藏',
@@ -4032,8 +4056,6 @@ extension on TranslationsZh {
 			'libraries.clearAll' => '全部清除',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => '确定要扫描“${title}”吗？',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => '确定要分析“${title}”吗？',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => '确定要刷新“${title}”的元数据吗？',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => '确定要清空“${title}”的回收站吗？',
 			'libraries.manageLibraries' => '管理媒体库',
@@ -4535,6 +4557,8 @@ extension on TranslationsZh {
 			'watchTogether.defaultDisplayName' => '用户',
 			'watchTogether.errors.timedOut' => '中继服务器未及时响应',
 			'watchTogether.errors.connectionLost' => '会话准备就绪前连接已断开',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => '中继服务器返回了意外的响应',
 			'watchTogether.errors.sessionEnded' => '主持人已结束会话',
 			'watchTogether.errors.sessionUnavailable' => '无法恢复此会话。请加入或创建房间以继续。',
@@ -4546,8 +4570,6 @@ extension on TranslationsZh {
 			'downloads.tracksQueued' => ({required Object count}) => '${count} 首曲目已加入下载队列',
 			'downloads.noDownloads' => '暂无下载',
 			'downloads.noDownloadsDescription' => '下载的内容将在此处显示以供离线观看',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => '下载',
 			'downloads.deleteDownload' => '删除下载',
 			'downloads.retryDownload' => '重试下载',
@@ -5049,6 +5071,8 @@ extension on TranslationsZh {
 			'addServer.responseNotJson' => '服务器响应不是有效的 JSON',
 			'addServer.responseMissingIdentity' => ({required Object product}) => '响应中缺少 ID 或服务器名称——这是 ${product} 服务器吗？',
 			'addServer.probeFailed' => ({required Object error}) => '无法连接到服务器：${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => '请输入至少一个 ${product} 服务器 URL',
 			'addServer.noReachableServer' => ({required Object product}) => '未找到可连接的 ${product} 服务器',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => '这些 URL 指向不同的 ${product} 服务器',

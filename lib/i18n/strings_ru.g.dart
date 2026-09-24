@@ -311,6 +311,9 @@ class _Translations$settings$ru extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'Как качество по умолчанию';
 	@override String get directPlayCoveredQuality => 'Воспроизводить меньшие видео в исходном качестве';
 	@override String get directPlayCoveredQualityDescription => 'Воспроизводить напрямую видео, уже укладывающиеся в ограничение качества, вместо их транскодирования';
+	@override String get videoCodecs => 'Видеокодеки';
+	@override String get videoCodecsDescription => 'Кодеки без отметки транскодирует сервер';
+	@override String get videoCodecsAlwaysAccepted => 'Принимается всегда';
 	@override String get musicQualityTitle => 'Качество музыки';
 	@override String get subtitleStyling => 'Стиль субтитров';
 	@override String get subtitleStylingDescription => 'Настроить внешний вид субтитров';
@@ -471,6 +474,14 @@ class _Translations$settings$ru extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Принудительно использовать нативный DV7 и не повторять DV-конвертацию';
 	@override String get dvConversionDv81Description => 'Принудительно выполнять inline-конвертацию RPU в Dolby Vision профиль 8.1';
 	@override String get dvConversionHevcStripDescription => 'Удалять слои Dolby Vision RPU/EL и передавать обычный HEVC';
+	@override String get hdrSdrConversion => 'Преобразование HDR в SDR';
+	@override String get hdrSdrConversionDescription => 'Выберите, что преобразует HDR-видео, если дисплей не поддерживает HDR.';
+	@override String get hdrSdrConversionAuto => 'Авто';
+	@override String get hdrSdrConversionAutoDescription => 'Устройство на Android 9 и новее, проигрыватель на более старых версиях';
+	@override String get hdrSdrConversionDevice => 'Устройство';
+	@override String get hdrSdrConversionDeviceDescription => 'Преобразует видеооборудование устройства. Быстрее всего, но цвета зависят от устройства';
+	@override String get hdrSdrConversionPlayer => 'Проигрыватель';
+	@override String get hdrSdrConversionPlayerDescription => 'Преобразует проигрыватель. Одинаковые цвета, но 4K может подтормаживать на слабых ТВ-приставках';
 	@override String get deinterlace => 'Деинтерлейсинг';
 	@override String get deinterlaceDescription => 'Устранять гребёнку на чересстрочном видео (только в плеере mpv)';
 	@override String get requireProfileSelectionOnOpen => 'Запрашивать профиль при запуске';
@@ -3227,6 +3238,9 @@ extension on TranslationsRu {
 			'settings.cellularQualitySameAsDefault' => 'Как качество по умолчанию',
 			'settings.directPlayCoveredQuality' => 'Воспроизводить меньшие видео в исходном качестве',
 			'settings.directPlayCoveredQualityDescription' => 'Воспроизводить напрямую видео, уже укладывающиеся в ограничение качества, вместо их транскодирования',
+			'settings.videoCodecs' => 'Видеокодеки',
+			'settings.videoCodecsDescription' => 'Кодеки без отметки транскодирует сервер',
+			'settings.videoCodecsAlwaysAccepted' => 'Принимается всегда',
 			'settings.musicQualityTitle' => 'Качество музыки',
 			'settings.subtitleStyling' => 'Стиль субтитров',
 			'settings.subtitleStylingDescription' => 'Настроить внешний вид субтитров',
@@ -3387,6 +3401,14 @@ extension on TranslationsRu {
 			'settings.dvConversionNativeDescription' => 'Принудительно использовать нативный DV7 и не повторять DV-конвертацию',
 			'settings.dvConversionDv81Description' => 'Принудительно выполнять inline-конвертацию RPU в Dolby Vision профиль 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Удалять слои Dolby Vision RPU/EL и передавать обычный HEVC',
+			'settings.hdrSdrConversion' => 'Преобразование HDR в SDR',
+			'settings.hdrSdrConversionDescription' => 'Выберите, что преобразует HDR-видео, если дисплей не поддерживает HDR.',
+			'settings.hdrSdrConversionAuto' => 'Авто',
+			'settings.hdrSdrConversionAutoDescription' => 'Устройство на Android 9 и новее, проигрыватель на более старых версиях',
+			'settings.hdrSdrConversionDevice' => 'Устройство',
+			'settings.hdrSdrConversionDeviceDescription' => 'Преобразует видеооборудование устройства. Быстрее всего, но цвета зависят от устройства',
+			'settings.hdrSdrConversionPlayer' => 'Проигрыватель',
+			'settings.hdrSdrConversionPlayerDescription' => 'Преобразует проигрыватель. Одинаковые цвета, но 4K может подтормаживать на слабых ТВ-приставках',
 			'settings.deinterlace' => 'Деинтерлейсинг',
 			'settings.deinterlaceDescription' => 'Устранять гребёнку на чересстрочном видео (только в плеере mpv)',
 			'settings.requireProfileSelectionOnOpen' => 'Запрашивать профиль при запуске',
@@ -3540,6 +3562,8 @@ extension on TranslationsRu {
 			'fileInfo.streamId' => 'ID потока',
 			'fileInfo.language' => 'Язык',
 			'fileInfo.languageCode' => 'Код языка',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Название дорожки',
 			'fileInfo.channels' => 'Каналы',
 			'fileInfo.sampleRate' => 'Частота дискретизации',
@@ -3551,8 +3575,6 @@ extension on TranslationsRu {
 			'fileInfo.externalDelivery' => 'Может передаваться отдельно',
 			'fileInfo.sidecarPath' => 'Путь к файлу-спутнику',
 			'fileInfo.sourceStream' => 'Скопировано из',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Временный',
 			'fileInfo.timeBase' => 'Временная база',
 			'fileInfo.overallBitrate' => 'Общий битрейт',
@@ -4054,6 +4076,8 @@ extension on TranslationsRu {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Не удалось очистить корзину: ${error}',
 			'libraries.analyzing' => ({required Object title}) => 'Анализ "${title}"...',
 			'libraries.analysisStarted' => ({required Object title}) => 'Анализ начат для "${title}"',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Не удалось проанализировать библиотеку: ${error}',
 			'libraries.noLibrariesFound' => 'Библиотеки не найдены',
 			'libraries.allLibrariesHidden' => 'Все библиотеки скрыты',
@@ -4065,8 +4089,6 @@ extension on TranslationsRu {
 			'libraries.clearAll' => 'Очистить все',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => 'Вы уверены, что хотите сканировать "${title}"?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => 'Вы уверены, что хотите проанализировать "${title}"?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => 'Вы уверены, что хотите обновить метаданные для "${title}"?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => 'Вы уверены, что хотите очистить корзину для "${title}"?',
 			'libraries.manageLibraries' => 'Управление библиотеками',
@@ -4568,6 +4590,8 @@ extension on TranslationsRu {
 			'watchTogether.defaultDisplayName' => 'Пользователь',
 			'watchTogether.errors.timedOut' => 'Сервер ретрансляции не ответил вовремя',
 			'watchTogether.errors.connectionLost' => 'Соединение закрылось до того, как сессия была готова',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'Сервер ретрансляции прислал неожиданный ответ',
 			'watchTogether.errors.sessionEnded' => 'Организатор завершил сессию',
 			'watchTogether.errors.sessionUnavailable' => 'Не удалось возобновить эту сессию. Присоединитесь к комнате или создайте её, чтобы продолжить.',
@@ -4579,8 +4603,6 @@ extension on TranslationsRu {
 			'downloads.tracksQueued' => ({required Object count}) => '${count} треков в очереди на загрузку',
 			'downloads.noDownloads' => 'Загрузок пока нет',
 			'downloads.noDownloadsDescription' => 'Загруженный контент появится здесь для просмотра офлайн',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'Загрузить',
 			'downloads.deleteDownload' => 'Удалить загрузку',
 			'downloads.retryDownload' => 'Повторить загрузку',
@@ -5082,6 +5104,8 @@ extension on TranslationsRu {
 			'addServer.responseNotJson' => 'Ответ сервера не является допустимым JSON',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'В ответе отсутствует идентификатор или имя сервера. Это точно сервер ${product}?',
 			'addServer.probeFailed' => ({required Object error}) => 'Не удалось связаться с сервером: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => 'Введите хотя бы один URL сервера ${product}',
 			'addServer.noReachableServer' => ({required Object product}) => 'Не найдено ни одного доступного сервера ${product}',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'Эти URL указывают на разные серверы ${product}',

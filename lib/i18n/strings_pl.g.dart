@@ -311,6 +311,9 @@ class _Translations$settings$pl extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'Taka sama jak domyślna jakość';
 	@override String get directPlayCoveredQuality => 'Odtwarzaj mniejsze wideo w oryginalnej jakości';
 	@override String get directPlayCoveredQualityDescription => 'Odtwarzaj bezpośrednio wideo mieszczące się już w limicie jakości zamiast je transkodować';
+	@override String get videoCodecs => 'Kodeki wideo';
+	@override String get videoCodecsDescription => 'Niezaznaczone kodeki są transkodowane przez serwer';
+	@override String get videoCodecsAlwaysAccepted => 'Zawsze akceptowany';
 	@override String get musicQualityTitle => 'Jakość muzyki';
 	@override String get subtitleStyling => 'Styl napisów';
 	@override String get subtitleStylingDescription => 'Dostosuj wygląd napisów';
@@ -471,6 +474,14 @@ class _Translations$settings$pl extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Wymuś natywne DV7 i wyłącz ponowną próbę konwersji DV';
 	@override String get dvConversionDv81Description => 'Wymuś wbudowaną konwersję RPU do profilu Dolby Vision 8.1';
 	@override String get dvConversionHevcStripDescription => 'Usuń warstwy Dolby Vision RPU/EL i przedstaw zwykłe HEVC';
+	@override String get hdrSdrConversion => 'Konwersja HDR do SDR';
+	@override String get hdrSdrConversionDescription => 'Wybierz, co konwertuje wideo HDR, gdy wyświetlacz nie obsługuje HDR.';
+	@override String get hdrSdrConversionAuto => 'Automatycznie';
+	@override String get hdrSdrConversionAutoDescription => 'Urządzenie na Androidzie 9 i nowszym, odtwarzacz na starszych wersjach';
+	@override String get hdrSdrConversionDevice => 'Urządzenie';
+	@override String get hdrSdrConversionDeviceDescription => 'Konwersję wykonuje sprzęt wideo urządzenia. Najszybciej, ale kolory zależą od urządzenia';
+	@override String get hdrSdrConversionPlayer => 'Odtwarzacz';
+	@override String get hdrSdrConversionPlayerDescription => 'Konwersję wykonuje odtwarzacz. Spójne kolory, ale 4K może się zacinać na słabszych przystawkach TV';
 	@override String get deinterlace => 'Usuwanie przeplotu';
 	@override String get deinterlaceDescription => 'Usuwa artefakty grzebienia z wideo z przeplotem (tylko odtwarzacz mpv)';
 	@override String get requireProfileSelectionOnOpen => 'Pytaj o profil przy otwarciu aplikacji';
@@ -3227,6 +3238,9 @@ extension on TranslationsPl {
 			'settings.cellularQualitySameAsDefault' => 'Taka sama jak domyślna jakość',
 			'settings.directPlayCoveredQuality' => 'Odtwarzaj mniejsze wideo w oryginalnej jakości',
 			'settings.directPlayCoveredQualityDescription' => 'Odtwarzaj bezpośrednio wideo mieszczące się już w limicie jakości zamiast je transkodować',
+			'settings.videoCodecs' => 'Kodeki wideo',
+			'settings.videoCodecsDescription' => 'Niezaznaczone kodeki są transkodowane przez serwer',
+			'settings.videoCodecsAlwaysAccepted' => 'Zawsze akceptowany',
 			'settings.musicQualityTitle' => 'Jakość muzyki',
 			'settings.subtitleStyling' => 'Styl napisów',
 			'settings.subtitleStylingDescription' => 'Dostosuj wygląd napisów',
@@ -3387,6 +3401,14 @@ extension on TranslationsPl {
 			'settings.dvConversionNativeDescription' => 'Wymuś natywne DV7 i wyłącz ponowną próbę konwersji DV',
 			'settings.dvConversionDv81Description' => 'Wymuś wbudowaną konwersję RPU do profilu Dolby Vision 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Usuń warstwy Dolby Vision RPU/EL i przedstaw zwykłe HEVC',
+			'settings.hdrSdrConversion' => 'Konwersja HDR do SDR',
+			'settings.hdrSdrConversionDescription' => 'Wybierz, co konwertuje wideo HDR, gdy wyświetlacz nie obsługuje HDR.',
+			'settings.hdrSdrConversionAuto' => 'Automatycznie',
+			'settings.hdrSdrConversionAutoDescription' => 'Urządzenie na Androidzie 9 i nowszym, odtwarzacz na starszych wersjach',
+			'settings.hdrSdrConversionDevice' => 'Urządzenie',
+			'settings.hdrSdrConversionDeviceDescription' => 'Konwersję wykonuje sprzęt wideo urządzenia. Najszybciej, ale kolory zależą od urządzenia',
+			'settings.hdrSdrConversionPlayer' => 'Odtwarzacz',
+			'settings.hdrSdrConversionPlayerDescription' => 'Konwersję wykonuje odtwarzacz. Spójne kolory, ale 4K może się zacinać na słabszych przystawkach TV',
 			'settings.deinterlace' => 'Usuwanie przeplotu',
 			'settings.deinterlaceDescription' => 'Usuwa artefakty grzebienia z wideo z przeplotem (tylko odtwarzacz mpv)',
 			'settings.requireProfileSelectionOnOpen' => 'Pytaj o profil przy otwarciu aplikacji',
@@ -3540,6 +3562,8 @@ extension on TranslationsPl {
 			'fileInfo.streamId' => 'ID strumienia',
 			'fileInfo.language' => 'Język',
 			'fileInfo.languageCode' => 'Kod języka',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Tytuł ścieżki',
 			'fileInfo.channels' => 'Kanały',
 			'fileInfo.sampleRate' => 'Częstotliwość próbkowania',
@@ -3551,8 +3575,6 @@ extension on TranslationsPl {
 			'fileInfo.externalDelivery' => 'Może być dostarczany osobno',
 			'fileInfo.sidecarPath' => 'Ścieżka pliku towarzyszącego',
 			'fileInfo.sourceStream' => 'Skopiowano z',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Tymczasowy',
 			'fileInfo.timeBase' => 'Baza czasu',
 			'fileInfo.overallBitrate' => 'Całkowita przepływność',
@@ -4054,6 +4076,8 @@ extension on TranslationsPl {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Nie udało się opróżnić kosza: ${error}',
 			'libraries.analyzing' => ({required Object title}) => 'Analizowanie "${title}"...',
 			'libraries.analysisStarted' => ({required Object title}) => 'Analiza rozpoczęta dla "${title}"',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Nie udało się przeanalizować biblioteki: ${error}',
 			'libraries.noLibrariesFound' => 'Nie znaleziono bibliotek',
 			'libraries.allLibrariesHidden' => 'Wszystkie biblioteki są ukryte',
@@ -4065,8 +4089,6 @@ extension on TranslationsPl {
 			'libraries.clearAll' => 'Wyczyść wszystko',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => 'Czy na pewno chcesz zeskanować "${title}"?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => 'Czy na pewno chcesz przeanalizować "${title}"?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => 'Czy na pewno chcesz odświeżyć metadane dla "${title}"?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => 'Czy na pewno chcesz opróżnić kosz dla "${title}"?',
 			'libraries.manageLibraries' => 'Zarządzaj bibliotekami',
@@ -4568,6 +4590,8 @@ extension on TranslationsPl {
 			'watchTogether.defaultDisplayName' => 'Użytkownik',
 			'watchTogether.errors.timedOut' => 'Serwer pośredniczący nie odpowiedział w wymaganym czasie',
 			'watchTogether.errors.connectionLost' => 'Połączenie zostało zamknięte, zanim sesja była gotowa',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'Serwer pośredniczący wysłał nieoczekiwaną odpowiedź',
 			'watchTogether.errors.sessionEnded' => 'Gospodarz zakończył sesję',
 			'watchTogether.errors.sessionUnavailable' => 'Nie można wznowić tej sesji. Dołącz do pokoju lub utwórz go, aby kontynuować.',
@@ -4579,8 +4603,6 @@ extension on TranslationsPl {
 			'downloads.tracksQueued' => ({required Object count}) => '${count} utworów w kolejce do pobrania',
 			'downloads.noDownloads' => 'Brak pobrań',
 			'downloads.noDownloadsDescription' => 'Pobrane treści pojawią się tutaj do oglądania offline',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'Pobierz',
 			'downloads.deleteDownload' => 'Usuń pobranie',
 			'downloads.retryDownload' => 'Ponów pobieranie',
@@ -5082,6 +5104,8 @@ extension on TranslationsPl {
 			'addServer.responseNotJson' => 'Odpowiedź serwera ma nieprawidłowy format JSON',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'W odpowiedzi brakuje identyfikatora lub nazwy serwera — czy to serwer ${product}?',
 			'addServer.probeFailed' => ({required Object error}) => 'Nie udało się połączyć z serwerem: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => 'Wprowadź co najmniej jeden adres URL serwera ${product}',
 			'addServer.noReachableServer' => ({required Object product}) => 'Nie znaleziono żadnego osiągalnego serwera ${product}',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'Te adresy URL wskazują różne serwery ${product}',

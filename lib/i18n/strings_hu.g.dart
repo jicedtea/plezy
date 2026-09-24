@@ -311,6 +311,9 @@ class _Translations$settings$hu extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'Ugyanaz, mint az alapértelmezett minőség';
 	@override String get directPlayCoveredQuality => 'Kisebb videók lejátszása eredeti minőségben';
 	@override String get directPlayCoveredQualityDescription => 'A minőségi korláton belüli videók közvetlen lejátszása átkódolás helyett';
+	@override String get videoCodecs => 'Videokodekek';
+	@override String get videoCodecsDescription => 'A nem bejelölt kodekeket a szerver átkódolja';
+	@override String get videoCodecsAlwaysAccepted => 'Mindig elfogadva';
 	@override String get musicQualityTitle => 'Zene minősége';
 	@override String get subtitleStyling => 'Feliratok stílusa';
 	@override String get subtitleStylingDescription => 'Feliratok megjelenésének testreszabása';
@@ -471,6 +474,14 @@ class _Translations$settings$hu extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'A natív DV7 kényszerítése és a DV-átalakítási újrapróbálkozás letiltása';
 	@override String get dvConversionDv81Description => 'A közvetlen RPU-átalakítás kényszerítése Dolby Vision Profile 8.1-re';
 	@override String get dvConversionHevcStripDescription => 'A Dolby Vision RPU/EL-rétegek eltávolítása és egyszerű HEVC-ként való megjelenítés';
+	@override String get hdrSdrConversion => 'HDR–SDR átalakítás';
+	@override String get hdrSdrConversionDescription => 'Válaszd ki, mi alakítsa át a HDR-videót, ha a kijelző nem tud HDR-t megjeleníteni.';
+	@override String get hdrSdrConversionAuto => 'Automatikus';
+	@override String get hdrSdrConversionAutoDescription => 'Eszköz Android 9-től, lejátszó a régebbi verziókon';
+	@override String get hdrSdrConversionDevice => 'Eszköz';
+	@override String get hdrSdrConversionDeviceDescription => 'Az eszköz videohardvere alakítja át. A leggyorsabb, de a színek az eszköztől függnek';
+	@override String get hdrSdrConversionPlayer => 'Lejátszó';
+	@override String get hdrSdrConversionPlayerDescription => 'A lejátszó alakítja át. Egységes színek, de a 4K akadozhat a gyengébb TV-boxokon';
 	@override String get deinterlace => 'Deinterlacing';
 	@override String get deinterlaceDescription => 'Fésűfog-műtermékek eltávolítása a váltott soros videóból (csak mpv lejátszóval)';
 	@override String get requireProfileSelectionOnOpen => 'Profil kérése az alkalmazás megnyitásakor';
@@ -3205,6 +3216,9 @@ extension on TranslationsHu {
 			'settings.cellularQualitySameAsDefault' => 'Ugyanaz, mint az alapértelmezett minőség',
 			'settings.directPlayCoveredQuality' => 'Kisebb videók lejátszása eredeti minőségben',
 			'settings.directPlayCoveredQualityDescription' => 'A minőségi korláton belüli videók közvetlen lejátszása átkódolás helyett',
+			'settings.videoCodecs' => 'Videokodekek',
+			'settings.videoCodecsDescription' => 'A nem bejelölt kodekeket a szerver átkódolja',
+			'settings.videoCodecsAlwaysAccepted' => 'Mindig elfogadva',
 			'settings.musicQualityTitle' => 'Zene minősége',
 			'settings.subtitleStyling' => 'Feliratok stílusa',
 			'settings.subtitleStylingDescription' => 'Feliratok megjelenésének testreszabása',
@@ -3365,6 +3379,14 @@ extension on TranslationsHu {
 			'settings.dvConversionNativeDescription' => 'A natív DV7 kényszerítése és a DV-átalakítási újrapróbálkozás letiltása',
 			'settings.dvConversionDv81Description' => 'A közvetlen RPU-átalakítás kényszerítése Dolby Vision Profile 8.1-re',
 			'settings.dvConversionHevcStripDescription' => 'A Dolby Vision RPU/EL-rétegek eltávolítása és egyszerű HEVC-ként való megjelenítés',
+			'settings.hdrSdrConversion' => 'HDR–SDR átalakítás',
+			'settings.hdrSdrConversionDescription' => 'Válaszd ki, mi alakítsa át a HDR-videót, ha a kijelző nem tud HDR-t megjeleníteni.',
+			'settings.hdrSdrConversionAuto' => 'Automatikus',
+			'settings.hdrSdrConversionAutoDescription' => 'Eszköz Android 9-től, lejátszó a régebbi verziókon',
+			'settings.hdrSdrConversionDevice' => 'Eszköz',
+			'settings.hdrSdrConversionDeviceDescription' => 'Az eszköz videohardvere alakítja át. A leggyorsabb, de a színek az eszköztől függnek',
+			'settings.hdrSdrConversionPlayer' => 'Lejátszó',
+			'settings.hdrSdrConversionPlayerDescription' => 'A lejátszó alakítja át. Egységes színek, de a 4K akadozhat a gyengébb TV-boxokon',
 			'settings.deinterlace' => 'Deinterlacing',
 			'settings.deinterlaceDescription' => 'Fésűfog-műtermékek eltávolítása a váltott soros videóból (csak mpv lejátszóval)',
 			'settings.requireProfileSelectionOnOpen' => 'Profil kérése az alkalmazás megnyitásakor',
@@ -3518,6 +3540,8 @@ extension on TranslationsHu {
 			'fileInfo.streamId' => 'Adatfolyam azonosítója',
 			'fileInfo.language' => 'Nyelv',
 			'fileInfo.languageCode' => 'Nyelvkód',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Sáv címe',
 			'fileInfo.channels' => 'Csatornák',
 			'fileInfo.sampleRate' => 'Mintavételi frekvencia',
@@ -3529,8 +3553,6 @@ extension on TranslationsHu {
 			'fileInfo.externalDelivery' => 'Külön is kiszolgálható',
 			'fileInfo.sidecarPath' => 'Kísérő fájl útvonala',
 			'fileInfo.sourceStream' => 'Másolva innen',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Ideiglenes',
 			'fileInfo.timeBase' => 'Időalap',
 			'fileInfo.overallBitrate' => 'Összesített bitráta',
@@ -4032,6 +4054,8 @@ extension on TranslationsHu {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Nem sikerült a lomtár ürítése: ${error}',
 			'libraries.analyzing' => ({required Object title}) => '"${title}" elemzése...',
 			'libraries.analysisStarted' => ({required Object title}) => 'Elemzés elindítva a következőhöz: "${title}"',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Nem sikerült a könyvtár elemzése: ${error}',
 			'libraries.noLibrariesFound' => 'Nem találhatók könyvtárak',
 			'libraries.allLibrariesHidden' => 'Minden könyvtár el van rejtve',
@@ -4043,8 +4067,6 @@ extension on TranslationsHu {
 			'libraries.clearAll' => 'Összes törlése',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => 'Biztosan be szeretnéd olvasni a következőt: "${title}"?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => 'Biztosan elemezni szeretnéd a következőt: "${title}"?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => 'Biztosan frissíteni szeretnéd a metaadatokat a következőhöz: "${title}"?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => 'Biztosan ki szeretnéd üríteni a lomtárat a következőnél: "${title}"?',
 			'libraries.manageLibraries' => 'Könyvtárak kezelése',
@@ -4546,6 +4568,8 @@ extension on TranslationsHu {
 			'watchTogether.defaultDisplayName' => 'Felhasználó',
 			'watchTogether.errors.timedOut' => 'A relészerver nem válaszolt időben',
 			'watchTogether.errors.connectionLost' => 'A kapcsolat lezárult, mielőtt a munkamenet elkészült volna',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'A relészerver váratlan választ küldött',
 			'watchTogether.errors.sessionEnded' => 'A házigazda befejezte a munkamenetet',
 			'watchTogether.errors.sessionUnavailable' => 'Ez a munkamenet nem folytatható. A folytatáshoz csatlakozz egy szobához vagy hozz létre egyet.',
@@ -4557,8 +4581,6 @@ extension on TranslationsHu {
 			'downloads.tracksQueued' => ({required Object count}) => '${count} zeneszám letöltésre sorba állítva',
 			'downloads.noDownloads' => 'Még nincsenek letöltések',
 			'downloads.noDownloadsDescription' => 'A letöltött tartalmak itt jelennek meg az offline megtekintéshez',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'Letöltés',
 			'downloads.deleteDownload' => 'Letöltés törlése',
 			'downloads.retryDownload' => 'Letöltés újrapróbálása',
@@ -5060,6 +5082,8 @@ extension on TranslationsHu {
 			'addServer.responseNotJson' => 'A szerver válasza nem érvényes JSON',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'A válaszból hiányzik az azonosító vagy a szerver neve – ez valóban ${product}-szerver?',
 			'addServer.probeFailed' => ({required Object error}) => 'Nem sikerült elérni a szervert: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => 'Adj meg legalább egy ${product}-szerverhez tartozó URL-t',
 			'addServer.noReachableServer' => ({required Object product}) => 'Nem található elérhető ${product}-szerver',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'Ezek az URL-ek különböző ${product}-szerverekre mutatnak',

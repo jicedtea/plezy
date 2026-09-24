@@ -311,6 +311,9 @@ class _Translations$settings$da extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'Samme som standardkvalitet';
 	@override String get directPlayCoveredQuality => 'Afspil mindre videoer i original kvalitet';
 	@override String get directPlayCoveredQualityDescription => 'Afspil videoer, der allerede er inden for kvalitetsgrænsen, direkte i stedet for at transkode dem';
+	@override String get videoCodecs => 'Videocodecs';
+	@override String get videoCodecsDescription => 'Codecs uden flueben transkodes af serveren';
+	@override String get videoCodecsAlwaysAccepted => 'Accepteres altid';
 	@override String get musicQualityTitle => 'Musikkvalitet';
 	@override String get subtitleStyling => 'Undertekststil';
 	@override String get subtitleStylingDescription => 'Tilpas underteksters udseende';
@@ -471,6 +474,14 @@ class _Translations$settings$da extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'Gennemtving indbygget DV7-understøttelse, og undlad at forsøge DV-konvertering igen';
 	@override String get dvConversionDv81Description => 'Tving inline RPU-konvertering til Dolby Vision profil 8.1';
 	@override String get dvConversionHevcStripDescription => 'Fjern Dolby Vision RPU/EL-lag og brug almindelig HEVC';
+	@override String get hdrSdrConversion => 'HDR til SDR-konvertering';
+	@override String get hdrSdrConversionDescription => 'Vælg, hvad der konverterer HDR-video, når skærmen ikke kan vise HDR.';
+	@override String get hdrSdrConversionAuto => 'Automatisk';
+	@override String get hdrSdrConversionAutoDescription => 'Enhed på Android 9 og nyere, afspiller på ældre versioner';
+	@override String get hdrSdrConversionDevice => 'Enhed';
+	@override String get hdrSdrConversionDeviceDescription => 'Enhedens videohardware konverterer. Hurtigst, men farverne afhænger af enheden';
+	@override String get hdrSdrConversionPlayer => 'Afspiller';
+	@override String get hdrSdrConversionPlayerDescription => 'Afspilleren konverterer. Ensartede farver, men 4K kan hakke på billige tv-bokse';
 	@override String get deinterlace => 'Deinterlacing';
 	@override String get deinterlaceDescription => 'Fjern kamartefakter fra interlaced video (kun mpv-afspiller)';
 	@override String get requireProfileSelectionOnOpen => 'Spørg om profil ved åbning';
@@ -3205,6 +3216,9 @@ extension on TranslationsDa {
 			'settings.cellularQualitySameAsDefault' => 'Samme som standardkvalitet',
 			'settings.directPlayCoveredQuality' => 'Afspil mindre videoer i original kvalitet',
 			'settings.directPlayCoveredQualityDescription' => 'Afspil videoer, der allerede er inden for kvalitetsgrænsen, direkte i stedet for at transkode dem',
+			'settings.videoCodecs' => 'Videocodecs',
+			'settings.videoCodecsDescription' => 'Codecs uden flueben transkodes af serveren',
+			'settings.videoCodecsAlwaysAccepted' => 'Accepteres altid',
 			'settings.musicQualityTitle' => 'Musikkvalitet',
 			'settings.subtitleStyling' => 'Undertekststil',
 			'settings.subtitleStylingDescription' => 'Tilpas underteksters udseende',
@@ -3365,6 +3379,14 @@ extension on TranslationsDa {
 			'settings.dvConversionNativeDescription' => 'Gennemtving indbygget DV7-understøttelse, og undlad at forsøge DV-konvertering igen',
 			'settings.dvConversionDv81Description' => 'Tving inline RPU-konvertering til Dolby Vision profil 8.1',
 			'settings.dvConversionHevcStripDescription' => 'Fjern Dolby Vision RPU/EL-lag og brug almindelig HEVC',
+			'settings.hdrSdrConversion' => 'HDR til SDR-konvertering',
+			'settings.hdrSdrConversionDescription' => 'Vælg, hvad der konverterer HDR-video, når skærmen ikke kan vise HDR.',
+			'settings.hdrSdrConversionAuto' => 'Automatisk',
+			'settings.hdrSdrConversionAutoDescription' => 'Enhed på Android 9 og nyere, afspiller på ældre versioner',
+			'settings.hdrSdrConversionDevice' => 'Enhed',
+			'settings.hdrSdrConversionDeviceDescription' => 'Enhedens videohardware konverterer. Hurtigst, men farverne afhænger af enheden',
+			'settings.hdrSdrConversionPlayer' => 'Afspiller',
+			'settings.hdrSdrConversionPlayerDescription' => 'Afspilleren konverterer. Ensartede farver, men 4K kan hakke på billige tv-bokse',
 			'settings.deinterlace' => 'Deinterlacing',
 			'settings.deinterlaceDescription' => 'Fjern kamartefakter fra interlaced video (kun mpv-afspiller)',
 			'settings.requireProfileSelectionOnOpen' => 'Spørg om profil ved åbning',
@@ -3518,6 +3540,8 @@ extension on TranslationsDa {
 			'fileInfo.streamId' => 'Strøm-ID',
 			'fileInfo.language' => 'Sprog',
 			'fileInfo.languageCode' => 'Sprogkode',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'Sportitel',
 			'fileInfo.channels' => 'Kanaler',
 			'fileInfo.sampleRate' => 'Samplingshastighed',
@@ -3529,8 +3553,6 @@ extension on TranslationsDa {
 			'fileInfo.externalDelivery' => 'Kan leveres separat',
 			'fileInfo.sidecarPath' => 'Sidecar-sti',
 			'fileInfo.sourceStream' => 'Kopieret fra',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => 'Midlertidig',
 			'fileInfo.timeBase' => 'Tidsbase',
 			'fileInfo.overallBitrate' => 'Samlet bitrate',
@@ -4032,6 +4054,8 @@ extension on TranslationsDa {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'Kunne ikke tømme papirkurv: ${error}',
 			'libraries.analyzing' => ({required Object title}) => 'Analyserer "${title}"...',
 			'libraries.analysisStarted' => ({required Object title}) => 'Analyse startet for "${title}"',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'Kunne ikke analysere bibliotek: ${error}',
 			'libraries.noLibrariesFound' => 'Ingen biblioteker fundet',
 			'libraries.allLibrariesHidden' => 'Alle biblioteker er skjult',
@@ -4043,8 +4067,6 @@ extension on TranslationsDa {
 			'libraries.clearAll' => 'Ryd alle',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => 'Er du sikker på, at du vil scanne "${title}"?',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => 'Er du sikker på, at du vil analysere "${title}"?',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => 'Er du sikker på, at du vil opdatere metadata for "${title}"?',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => 'Er du sikker på, at du vil tømme papirkurven for "${title}"?',
 			'libraries.manageLibraries' => 'Administrer biblioteker',
@@ -4546,6 +4568,8 @@ extension on TranslationsDa {
 			'watchTogether.defaultDisplayName' => 'Bruger',
 			'watchTogether.errors.timedOut' => 'Relayserveren svarede ikke i tide',
 			'watchTogether.errors.connectionLost' => 'Forbindelsen blev lukket, før sessionen var klar',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'Relayserveren sendte et uventet svar',
 			'watchTogether.errors.sessionEnded' => 'Værten afsluttede sessionen',
 			'watchTogether.errors.sessionUnavailable' => 'Kan ikke genoptage denne session. Deltag i eller opret et rum for at fortsætte.',
@@ -4557,8 +4581,6 @@ extension on TranslationsDa {
 			'downloads.tracksQueued' => ({required Object count}) => '${count} numre i kø til download',
 			'downloads.noDownloads' => 'Ingen downloads endnu',
 			'downloads.noDownloadsDescription' => 'Downloadet indhold vises her til offlinevisning',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'Download',
 			'downloads.deleteDownload' => 'Slet download',
 			'downloads.retryDownload' => 'Prøv download igen',
@@ -5060,6 +5082,8 @@ extension on TranslationsDa {
 			'addServer.responseNotJson' => 'Serversvaret var ikke gyldig JSON',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'Svaret mangler et ID eller servernavn – er dette en ${product}-server?',
 			'addServer.probeFailed' => ({required Object error}) => 'Kunne ikke nå serveren: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => 'Indtast mindst én URL til en ${product}-server',
 			'addServer.noReachableServer' => ({required Object product}) => 'Der blev ikke fundet nogen ${product}-server, som kunne nås',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'Disse URL\'er peger på forskellige ${product}-servere',

@@ -311,6 +311,9 @@ class _Translations$settings$ja extends Translations$settings$en {
 	@override String get cellularQualitySameAsDefault => 'デフォルト画質と同じ';
 	@override String get directPlayCoveredQuality => '小さい動画をオリジナル画質で再生';
 	@override String get directPlayCoveredQualityDescription => '画質制限内の動画はトランスコードせずにダイレクト再生します';
+	@override String get videoCodecs => 'ビデオコーデック';
+	@override String get videoCodecsDescription => 'チェックを外したコーデックはサーバーがトランスコードします';
+	@override String get videoCodecsAlwaysAccepted => '常に許可';
 	@override String get musicQualityTitle => '音楽の音質';
 	@override String get subtitleStyling => '字幕スタイル';
 	@override String get subtitleStylingDescription => '字幕の外観をカスタマイズ';
@@ -471,6 +474,14 @@ class _Translations$settings$ja extends Translations$settings$en {
 	@override String get dvConversionNativeDescription => 'ネイティブ DV7 を強制し、DV 変換の再試行を抑制します';
 	@override String get dvConversionDv81Description => 'Dolby Vision プロファイル 8.1 へのインライン RPU 変換を強制します';
 	@override String get dvConversionHevcStripDescription => 'Dolby Vision の RPU/EL レイヤーを削除し、通常の HEVC として扱います';
+	@override String get hdrSdrConversion => 'HDRからSDRへの変換';
+	@override String get hdrSdrConversionDescription => 'ディスプレイがHDRを表示できないときに、HDR映像を何で変換するかを選択します。';
+	@override String get hdrSdrConversionAuto => '自動';
+	@override String get hdrSdrConversionAutoDescription => 'Android 9以降はデバイス、それより前のバージョンではプレーヤー';
+	@override String get hdrSdrConversionDevice => 'デバイス';
+	@override String get hdrSdrConversionDeviceDescription => 'デバイスの映像ハードウェアで変換します。最も高速ですが、色はデバイスによって異なります';
+	@override String get hdrSdrConversionPlayer => 'プレーヤー';
+	@override String get hdrSdrConversionPlayerDescription => 'プレーヤーで変換します。色は一定ですが、低価格なTVボックスでは4Kがカクつくことがあります';
 	@override String get deinterlace => 'デインターレース';
 	@override String get deinterlaceDescription => 'インターレース映像のくし型ノイズを除去します（mpvプレーヤーのみ）';
 	@override String get requireProfileSelectionOnOpen => 'アプリ起動時にプロフィールを確認';
@@ -3194,6 +3205,9 @@ extension on TranslationsJa {
 			'settings.cellularQualitySameAsDefault' => 'デフォルト画質と同じ',
 			'settings.directPlayCoveredQuality' => '小さい動画をオリジナル画質で再生',
 			'settings.directPlayCoveredQualityDescription' => '画質制限内の動画はトランスコードせずにダイレクト再生します',
+			'settings.videoCodecs' => 'ビデオコーデック',
+			'settings.videoCodecsDescription' => 'チェックを外したコーデックはサーバーがトランスコードします',
+			'settings.videoCodecsAlwaysAccepted' => '常に許可',
 			'settings.musicQualityTitle' => '音楽の音質',
 			'settings.subtitleStyling' => '字幕スタイル',
 			'settings.subtitleStylingDescription' => '字幕の外観をカスタマイズ',
@@ -3354,6 +3368,14 @@ extension on TranslationsJa {
 			'settings.dvConversionNativeDescription' => 'ネイティブ DV7 を強制し、DV 変換の再試行を抑制します',
 			'settings.dvConversionDv81Description' => 'Dolby Vision プロファイル 8.1 へのインライン RPU 変換を強制します',
 			'settings.dvConversionHevcStripDescription' => 'Dolby Vision の RPU/EL レイヤーを削除し、通常の HEVC として扱います',
+			'settings.hdrSdrConversion' => 'HDRからSDRへの変換',
+			'settings.hdrSdrConversionDescription' => 'ディスプレイがHDRを表示できないときに、HDR映像を何で変換するかを選択します。',
+			'settings.hdrSdrConversionAuto' => '自動',
+			'settings.hdrSdrConversionAutoDescription' => 'Android 9以降はデバイス、それより前のバージョンではプレーヤー',
+			'settings.hdrSdrConversionDevice' => 'デバイス',
+			'settings.hdrSdrConversionDeviceDescription' => 'デバイスの映像ハードウェアで変換します。最も高速ですが、色はデバイスによって異なります',
+			'settings.hdrSdrConversionPlayer' => 'プレーヤー',
+			'settings.hdrSdrConversionPlayerDescription' => 'プレーヤーで変換します。色は一定ですが、低価格なTVボックスでは4Kがカクつくことがあります',
 			'settings.deinterlace' => 'デインターレース',
 			'settings.deinterlaceDescription' => 'インターレース映像のくし型ノイズを除去します（mpvプレーヤーのみ）',
 			'settings.requireProfileSelectionOnOpen' => 'アプリ起動時にプロフィールを確認',
@@ -3507,6 +3529,8 @@ extension on TranslationsJa {
 			'fileInfo.streamId' => 'ストリーム ID',
 			'fileInfo.language' => '言語',
 			'fileInfo.languageCode' => '言語コード',
+			_ => null,
+		} ?? switch (path) {
 			'fileInfo.streamTitle' => 'トラックタイトル',
 			'fileInfo.channels' => 'チャンネル',
 			'fileInfo.sampleRate' => 'サンプルレート',
@@ -3518,8 +3542,6 @@ extension on TranslationsJa {
 			'fileInfo.externalDelivery' => '個別に配信可能',
 			'fileInfo.sidecarPath' => 'サイドカーパス',
 			'fileInfo.sourceStream' => 'コピー元',
-			_ => null,
-		} ?? switch (path) {
 			'fileInfo.temporary' => '一時的',
 			'fileInfo.timeBase' => 'タイムベース',
 			'fileInfo.overallBitrate' => '全体ビットレート',
@@ -4021,6 +4043,8 @@ extension on TranslationsJa {
 			'libraries.failedToEmptyTrash' => ({required Object error}) => 'ゴミ箱を空にできませんでした: ${error}',
 			'libraries.analyzing' => ({required Object title}) => '「${title}」を解析中…',
 			'libraries.analysisStarted' => ({required Object title}) => '「${title}」の解析を開始しました',
+			_ => null,
+		} ?? switch (path) {
 			'libraries.failedToAnalyze' => ({required Object error}) => 'ライブラリの解析に失敗しました: ${error}',
 			'libraries.noLibrariesFound' => 'ライブラリが見つかりません',
 			'libraries.allLibrariesHidden' => 'すべてのライブラリが非表示です',
@@ -4032,8 +4056,6 @@ extension on TranslationsJa {
 			'libraries.clearAll' => 'すべてクリア',
 			'libraries.scanLibraryConfirm' => ({required Object title}) => '"${title}"をスキャンしてもよろしいですか？',
 			'libraries.analyzeLibraryConfirm' => ({required Object title}) => '"${title}"を解析してもよろしいですか？',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.refreshMetadataConfirm' => ({required Object title}) => '"${title}"のメタデータを更新してもよろしいですか？',
 			'libraries.emptyTrashConfirm' => ({required Object title}) => '"${title}"のゴミ箱を空にしてもよろしいですか？',
 			'libraries.manageLibraries' => 'ライブラリを管理',
@@ -4535,6 +4557,8 @@ extension on TranslationsJa {
 			'watchTogether.defaultDisplayName' => 'ユーザー',
 			'watchTogether.errors.timedOut' => 'リレーサーバーが時間内に応答しませんでした',
 			'watchTogether.errors.connectionLost' => 'セッションの準備が整う前に接続が閉じられました',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.errors.invalidRelayResponse' => 'リレーサーバーから予期しない応答が返されました',
 			'watchTogether.errors.sessionEnded' => 'ホストがセッションを終了しました',
 			'watchTogether.errors.sessionUnavailable' => 'このセッションを再開できません。ルームに参加するか作成して続行してください。',
@@ -4546,8 +4570,6 @@ extension on TranslationsJa {
 			'downloads.tracksQueued' => ({required Object count}) => '${count} 曲をダウンロード待機中',
 			'downloads.noDownloads' => 'ダウンロードはまだありません',
 			'downloads.noDownloadsDescription' => 'ダウンロードしたコンテンツはここに表示され、オフラインで視聴できます',
-			_ => null,
-		} ?? switch (path) {
 			'downloads.downloadNow' => 'ダウンロード',
 			'downloads.deleteDownload' => 'ダウンロードを削除',
 			'downloads.retryDownload' => 'ダウンロードを再試行',
@@ -5049,6 +5071,8 @@ extension on TranslationsJa {
 			'addServer.responseNotJson' => 'サーバーのレスポンスが有効なJSONではありません',
 			'addServer.responseMissingIdentity' => ({required Object product}) => 'レスポンスにIDまたはサーバー名がありません。これは${product}サーバーですか？',
 			'addServer.probeFailed' => ({required Object error}) => 'サーバーに接続できませんでした: ${error}',
+			_ => null,
+		} ?? switch (path) {
 			'addServer.enterAtLeastOneUrl' => ({required Object product}) => '${product}サーバーのURLを1つ以上入力してください',
 			'addServer.noReachableServer' => ({required Object product}) => '接続可能な${product}サーバーが見つかりませんでした',
 			'addServer.urlsPointToDifferentServers' => ({required Object product}) => 'これらのURLは異なる${product}サーバーを指しています',
