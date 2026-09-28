@@ -442,7 +442,8 @@
     "hint": "Zoek films, series, muziek...",
     "tryDifferentTerm": "Probeer een andere zoekterm",
     "searchYourMedia": "Zoek in je media",
-    "enterTitleActorOrKeyword": "Voer een titel, acteur of trefwoord in"
+    "enterTitleActorOrKeyword": "Voer een titel, acteur of trefwoord in",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "Stel sneltoets in voor ${actionName}",
@@ -914,6 +915,8 @@
     "signOut": "Afmelden",
     "signOutPlexTitle": "Afmelden bij Plex?",
     "signOutPlexMessage": "${displayName} en alle Plex Home-gebruikers verwijderen? Je kunt altijd opnieuw inloggen.",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "Afgemeld bij Plex.",
     "signOutFailed": "Afmelden mislukt.",
     "sectionTitle": "Profielen",
@@ -1415,6 +1418,7 @@
       "otherMedia": "Anders"
     },
     "creditRole": {
+      "actor": "",
       "director": "Regisseur",
       "writer": "Schrijver",
       "producer": "Producent",

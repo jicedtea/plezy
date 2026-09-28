@@ -442,7 +442,8 @@
     "hint": "영화, 시리즈, 음악 등을 검색하세요...",
     "tryDifferentTerm": "다른 검색어를 시도해 보세요",
     "searchYourMedia": "미디어 검색",
-    "enterTitleActorOrKeyword": "제목, 배우 또는 키워드를 입력하세요"
+    "enterTitleActorOrKeyword": "제목, 배우 또는 키워드를 입력하세요",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "${actionName}에 대한 단축키 설정",
@@ -910,6 +911,8 @@
     "signOut": "로그아웃",
     "signOutPlexTitle": "Plex에서 로그아웃하시겠습니까?",
     "signOutPlexMessage": "${displayName} 및 모든 Plex Home 사용자를 제거할까요? 언제든 다시 로그인할 수 있습니다.",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "Plex에서 로그아웃되었습니다.",
     "signOutFailed": "로그아웃에 실패했습니다.",
     "sectionTitle": "프로필",
@@ -1407,6 +1410,7 @@
       "otherMedia": "기타"
     },
     "creditRole": {
+      "actor": "",
       "director": "감독",
       "writer": "각본",
       "producer": "프로듀서",

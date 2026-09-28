@@ -442,7 +442,8 @@
     "hint": "Search movies, shows, music...",
     "tryDifferentTerm": "Try a different search term",
     "searchYourMedia": "Search your media",
-    "enterTitleActorOrKeyword": "Enter a title, actor, or keyword"
+    "enterTitleActorOrKeyword": "Enter a title, actor, or keyword",
+    "people": "People"
   },
   "hotkeys": {
     "setShortcutFor": "Set Shortcut for ${actionName}",
@@ -914,6 +915,8 @@
     "signOut": "Sign out",
     "signOutPlexTitle": "Sign out of Plex?",
     "signOutPlexMessage": "Remove ${displayName} and all Plex Home users? Sign back in anytime.",
+    "signOutPlexDeleteDownloads": "Also delete downloads",
+    "signOutPlexDeleteDownloadsDescription": "Otherwise they stay on this device and come back when you sign back in to this account.",
     "signedOutPlex": "Signed out of Plex.",
     "signOutFailed": "Sign out failed.",
     "sectionTitle": "Profiles",
@@ -1415,6 +1418,7 @@
       "otherMedia": "Other"
     },
     "creditRole": {
+      "actor": "Actor",
       "director": "Director",
       "writer": "Writer",
       "producer": "Producer",

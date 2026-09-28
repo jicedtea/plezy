@@ -442,7 +442,8 @@
     "hint": "Поиск фильмов, сериалов, музыки...",
     "tryDifferentTerm": "Попробуйте другой запрос",
     "searchYourMedia": "Поиск в вашей медиатеке",
-    "enterTitleActorOrKeyword": "Введите название, актёра или ключевое слово"
+    "enterTitleActorOrKeyword": "Введите название, актёра или ключевое слово",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "Назначить клавишу для ${actionName}",
@@ -922,6 +923,8 @@
     "signOut": "Выйти",
     "signOutPlexTitle": "Выйти из Plex?",
     "signOutPlexMessage": "Удалить ${displayName} и всех пользователей Plex Home? Вы сможете войти снова в любое время.",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "Вы вышли из Plex.",
     "signOutFailed": "Не удалось выйти.",
     "sectionTitle": "Профили",
@@ -1431,6 +1434,7 @@
       "otherMedia": "Другое"
     },
     "creditRole": {
+      "actor": "",
       "director": "Режиссёр",
       "writer": "Сценарист",
       "producer": "Продюсер",

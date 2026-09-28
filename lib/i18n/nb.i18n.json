@@ -442,7 +442,8 @@
     "hint": "Søk i filmer, serier, musikk...",
     "tryDifferentTerm": "Prøv et annet søkeord",
     "searchYourMedia": "Søk i mediene dine",
-    "enterTitleActorOrKeyword": "Skriv inn tittel, skuespiller eller nøkkelord"
+    "enterTitleActorOrKeyword": "Skriv inn tittel, skuespiller eller nøkkelord",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "Angi snarvei for ${actionName}",
@@ -914,6 +915,8 @@
     "signOut": "Logg ut",
     "signOutPlexTitle": "Logge ut av Plex?",
     "signOutPlexMessage": "Fjerne ${displayName} og alle Plex Home-brukere? Du kan logge inn igjen når som helst.",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "Logget ut av Plex.",
     "signOutFailed": "Utlogging mislyktes.",
     "sectionTitle": "Profiler",
@@ -1415,6 +1418,7 @@
       "otherMedia": "Annet"
     },
     "creditRole": {
+      "actor": "",
       "director": "Regissør",
       "writer": "Forfatter",
       "producer": "Produsent",

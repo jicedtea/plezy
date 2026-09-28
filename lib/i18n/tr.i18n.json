@@ -442,7 +442,8 @@
     "hint": "Film, dizi, müzik ara...",
     "tryDifferentTerm": "Farklı bir arama terimi deneyin",
     "searchYourMedia": "Medyanızda arayın",
-    "enterTitleActorOrKeyword": "Başlık, oyuncu veya anahtar kelime girin"
+    "enterTitleActorOrKeyword": "Başlık, oyuncu veya anahtar kelime girin",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "${actionName} için Kısayol Ayarla",
@@ -914,6 +915,8 @@
     "signOut": "Çıkış Yap",
     "signOutPlexTitle": "Plex'ten çıkış yapılsın mı?",
     "signOutPlexMessage": "${displayName} ve tüm Plex Ev kullanıcıları kaldırılsın mı? İstediğiniz zaman tekrar giriş yapabilirsiniz.",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "Plex'ten çıkış yapıldı.",
     "signOutFailed": "Çıkış yapılamadı.",
     "sectionTitle": "Profiller",
@@ -1415,6 +1418,7 @@
       "otherMedia": "Diğer"
     },
     "creditRole": {
+      "actor": "",
       "director": "Yönetmen",
       "writer": "Senarist",
       "producer": "Yapımcı",

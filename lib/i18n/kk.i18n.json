@@ -442,7 +442,8 @@
     "hint": "Фильмдер, сериалдар, музыка іздеу...",
     "tryDifferentTerm": "Басқа іздеу сөзін байқап көріңіз",
     "searchYourMedia": "Медиафайлдардан іздеу",
-    "enterTitleActorOrKeyword": "Атауын, актерді немесе кілт сөзді енгізіңіз"
+    "enterTitleActorOrKeyword": "Атауын, актерді немесе кілт сөзді енгізіңіз",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "${actionName} үшін пернелер тіркесін орнату",
@@ -914,6 +915,8 @@
     "signOut": "Шығу",
     "signOutPlexTitle": "Plex-тен шығу?",
     "signOutPlexMessage": "${displayName} мен барлық Plex Home пайдаланушылары өшірілсін бе? Кез келген уақытта қайта кіре аласыз.",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "Plex-тен шықтыңыз.",
     "signOutFailed": "Шығу мүмкін болмады.",
     "sectionTitle": "Профильдер",
@@ -1415,6 +1418,7 @@
       "otherMedia": "Басқа"
     },
     "creditRole": {
+      "actor": "",
       "director": "Режиссер",
       "writer": "Сценарист",
       "producer": "Продюсер",

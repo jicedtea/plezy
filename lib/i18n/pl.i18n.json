@@ -442,7 +442,8 @@
     "hint": "Szukaj filmów, seriali, muzyki...",
     "tryDifferentTerm": "Spróbuj innego wyszukiwania",
     "searchYourMedia": "Przeszukaj swoje media",
-    "enterTitleActorOrKeyword": "Wprowadź tytuł, aktora lub słowo kluczowe"
+    "enterTitleActorOrKeyword": "Wprowadź tytuł, aktora lub słowo kluczowe",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "Ustaw skrót dla ${actionName}",
@@ -922,6 +923,8 @@
     "signOut": "Wyloguj się",
     "signOutPlexTitle": "Wylogować się z Plex?",
     "signOutPlexMessage": "Usunąć ${displayName} i wszystkich użytkowników Plex Home? Możesz zalogować się ponownie w każdej chwili.",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "Wylogowano z Plex.",
     "signOutFailed": "Wylogowanie nie powiodło się.",
     "sectionTitle": "Profile",
@@ -1431,6 +1434,7 @@
       "otherMedia": "Inne"
     },
     "creditRole": {
+      "actor": "",
       "director": "Reżyser",
       "writer": "Scenarzysta",
       "producer": "Producent",

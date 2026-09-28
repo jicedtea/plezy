@@ -442,7 +442,8 @@
     "hint": "Sök filmer, serier, musik...",
     "tryDifferentTerm": "Prova en annan sökterm",
     "searchYourMedia": "Sök i dina media",
-    "enterTitleActorOrKeyword": "Ange en titel, skådespelare eller nyckelord"
+    "enterTitleActorOrKeyword": "Ange en titel, skådespelare eller nyckelord",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "Sätt genväg för ${actionName}",
@@ -914,6 +915,8 @@
     "signOut": "Logga ut",
     "signOutPlexTitle": "Logga ut från Plex?",
     "signOutPlexMessage": "Ta bort ${displayName} och alla Plex Home-användare? Du kan logga in igen när som helst.",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "Utloggad från Plex.",
     "signOutFailed": "Utloggningen misslyckades.",
     "sectionTitle": "Profiler",
@@ -1415,6 +1418,7 @@
       "otherMedia": "Annat"
     },
     "creditRole": {
+      "actor": "",
       "director": "Regissör",
       "writer": "Författare",
       "producer": "Producent",

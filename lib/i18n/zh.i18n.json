@@ -442,7 +442,8 @@
     "hint": "搜索电影、剧集、音乐…",
     "tryDifferentTerm": "尝试不同的搜索词",
     "searchYourMedia": "搜索媒体",
-    "enterTitleActorOrKeyword": "输入标题、演员或关键词"
+    "enterTitleActorOrKeyword": "输入标题、演员或关键词",
+    "people": ""
   },
   "hotkeys": {
     "setShortcutFor": "为 ${actionName} 设置快捷键",
@@ -910,6 +911,8 @@
     "signOut": "退出登录",
     "signOutPlexTitle": "退出 Plex 登录？",
     "signOutPlexMessage": "要移除 ${displayName} 和所有 Plex Home 用户吗？可随时重新登录。",
+    "signOutPlexDeleteDownloads": "",
+    "signOutPlexDeleteDownloadsDescription": "",
     "signedOutPlex": "已退出 Plex 登录。",
     "signOutFailed": "退出登录失败。",
     "sectionTitle": "用户资料",
@@ -1407,6 +1410,7 @@
       "otherMedia": "其他"
     },
     "creditRole": {
+      "actor": "",
       "director": "导演",
       "writer": "编剧",
       "producer": "制片人",
