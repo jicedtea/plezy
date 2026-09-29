@@ -2461,6 +2461,12 @@ class Translations$messages$en {
 	/// en: 'The server kept refusing to stream this file (HTTP 503). It may be restarting, busy, or the file's storage may be offline. Try again in a moment — if it keeps happening, ask the server owner to check the server and the file's storage.'
 	String get serverBusyBody => 'The server kept refusing to stream this file (HTTP 503). It may be restarting, busy, or the file\'s storage may be offline. Try again in a moment — if it keeps happening, ask the server owner to check the server and the file\'s storage.';
 
+	/// en: 'Playback not allowed'
+	String get playbackNotAllowedTitle => 'Playback not allowed';
+
+	/// en: 'The server refused to stream this item (HTTP 403). Your account may not have permission to play it, or the server may only allow playback on its local network.'
+	String get playbackNotAllowedBody => 'The server refused to stream this item (HTTP 403). Your account may not have permission to play it, or the server may only allow playback on its local network.';
+
 	/// en: 'Logs uploaded'
 	String get logsUploaded => 'Logs uploaded';
 
@@ -2883,6 +2889,12 @@ class Translations$connections$en {
 
 	/// en: 'Session expired for ${count} servers'
 	String sessionExpiredMany({required Object count}) => 'Session expired for ${count} servers';
+
+	/// en: '${name} refused access for this account'
+	String accessDeniedOne({required Object name}) => '${name} refused access for this account';
+
+	/// en: '${count} servers refused access for this account'
+	String accessDeniedMany({required Object count}) => '${count} servers refused access for this account';
 
 	/// en: 'Sign in again'
 	String get signInAgain => 'Sign in again';
@@ -4586,6 +4598,9 @@ class Translations$downloads$en {
 	/// en: 'Sign in required'
 	String get syncRuleSignInRequired => 'Sign in required';
 
+	/// en: 'Access denied'
+	String get syncRuleAccessDenied => 'Access denied';
+
 	/// en: 'Not available for current profile'
 	String get syncRuleNotAvailableForProfile => 'Not available for current profile';
 
@@ -4620,11 +4635,29 @@ class Translations$downloads$en {
 	/// en: 'File not found (404)'
 	String get errorFileNotFound => 'File not found (404)';
 
+	/// en: 'Download not allowed by the server (403)'
+	String get errorDownloadNotAllowed => 'Download not allowed by the server (403)';
+
 	/// en: 'Download failed'
 	String get errorDownloadFailed => 'Download failed';
 
-	/// en: 'Post-processing failed: ${error}'
-	String errorPostProcessing({required Object error}) => 'Post-processing failed: ${error}';
+	/// en: 'Download failed: ${reason}'
+	String errorDownloadFailedWithReason({required Object reason}) => 'Download failed: ${reason}';
+
+	/// en: 'Download failed (HTTP ${status})'
+	String errorHttpStatus({required Object status}) => 'Download failed (HTTP ${status})';
+
+	/// en: 'Post-processing failed: ${reason}'
+	String errorPostProcessing({required Object reason}) => 'Post-processing failed: ${reason}';
+
+	/// en: 'the file could not be saved on this device'
+	String get reasonFileNotSaved => 'the file could not be saved on this device';
+
+	/// en: 'the partial download could not be resumed'
+	String get reasonCannotResume => 'the partial download could not be resumed';
+
+	/// en: 'this device is out of storage'
+	String get reasonDeviceStorageFull => 'this device is out of storage';
 
 	/// en: 'Downloading...'
 	String get notificationDownloading => 'Downloading...';
@@ -8076,6 +8109,8 @@ extension on Translations {
 			'messages.mediaUnreadableBody' => 'The server found this item but could not read its file (HTTP 404). The file was probably moved, deleted, or its storage is offline. Ask the server owner to check the file and rescan the library.',
 			'messages.serverBusyTitle' => 'Stream unavailable',
 			'messages.serverBusyBody' => 'The server kept refusing to stream this file (HTTP 503). It may be restarting, busy, or the file\'s storage may be offline. Try again in a moment — if it keeps happening, ask the server owner to check the server and the file\'s storage.',
+			'messages.playbackNotAllowedTitle' => 'Playback not allowed',
+			'messages.playbackNotAllowedBody' => 'The server refused to stream this item (HTTP 403). Your account may not have permission to play it, or the server may only allow playback on its local network.',
 			'messages.logsUploaded' => 'Logs uploaded',
 			'messages.logsUploadFailed' => 'Failed to upload logs',
 			'messages.logId' => 'Log ID',
@@ -8202,6 +8237,8 @@ extension on Translations {
 			'connections.addConnectionSubtitleScoped' => ({required Object displayName}) => 'Add to ${displayName}: Plex, Jellyfin, Emby, or another profile connection',
 			'connections.sessionExpiredOne' => ({required Object name}) => 'Session expired for ${name}',
 			'connections.sessionExpiredMany' => ({required Object count}) => 'Session expired for ${count} servers',
+			'connections.accessDeniedOne' => ({required Object name}) => '${name} refused access for this account',
+			'connections.accessDeniedMany' => ({required Object count}) => '${count} servers refused access for this account',
 			'connections.signInAgain' => 'Sign in again',
 			'connections.editMediaBrowserTitle' => ({required Object product}) => 'Edit ${product} connection',
 			'connections.editMediaBrowserIntro' => ({required Object serverName}) => 'Add or remove URLs for ${serverName}. Plezy will use the reachable URL with the lowest latency.',
@@ -8305,12 +8342,12 @@ extension on Translations {
 			'errors.reasonNotFound' => 'the item is no longer on the server',
 			'errors.reasonServerError' => 'the server reported an error',
 			'errors.reasonCancelled' => 'the request was cancelled',
+			_ => null,
+		} ?? switch (path) {
 			'errors.reasonUnexpected' => 'an unexpected error occurred',
 			'libraries.title' => 'Libraries',
 			'libraries.fallbackTitle' => 'Library',
 			'libraries.scanLibraryFiles' => 'Scan Library Files',
-			_ => null,
-		} ?? switch (path) {
 			'libraries.scanLibrary' => 'Scan Library',
 			'libraries.analyze' => 'Analyze',
 			'libraries.analyzeLibrary' => 'Analyze Library',
@@ -8819,12 +8856,12 @@ extension on Translations {
 			'watchTogether.endSession' => 'End Session',
 			'watchTogether.leaveSession' => 'Leave Session',
 			'watchTogether.endSessionQuestion' => 'End Session?',
+			_ => null,
+		} ?? switch (path) {
 			'watchTogether.leaveSessionQuestion' => 'Leave Session?',
 			'watchTogether.endSessionConfirm' => 'This will end the session for all participants.',
 			'watchTogether.leaveSessionConfirm' => 'You will be removed from the session.',
 			'watchTogether.endSessionConfirmOverlay' => 'This will end the watch session for all participants.',
-			_ => null,
-		} ?? switch (path) {
 			'watchTogether.leaveSessionConfirmOverlay' => 'You will be disconnected from the watch session.',
 			'watchTogether.end' => 'End',
 			'watchTogether.leave' => 'Leave',
@@ -8938,6 +8975,7 @@ extension on Translations {
 			'downloads.syncRuleAvailable' => 'Available',
 			'downloads.syncRuleOffline' => 'Offline',
 			'downloads.syncRuleSignInRequired' => 'Sign in required',
+			'downloads.syncRuleAccessDenied' => 'Access denied',
 			'downloads.syncRuleNotAvailableForProfile' => 'Not available for current profile',
 			'downloads.syncRuleUnknownServer' => 'Unknown server',
 			'downloads.syncRuleListCreated' => 'Sync rule created',
@@ -8975,8 +9013,14 @@ extension on Translations {
 			'downloads.unknownAlbum' => 'Unknown Album',
 			'downloads.completedOfTotal' => ({required Object completed, required Object total}) => '${completed}/${total} completed',
 			'downloads.errorFileNotFound' => 'File not found (404)',
+			'downloads.errorDownloadNotAllowed' => 'Download not allowed by the server (403)',
 			'downloads.errorDownloadFailed' => 'Download failed',
-			'downloads.errorPostProcessing' => ({required Object error}) => 'Post-processing failed: ${error}',
+			'downloads.errorDownloadFailedWithReason' => ({required Object reason}) => 'Download failed: ${reason}',
+			'downloads.errorHttpStatus' => ({required Object status}) => 'Download failed (HTTP ${status})',
+			'downloads.errorPostProcessing' => ({required Object reason}) => 'Post-processing failed: ${reason}',
+			'downloads.reasonFileNotSaved' => 'the file could not be saved on this device',
+			'downloads.reasonCannotResume' => 'the partial download could not be resumed',
+			'downloads.reasonDeviceStorageFull' => 'this device is out of storage',
 			'downloads.notificationDownloading' => 'Downloading...',
 			'downloads.notificationComplete' => 'Download complete',
 			'downloads.notificationPaused' => 'Download paused',
@@ -9326,6 +9370,8 @@ extension on Translations {
 			'services.libraryFilter.title' => 'Library filter',
 			'services.libraryFilter.subtitleAllSyncing' => 'Syncing all libraries',
 			'services.libraryFilter.subtitleNoneSyncing' => 'Nothing syncing',
+			_ => null,
+		} ?? switch (path) {
 			'services.libraryFilter.subtitleBlocked' => ({required Object count}) => '${count} blocked',
 			'services.libraryFilter.subtitleAllowed' => ({required Object count}) => '${count} allowed',
 			'services.libraryFilter.mode' => 'Filter mode',
@@ -9337,8 +9383,6 @@ extension on Translations {
 			'services.libraryFilter.noLibraries' => 'No libraries available',
 			'addServer.addMediaBrowserTitle' => ({required Object product}) => 'Add ${product} server',
 			'addServer.serverUrls' => 'Server URLs',
-			_ => null,
-		} ?? switch (path) {
 			'addServer.serverUrlsHelper' => 'Multiple URLs allowed, separated by commas.',
 			'addServer.findServer' => 'Find server',
 			'addServer.searchingLocalMediaBrowserServers' => ({required Object product}) => 'Looking for local ${product} servers...',
