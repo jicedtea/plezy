@@ -145,7 +145,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
 
             _seekAndTimingGroup(),
             _autoPlayAndSkipGroup(),
-            _behaviorGroup(context, isMobile),
+            _behaviorGroup(context),
             if (isMobile) _gesturesGroup(),
             _rememberPlayerChangesGroup(),
             const SizedBox(height: 24),
@@ -238,7 +238,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
     PlayerSettingScope.title => t.settings.playerScopeTitle,
   };
 
-  Widget _behaviorGroup(BuildContext context, bool isMobile) => SettingsGroup(
+  Widget _behaviorGroup(BuildContext context) => SettingsGroup(
     title: t.settings.behavior,
     children: [
       SettingSwitchTile(
@@ -272,7 +272,7 @@ class PlaybackSettingsScreen extends StatelessWidget {
         subtitleBuilder: (mode) => '${_specialsOrderingLabel(mode)} · ${t.settings.specialsOrderingDescription}',
         options: SpecialsOrdering.values.map((m) => DialogOption(value: m, title: _specialsOrderingLabel(m))).toList(),
       ),
-      if (!isMobile)
+      if (!PlatformDetector.isTV())
         SettingSwitchTile(
           pref: SettingsService.clickVideoTogglesPlayback,
           icon: Symbols.play_pause_rounded,

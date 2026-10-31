@@ -24,9 +24,9 @@ env:
   # an update to it. Set to "" or com.edde746.plezy to build unrenamed.
   ANDROID_APPLICATION_ID: "cn.kuwo.player"
   # Only place this workflow names the SDK; .github/actions/setup-flutter-git pins the same release.
-  FLUTTER_VERSION: "3.44.0"
+  FLUTTER_VERSION: "3.47.1"
   # Shared by every release build command; SENTRY_DIST stays per-platform.
-  RELEASE_DART_DEFINES: --dart-define=ENABLE_UPDATE_CHECK=true ${{ github.repository == 'edde746/plezy' && '--dart-define=ENABLE_SENTRY=true' || '' }} --dart-define=GIT_COMMIT=${{ github.sha }} --dart-define=SENTRY_ENVIRONMENT=github --dart-define=ENABLE_DONATIONS=true
+  RELEASE_DART_DEFINES: --dart-define=ENABLE_UPDATE_CHECK=true ${{ github.repository == 'edde746/plezy' && '--dart-define=ENABLE_SENTRY=true' || '' }} --dart-define=GIT_COMMIT=${{ github.sha }} --dart-define=SENTRY_ENVIRONMENT=github --dart-define=ENABLE_DONATIONS=true --dart-define=UPDATE_REPO=${{ github.repository }} --dart-define=CLICK_TOGGLES_PLAYBACK=true
   TRUSTED_BUILD_CACHE_VERSION: trusted-build-v1
 
 jobs:
@@ -424,13 +424,13 @@ jobs:
                 <title>Version ${VERSION}</title>
                 <sparkle:version>${BUILD_NUMBER}</sparkle:version>
                 <sparkle:shortVersionString>${VERSION}</sparkle:shortVersionString>
-                <sparkle:releaseNotesLink>https://gh-html.edde746.dev/edde746/plezy/${VERSION}</sparkle:releaseNotesLink>
+                <sparkle:releaseNotesLink>https://github.com/${{ github.repository }}/releases/tag/${VERSION}</sparkle:releaseNotesLink>
           XMLEOF
 
           # Windows enclosure
           if [ -n "$WIN_ED_SIG" ]; then
             cat >> appcast.xml << XMLEOF
-                <enclosure url="https://github.com/edde746/plezy/releases/download/${VERSION}/plezy-windows-installer.exe"
+                <enclosure url="https://github.com/${{ github.repository }}/releases/download/${VERSION}/plezy-windows-installer.exe"
                            length="${WIN_INSTALLER_SIZE}" type="application/octet-stream"
                            sparkle:edSignature="${WIN_ED_SIG}"
                            sparkle:installerArguments="/SILENT /SP-"
@@ -473,5 +473,10 @@ jobs:
           files: ${{ steps.release-files.outputs.files }}
           draft: true
           prerelease: false
+          # The update check compares this tag to the app version, and the
+          # appcast's installer URL downloads from it.
+          name: ${{ steps.version.outputs.version }}
+          tag_name: ${{ steps.version.outputs.version }}
+          target_commitish: ${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
