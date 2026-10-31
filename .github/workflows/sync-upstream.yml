@@ -38,7 +38,7 @@ env:
   # can never install over or masquerade as an update to the real app.
   ANDROID_APPLICATION_ID: "cn.kuwo.player"
   # Keep in step with build.yml's FLUTTER_VERSION.
-  FLUTTER_VERSION: "3.47.0"
+  FLUTTER_VERSION: "3.47.1"
   # Fork builds get no Sentry DSN and no symbol upload, so obfuscation and
   # split debug info are left off to keep crash traces readable.
   RELEASE_DART_DEFINES: --dart-define=ENABLE_UPDATE_CHECK=true --dart-define=ENABLE_DONATIONS=true --dart-define=SENTRY_ENVIRONMENT=github
@@ -334,6 +334,14 @@ jobs:
         with:
           application-id: ${{ env.ANDROID_APPLICATION_ID }}
           apk-suffix: honor-packed
+
+      # The tag is upstream's source, so the fork's own code changes are not in
+      # it; this rewrites the same defaults into the tree before building.
+      - name: Apply fork defaults
+        uses: ./.fork-tooling/.github/actions/apply-fork-defaults
+        with:
+          update-repo: ${{ github.repository }}
+          click-toggles-playback: "true"
 
       # The keystore is mandatory. Contrary to the comment in
       # android/app/build.gradle.kts, the `release` buildType does NOT fall back

@@ -1,0 +1,72 @@
+name: Apply fork defaults
+description: >
+  Rewrites an upstream source tree so the build checks this fork for updates
+  and clicking the video toggles playback by default. For sync-upstream.yml,
+  which builds upstream's tag directly and so lacks the fork's own code
+  changes; build-2.yml builds the fork's main and gets the same result from
+  dart-defines.
+
+inputs:
+  update-repo:
+    description: >
+      `owner/repo` the in-app update check should read releases and the appcast
+      from. Leave empty to keep upstream's.
+    required: false
+    default: ""
+  click-toggles-playback:
+    description: >
+      "true" to make clicking or tapping the video play/pause by default, and
+      to expose that setting on mobile so it can be turned back off.
+    required: false
+    default: "false"
+
+runs:
+  using: composite
+  steps:
+    # Every substitution is count-verified, so an upstream refactor fails the
+    # build here instead of silently shipping upstream's defaults.
+    - shell: bash
+      env:
+        UPDATE_REPO: ${{ inputs.update-repo }}
+        CLICK_TOGGLES_PLAYBACK: ${{ inputs.click-toggles-playback }}
+      run: |
+        set -euo pipefail
+
+        # Literal, multi-line-capable replacement with an exact match count.
+        rewrite() {
+          python3 - "$@" <<'PY'
+        import sys
+        path, literal, replacement, expected = sys.argv[1], sys.argv[2], sys.argv[3], int(sys.argv[4])
+        with open(path, encoding="utf-8", newline="") as f:
+            text = f.read()
+        actual = text.count(literal)
+        if actual != expected:
+            sys.exit(f"ERROR: {path} has {actual} occurrences of [{literal}], expected {expected}.\n"
+                     "The upstream layout changed; update this action before shipping.")
+        with open(path, "w", encoding="utf-8", newline="") as f:
+            f.write(text.replace(literal, replacement))
+        PY
+        }
+
+        if [[ -n "$UPDATE_REPO" && "$UPDATE_REPO" != "edde746/plezy" ]]; then
+          # The releases API repo and the jsDelivr appcast feed.
+          rewrite lib/services/update_service.dart "edde746/plezy" "$UPDATE_REPO" 2
+          echo "Update check now reads from $UPDATE_REPO:"
+          grep -n "$UPDATE_REPO" lib/services/update_service.dart
+        else
+          echo "Keeping upstream's update repo."
+        fi
+
+        if [[ "$CLICK_TOGGLES_PLAYBACK" == "true" ]]; then
+          rewrite lib/services/settings_service.dart \
+            "BoolPref('click_video_toggles_playback')" \
+            "BoolPref('click_video_toggles_playback', defaultValue: true)" 1
+          # Upstream hides the toggle on mobile; show it everywhere but TV so a
+          # default-on setting can still be switched off.
+          screen=lib/screens/settings/playback_settings_screen.dart
+          rewrite "$screen" \
+            $'if (!isMobile)\n        SettingSwitchTile(\n          pref: SettingsService.clickVideoTogglesPlayback,' \
+            $'if (!PlatformDetector.isTV())\n        SettingSwitchTile(\n          pref: SettingsService.clickVideoTogglesPlayback,' 1
+          echo "Click on video toggles playback by default."
+          grep -n "click_video_toggles_playback" lib/services/settings_service.dart
+        fi
