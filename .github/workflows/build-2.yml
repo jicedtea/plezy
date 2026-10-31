@@ -11,6 +11,14 @@ on:
         description: Build Windows
         default: true
         type: boolean
+      update_from_fork:
+        description: In-app update check reads this fork's releases (off = upstream's)
+        default: true
+        type: boolean
+      click_toggles_playback:
+        description: Clicking or tapping the video plays/pauses by default
+        default: true
+        type: boolean
 
 env:
   # Android applicationId these APKs are built under. Overridden from the
@@ -26,7 +34,7 @@ env:
   # Only place this workflow names the SDK; .github/actions/setup-flutter-git pins the same release.
   FLUTTER_VERSION: "3.47.1"
   # Shared by every release build command; SENTRY_DIST stays per-platform.
-  RELEASE_DART_DEFINES: --dart-define=ENABLE_UPDATE_CHECK=true ${{ github.repository == 'edde746/plezy' && '--dart-define=ENABLE_SENTRY=true' || '' }} --dart-define=GIT_COMMIT=${{ github.sha }} --dart-define=SENTRY_ENVIRONMENT=github --dart-define=ENABLE_DONATIONS=true --dart-define=UPDATE_REPO=${{ github.repository }} --dart-define=CLICK_TOGGLES_PLAYBACK=true
+  RELEASE_DART_DEFINES: --dart-define=ENABLE_UPDATE_CHECK=true ${{ github.repository == 'edde746/plezy' && '--dart-define=ENABLE_SENTRY=true' || '' }} --dart-define=GIT_COMMIT=${{ github.sha }} --dart-define=SENTRY_ENVIRONMENT=github --dart-define=ENABLE_DONATIONS=true --dart-define=UPDATE_REPO=${{ inputs.update_from_fork && github.repository || 'edde746/plezy' }} --dart-define=CLICK_TOGGLES_PLAYBACK=${{ inputs.click_toggles_playback }}
   TRUSTED_BUILD_CACHE_VERSION: trusted-build-v1
 
 jobs:

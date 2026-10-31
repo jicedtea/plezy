@@ -20,6 +20,15 @@ on:
         description: Validate the sync and release path, then stop without building (about a minute)
         default: false
         type: boolean
+      # Scheduled runs have no inputs; the build step treats them as on.
+      update_from_fork:
+        description: In-app update check reads this fork's releases (off = upstream's)
+        default: true
+        type: boolean
+      click_toggles_playback:
+        description: Clicking or tapping the video plays/pauses by default
+        default: true
+        type: boolean
 
 concurrency:
   group: sync-upstream-release
@@ -340,8 +349,9 @@ jobs:
       - name: Apply fork defaults
         uses: ./.fork-tooling/.github/actions/apply-fork-defaults
         with:
-          update-repo: ${{ github.repository }}
-          click-toggles-playback: "true"
+          # `!= false` so a scheduled run, whose inputs are null, gets the defaults.
+          update-repo: ${{ inputs.update_from_fork != false && github.repository || '' }}
+          click-toggles-playback: ${{ inputs.click_toggles_playback != false }}
 
       # The keystore is mandatory. Contrary to the comment in
       # android/app/build.gradle.kts, the `release` buildType does NOT fall back
